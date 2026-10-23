@@ -1,0 +1,35 @@
+{
+  "relations": [
+    "TRANSFERRED_TO",
+    "CONTACTED_VIA",
+    "IMPERSONATES",
+    "ASSOCIATED_WITH_BANK",
+    "PAID_AMOUNT",
+    "USES_ACCOUNT",
+    "SENT_MESSAGE_TO",
+    "OWNS_OR_CONTROLS",
+    "NO_RELATION"
+  ],
+  "label2id": {
+    "TRANSFERRED_TO": 0,
+    "CONTACTED_VIA": 1,
+    "IMPERSONATES": 2,
+    "ASSOCIATED_WITH_BANK": 3,
+    "PAID_AMOUNT": 4,
+    "USES_ACCOUNT": 5,
+    "SENT_MESSAGE_TO": 6,
+    "OWNS_OR_CONTROLS": 7,
+    "NO_RELATION": 8
+  },
+  "id2label": {
+    "0": "TRANSFERRED_TO",
+    "1": "CONTACTED_VIA",
+    "2": "IMPERSONATES",
+    "3": "ASSOCIATED_WITH_BANK",
+    "4": "PAID_AMOUNT",
+    "5": "USES_ACCOUNT",
+    "6": "SENT_MESSAGE_TO",
+    "7": "OWNS_OR_CONTROLS",
+    "8": "NO_RELATION"
+  }
+}

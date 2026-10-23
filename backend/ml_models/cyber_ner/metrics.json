@@ -1,0 +1,27 @@
+{
+  "validation": {
+    "loss": 0.1719970703125,
+    "entity_precision": 0.8341013824884793,
+    "entity_recall": 0.9141414141414141,
+    "entity_f1": 0.8722891566265061,
+    "token_accuracy": 0.9551710578057413
+  },
+  "heldout_test": {
+    "loss": 0.16174164414405823,
+    "entity_precision": 0.5172413793103449,
+    "entity_recall": 0.6707897240723121,
+    "entity_f1": 0.5840927920463961,
+    "token_accuracy": 0.9324384127452426,
+    "runtime": 1.1081,
+    "samples_per_second": 286.067,
+    "steps_per_second": 36.097
+  },
+  "challenge": {
+    "precision": 0.030303030303030304,
+    "recall": 0.034482758620689655,
+    "f1": 0.03225806451612904,
+    "tp": 1,
+    "fp": 32,
+    "fn": 28
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "best_epoch": 4,
+  "best_validation_macro_f1_at_0.5": 0.9688976401626817,
+  "validation": {
+    "support_examples": 2384,
+    "micro_precision": 0.978194338179036,
+    "micro_recall": 0.9811972371450499,
+    "micro_f1": 0.9796934865900383,
+    "macro_precision": 0.9842212604859676,
+    "macro_recall": 0.9841601005656193,
+    "macro_f1": 0.9839744121985324,
+    "hamming_loss": 0.002470171513795675,
+    "subset_accuracy": 0.9756711409395973
+  },
+  "test": {
+    "support_examples": 2271,
+    "micro_precision": 0.9720308066477503,
+    "micro_recall": 0.9771801140994295,
+    "micro_f1": 0.9745986588091852,
+    "macro_precision": 0.9777624319905822,
+    "macro_recall": 0.977056374890259,
+    "macro_f1": 0.976722741216245,
+    "hamming_loss": 0.0030578795440090022,
+    "subset_accuracy": 0.9678555702333773
+  },
+  "real_test": {
+    "support_examples": 1620,
+    "micro_precision": 0.9747557003257329,
+    "micro_recall": 0.9779411764705882,
+    "micro_f1": 0.9763458401305057,
+    "macro_precision": 0.8261775103925715,
+    "macro_recall": 0.8061386334290136,
+    "macro_f1": 0.8130605084462317,
+    "hamming_loss": 0.001989026063100137,
+    "subset_accuracy": 0.9808641975308642
+  },
+  "synthetic_test": {
+    "support_examples": 651,
+    "micro_precision": 0.9693301049233253,
+    "micro_recall": 0.9764227642276423,
+    "micro_f1": 0.9728635074929121,
+    "macro_precision": 0.9626710211726393,
+    "macro_recall": 0.9663176130835365,
+    "macro_f1": 0.9637240385008476,
+    "hamming_loss": 0.005717699266086363,
+    "subset_accuracy": 0.9354838709677419
+  }
+}

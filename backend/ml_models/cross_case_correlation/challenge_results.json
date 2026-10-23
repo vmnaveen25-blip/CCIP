@@ -1,0 +1,35 @@
+[
+  {
+    "expected": "STRONGLY_RELATED",
+    "predicted": "STRONGLY_RELATED",
+    "confidence": 0.9993842840194702,
+    "correct": true,
+    "probabilities": {
+      "UNRELATED": 0.00033830147003754973,
+      "POSSIBLY_RELATED": 0.00027738255448639393,
+      "STRONGLY_RELATED": 0.9993842840194702
+    }
+  },
+  {
+    "expected": "POSSIBLY_RELATED",
+    "predicted": "POSSIBLY_RELATED",
+    "confidence": 0.9976911544799805,
+    "correct": true,
+    "probabilities": {
+      "UNRELATED": 0.0005032247863709927,
+      "POSSIBLY_RELATED": 0.9976911544799805,
+      "STRONGLY_RELATED": 0.0018056902335956693
+    }
+  },
+  {
+    "expected": "UNRELATED",
+    "predicted": "UNRELATED",
+    "confidence": 0.9994620680809021,
+    "correct": true,
+    "probabilities": {
+      "UNRELATED": 0.9994620680809021,
+      "POSSIBLY_RELATED": 0.00020112624042667449,
+      "STRONGLY_RELATED": 0.000336857425281778
+    }
+  }
+]

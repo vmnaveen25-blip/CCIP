@@ -1,0 +1,88 @@
+{
+  "model_name": "ccip-cyber-ner-deberta-v3-base",
+  "base_model": "microsoft/deberta-v3-base",
+  "task": "token-classification",
+  "version": "cyber-ner-bootstrap-v4.0.0",
+  "max_length": 256,
+  "precision_mode": "FP32",
+  "entity_types": [
+    "PHONE_NUMBER",
+    "UPI_ID",
+    "BANK_ACCOUNT",
+    "SOCIAL_HANDLE",
+    "TRANSACTION_ID",
+    "UTR",
+    "AMOUNT",
+    "BANK_NAME",
+    "ORGANIZATION",
+    "PLATFORM_NAME",
+    "PERSON_NAME"
+  ],
+  "num_entity_types": 11,
+  "num_bio_labels": 23,
+  "training": {
+    "epochs": 4,
+    "learning_rate": 1e-05,
+    "train_batch_size": 4,
+    "eval_batch_size": 8,
+    "gradient_accumulation_steps": 4,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "max_grad_norm": 1.0,
+    "seed": 42,
+    "training_seconds": 552.86,
+    "transformers_version": "5.16.1",
+    "torch_version": "2.11.0+cu128"
+  },
+  "dataset": {
+    "name": "ccip-cyber-ner-bootstrap-v2",
+    "seed": 42,
+    "source": "controlled synthetic complaint-style data using split-isolated templates/vocabularies",
+    "counts": {
+      "train": 2611,
+      "validation": 130,
+      "test": 317,
+      "total": 3058
+    },
+    "leakage_controls": {
+      "exact_text_disjoint": true,
+      "separate_template_families": true,
+      "partially_held_out_entity_values": true
+    },
+    "limitations": [
+      "Dataset remains primarily synthetic/bootstrap data.",
+      "Validation/test metrics are more conservative than v1 but still not real-world field accuracy.",
+      "Investigator-reviewed real complaint annotations remain required before production performance claims."
+    ]
+  },
+  "deployment_recommendation": {
+    "mode": "HYBRID_RULES_PLUS_TRANSFORMER",
+    "deterministic_authority_for": [
+      "URL",
+      "DOMAIN",
+      "EMAIL_ADDRESS",
+      "IP_ADDRESS",
+      "IFSC_CODE",
+      "FILE_HASH"
+    ],
+    "transformer_focus": [
+      "PHONE_NUMBER",
+      "UPI_ID",
+      "BANK_ACCOUNT",
+      "SOCIAL_HANDLE",
+      "TRANSACTION_ID",
+      "UTR",
+      "AMOUNT",
+      "BANK_NAME",
+      "ORGANIZATION",
+      "PLATFORM_NAME",
+      "PERSON_NAME"
+    ]
+  },
+  "limitations": [
+    "Bootstrap model trained primarily on controlled synthetic complaint-style text.",
+    "Held-out template families reduce leakage but do not replace real field validation.",
+    "Challenge set is small and manually authored.",
+    "Do not claim production-grade accuracy until evaluated on investigator-reviewed real complaints."
+  ]
+}

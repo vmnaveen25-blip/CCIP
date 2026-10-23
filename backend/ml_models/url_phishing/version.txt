@@ -1,0 +1,16 @@
+Model: XGBoost Classifier (XGBClassifier)
+Version: 2.0.0-xgboost
+Date: 2026-09-05
+Algorithm: XGBoost
+Estimators: 300
+Max Depth: 8
+Learning Rate: 0.1
+Subsample: 0.9
+Colsample Bytree: 0.9
+Features Count: 30
+Dataset Samples: 11055
+Accuracy: 0.9774
+Precision: 0.9720
+Recall: 0.9878
+F1 Score: 0.9799
+Classes: 0 (Legitimate), 1 (Phishing)

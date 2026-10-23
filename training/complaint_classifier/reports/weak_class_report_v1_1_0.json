@@ -1,0 +1,186 @@
+{
+  "dataset_version": "complaint-dataset-v1.1.0",
+  "comparison_baseline": "complaint-dataset-v1.0.0",
+  "labels": {
+    "PHISHING": {
+      "v1_0_0_train_count": 2081,
+      "v1_1_0_train_count": 4814,
+      "difference": 2733,
+      "percentage_increase": "+131.3%",
+      "v1_1_0_val_count": 459,
+      "v1_1_0_test_count": 353,
+      "v1_1_0_total_count": 5626,
+      "target_1000_met": true
+    },
+    "UPI_FRAUD": {
+      "v1_0_0_train_count": 486,
+      "v1_1_0_train_count": 2183,
+      "difference": 1697,
+      "percentage_increase": "+349.2%",
+      "v1_1_0_val_count": 111,
+      "v1_1_0_test_count": 130,
+      "v1_1_0_total_count": 2424,
+      "target_1000_met": true
+    },
+    "BANKING_FRAUD": {
+      "v1_0_0_train_count": 2021,
+      "v1_1_0_train_count": 2974,
+      "difference": 953,
+      "percentage_increase": "+47.2%",
+      "v1_1_0_val_count": 368,
+      "v1_1_0_test_count": 298,
+      "v1_1_0_total_count": 3640,
+      "target_1000_met": true
+    },
+    "CARD_FRAUD": {
+      "v1_0_0_train_count": 110,
+      "v1_1_0_train_count": 1171,
+      "difference": 1061,
+      "percentage_increase": "+964.5%",
+      "v1_1_0_val_count": 105,
+      "v1_1_0_test_count": 26,
+      "v1_1_0_total_count": 1302,
+      "target_1000_met": true
+    },
+    "INVESTMENT_SCAM": {
+      "v1_0_0_train_count": 938,
+      "v1_1_0_train_count": 1650,
+      "difference": 712,
+      "percentage_increase": "+75.9%",
+      "v1_1_0_val_count": 56,
+      "v1_1_0_test_count": 104,
+      "v1_1_0_total_count": 1810,
+      "target_1000_met": true
+    },
+    "JOB_SCAM": {
+      "v1_0_0_train_count": 271,
+      "v1_1_0_train_count": 1453,
+      "difference": 1182,
+      "percentage_increase": "+436.2%",
+      "v1_1_0_val_count": 64,
+      "v1_1_0_test_count": 100,
+      "v1_1_0_total_count": 1617,
+      "target_1000_met": true
+    },
+    "LOAN_APP_FRAUD": {
+      "v1_0_0_train_count": 135,
+      "v1_1_0_train_count": 1594,
+      "difference": 1459,
+      "percentage_increase": "+1080.7%",
+      "v1_1_0_val_count": 74,
+      "v1_1_0_test_count": 79,
+      "v1_1_0_total_count": 1747,
+      "target_1000_met": true
+    },
+    "DIGITAL_ARREST": {
+      "v1_0_0_train_count": 2143,
+      "v1_1_0_train_count": 2547,
+      "difference": 404,
+      "percentage_increase": "+18.9%",
+      "v1_1_0_val_count": 252,
+      "v1_1_0_test_count": 234,
+      "v1_1_0_total_count": 3033,
+      "target_1000_met": true
+    },
+    "IDENTITY_THEFT": {
+      "v1_0_0_train_count": 203,
+      "v1_1_0_train_count": 1494,
+      "difference": 1291,
+      "percentage_increase": "+636.0%",
+      "v1_1_0_val_count": 154,
+      "v1_1_0_test_count": 126,
+      "v1_1_0_total_count": 1774,
+      "target_1000_met": true
+    },
+    "ACCOUNT_TAKEOVER": {
+      "v1_0_0_train_count": 84,
+      "v1_1_0_train_count": 1104,
+      "difference": 1020,
+      "percentage_increase": "+1214.3%",
+      "v1_1_0_val_count": 61,
+      "v1_1_0_test_count": 81,
+      "v1_1_0_total_count": 1246,
+      "target_1000_met": true
+    },
+    "SOCIAL_MEDIA_CRIME": {
+      "v1_0_0_train_count": 45,
+      "v1_1_0_train_count": 2374,
+      "difference": 2329,
+      "percentage_increase": "+5175.6%",
+      "v1_1_0_val_count": 124,
+      "v1_1_0_test_count": 128,
+      "v1_1_0_total_count": 2626,
+      "target_1000_met": true
+    },
+    "ONLINE_SHOPPING_FRAUD": {
+      "v1_0_0_train_count": 145,
+      "v1_1_0_train_count": 1510,
+      "difference": 1365,
+      "percentage_increase": "+941.4%",
+      "v1_1_0_val_count": 68,
+      "v1_1_0_test_count": 51,
+      "v1_1_0_total_count": 1629,
+      "target_1000_met": true
+    },
+    "SEXTORTION": {
+      "v1_0_0_train_count": 86,
+      "v1_1_0_train_count": 1540,
+      "difference": 1454,
+      "percentage_increase": "+1690.7%",
+      "v1_1_0_val_count": 113,
+      "v1_1_0_test_count": 78,
+      "v1_1_0_total_count": 1731,
+      "target_1000_met": true
+    },
+    "CYBERSTALKING": {
+      "v1_0_0_train_count": 20,
+      "v1_1_0_train_count": 2114,
+      "difference": 2094,
+      "percentage_increase": "+10470.0%",
+      "v1_1_0_val_count": 101,
+      "v1_1_0_test_count": 117,
+      "v1_1_0_total_count": 2332,
+      "target_1000_met": true
+    },
+    "MALWARE_RANSOMWARE": {
+      "v1_0_0_train_count": 62,
+      "v1_1_0_train_count": 1104,
+      "difference": 1042,
+      "percentage_increase": "+1680.6%",
+      "v1_1_0_val_count": 82,
+      "v1_1_0_test_count": 88,
+      "v1_1_0_total_count": 1274,
+      "target_1000_met": true
+    },
+    "CRYPTO_FRAUD": {
+      "v1_0_0_train_count": 440,
+      "v1_1_0_train_count": 1410,
+      "difference": 970,
+      "percentage_increase": "+220.5%",
+      "v1_1_0_val_count": 92,
+      "v1_1_0_test_count": 100,
+      "v1_1_0_total_count": 1602,
+      "target_1000_met": true
+    },
+    "BUSINESS_EMAIL_COMPROMISE": {
+      "v1_0_0_train_count": 11,
+      "v1_1_0_train_count": 1325,
+      "difference": 1314,
+      "percentage_increase": "+11945.5%",
+      "v1_1_0_val_count": 75,
+      "v1_1_0_test_count": 66,
+      "v1_1_0_total_count": 1466,
+      "target_1000_met": true
+    },
+    "OTHER": {
+      "v1_0_0_train_count": 3226,
+      "v1_1_0_train_count": 2792,
+      "difference": -434,
+      "percentage_increase": "+-13.5%",
+      "v1_1_0_val_count": 247,
+      "v1_1_0_test_count": 295,
+      "v1_1_0_total_count": 3334,
+      "target_1000_met": true
+    }
+  }
+}

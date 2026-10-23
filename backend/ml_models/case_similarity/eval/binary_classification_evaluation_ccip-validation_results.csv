@@ -1,0 +1,4 @@
+epoch,steps,cosine_accuracy,cosine_accuracy_threshold,cosine_f1,cosine_precision,cosine_recall,cosine_f1_threshold,cosine_ap,cosine_mcc
+1.0,157,1.0,0.6666177,1.0,1.0,1.0,0.6666177,1.0,1.0
+2.0,314,1.0,0.67269385,1.0,1.0,1.0,0.67269385,1.0,1.0
+3.0,471,1.0,0.6399361,1.0,1.0,1.0,0.6399361,1.0,1.0

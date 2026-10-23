@@ -1,0 +1,44 @@
+{
+  "accuracy": 1.0,
+  "macro_precision": 1.0,
+  "macro_recall": 1.0,
+  "macro_f1": 1.0,
+  "per_class": {
+    "UNRELATED": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 500
+    },
+    "POSSIBLY_RELATED": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 500
+    },
+    "STRONGLY_RELATED": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 500
+    }
+  },
+  "confusion_matrix": [
+    [
+      500,
+      0,
+      0
+    ],
+    [
+      0,
+      500,
+      0
+    ],
+    [
+      0,
+      0,
+      500
+    ]
+  ],
+  "loss": 0.00024600756358345374
+}

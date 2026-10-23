@@ -1,0 +1,108 @@
+{
+  "mapping_version": "1.0.0",
+  "sources": {
+    "Shade63/scam-classification-multiclass": {
+      "data_file": "sentinel_dataset_multiclass.csv",
+      "legitimate_category": "legit",
+      "category_rules": {
+        "legit": {
+          "is_cybercrime": 0,
+          "labels": []
+        },
+        "bank_phishing": {
+          "is_cybercrime": 1,
+          "primary_label": "PHISHING",
+          "context_rules": [
+            {
+              "condition": "banking_context",
+              "add_label": "BANKING_FRAUD"
+            }
+          ]
+        },
+        "financial_fraud": {
+          "is_cybercrime": 1,
+          "context_dispatch": true,
+          "fallback_label": "OTHER"
+        },
+        "government_impersonation": {
+          "is_cybercrime": 1,
+          "context_rules": [
+            {
+              "condition": "coercion_or_detention",
+              "label": "DIGITAL_ARREST"
+            }
+          ],
+          "fallback_label": "OTHER"
+        },
+        "romance_parcel_sextortion": {
+          "is_cybercrime": 1,
+          "context_rules": [
+            {
+              "condition": "sexual_blackmail",
+              "label": "SEXTORTION"
+            },
+            {
+              "condition": "parcel_customs",
+              "label": "OTHER"
+            }
+          ],
+          "fallback_label": "OTHER"
+        }
+      }
+    },
+    "ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset": {
+      "legitimate_category": "none",
+      "category_rules": {
+        "none": {
+          "is_cybercrime": 0,
+          "labels": []
+        },
+        "police_digital_arrest": {
+          "is_cybercrime": 1,
+          "labels": ["DIGITAL_ARREST"]
+        },
+        "police_blackmail": {
+          "is_cybercrime": 1,
+          "labels": ["DIGITAL_ARREST"]
+        },
+        "bank_kyc": {
+          "is_cybercrime": 1,
+          "labels": ["PHISHING", "BANKING_FRAUD"]
+        },
+        "amazon": {
+          "is_cybercrime": 1,
+          "labels": ["ONLINE_SHOPPING_FRAUD"]
+        },
+        "aadhaar": {
+          "is_cybercrime": 1,
+          "labels": ["IDENTITY_THEFT", "PHISHING"]
+        },
+        "lottery": {
+          "is_cybercrime": 1,
+          "labels": ["OTHER"]
+        },
+        "relative": {
+          "is_cybercrime": 1,
+          "labels": ["OTHER"]
+        }
+      }
+    },
+    "sidddd625/adaption-fraud-and-cyber-safety": {
+      "input_field": "user_query",
+      "fallback_input_field": "enhanced_prompt",
+      "exclude_fields": ["combined_completition", "enhanced_completion", "actions_suggestions_next_step", "answer_guidance"],
+      "subdomain_mapping_type": "exact_and_keyword",
+      "synthetic": true
+    },
+    "anmolshrivastav/scam-hum-india": {
+      "legitimate_labels": ["ham", "0"],
+      "scam_labels": ["spam", "1"],
+      "contextual_classification": true
+    },
+    "vnovaai/INDIA_FRAUD_DETECTION_JSONL_V1": {
+      "input_field": "scenario",
+      "exclude_fields": ["advice"],
+      "synthetic": true
+    }
+  }
+}

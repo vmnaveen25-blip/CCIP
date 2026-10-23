@@ -1,0 +1,31 @@
+{
+  "accuracy": 1.0,
+  "macro_precision": 1.0,
+  "macro_recall": 1.0,
+  "macro_f1": 1.0,
+  "per_class": {
+    "NO_LINK": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 10703
+    },
+    "CANDIDATE_LINK": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 10703
+    }
+  },
+  "confusion_matrix": [
+    [
+      10703,
+      0
+    ],
+    [
+      0,
+      10703
+    ]
+  ],
+  "loss": 9.096442902643633e-05
+}

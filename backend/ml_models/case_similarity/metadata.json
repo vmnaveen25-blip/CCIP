@@ -1,0 +1,55 @@
+{
+  "model_name": "ccip-case-similarity-minilm-v1",
+  "base_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "task": "sentence-embedding-case-similarity",
+  "version": "case-similarity-bootstrap-v1.0.0",
+  "embedding_dimension": 384,
+  "similarity": "cosine",
+  "threshold": 0.5499999999999998,
+  "training": {
+    "epochs": 3,
+    "batch_size": 32,
+    "learning_rate": 2e-05,
+    "training_seconds": 58.75,
+    "seed": 42
+  },
+  "dataset": {
+    "name": "ccip-case-similarity-bootstrap-v1",
+    "source": "controlled synthetic cybercrime complaint pairs with hard negatives",
+    "counts": {
+      "train": 5000,
+      "validation": 900,
+      "test": 1200
+    },
+    "categories": [
+      "PHISHING",
+      "UPI_FRAUD",
+      "BANKING_FRAUD",
+      "CARD_FRAUD",
+      "INVESTMENT_SCAM",
+      "JOB_SCAM",
+      "LOAN_APP_FRAUD",
+      "DIGITAL_ARREST",
+      "IDENTITY_THEFT",
+      "ACCOUNT_TAKEOVER",
+      "SOCIAL_MEDIA_CRIME",
+      "ONLINE_SHOPPING_FRAUD",
+      "SEXTORTION",
+      "CYBERSTALKING",
+      "MALWARE_RANSOMWARE",
+      "CRYPTO_FRAUD",
+      "BUSINESS_EMAIL_COMPROMISE"
+    ],
+    "limitations": [
+      "Bootstrap dataset is synthetic.",
+      "Pair labels represent semantic category similarity, not investigator-confirmed case linkage.",
+      "Real investigator-reviewed case pairs are required before production linkage claims."
+    ]
+  },
+  "limitations": [
+    "Trained on controlled synthetic complaint pairs.",
+    "Similarity does not prove two cases are linked.",
+    "Investigator review is required for every cross-case recommendation.",
+    "Real investigator-confirmed case pairs are required before production linkage claims."
+  ]
+}

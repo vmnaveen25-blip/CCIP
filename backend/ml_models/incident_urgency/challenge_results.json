@@ -1,0 +1,106 @@
+[
+  {
+    "text": "I received a fake bank SMS asking for my OTP, but I ignored it and lost no money.",
+    "expected": "LOW",
+    "predicted": "LOW",
+    "confidence": 0.9992225170135498,
+    "correct": true,
+    "probabilities": {
+      "LOW": 0.9992225170135498,
+      "MEDIUM": 0.00037052095285616815,
+      "HIGH": 0.00032242131419479847,
+      "CRITICAL": 8.450000314041972e-05
+    }
+  },
+  {
+    "text": "A fake KYC link arrived by message, but I never opened it.",
+    "expected": "LOW",
+    "predicted": "LOW",
+    "confidence": 0.9994818568229675,
+    "correct": true,
+    "probabilities": {
+      "LOW": 0.9994818568229675,
+      "MEDIUM": 0.00031219766242429614,
+      "HIGH": 0.00011482305126264691,
+      "CRITICAL": 9.11693277885206e-05
+    }
+  },
+  {
+    "text": "My Instagram account was hacked and the password was changed, but I recovered access.",
+    "expected": "MEDIUM",
+    "predicted": "MEDIUM",
+    "confidence": 0.9996285438537598,
+    "correct": true,
+    "probabilities": {
+      "LOW": 8.557078399462625e-05,
+      "MEDIUM": 0.9996285438537598,
+      "HIGH": 0.00020075670909136534,
+      "CRITICAL": 8.511987107340246e-05
+    }
+  },
+  {
+    "text": "My card shows one unauthorized payment of \u20b912,000.",
+    "expected": "MEDIUM",
+    "predicted": "MEDIUM",
+    "confidence": 0.9996901750564575,
+    "correct": true,
+    "probabilities": {
+      "LOW": 0.00010995352931786329,
+      "MEDIUM": 0.9996901750564575,
+      "HIGH": 0.00011393021122785285,
+      "CRITICAL": 8.590673678554595e-05
+    }
+  },
+  {
+    "text": "I transferred \u20b975,000 to an online investment group and they stopped responding.",
+    "expected": "HIGH",
+    "predicted": "HIGH",
+    "confidence": 0.9995098114013672,
+    "correct": true,
+    "probabilities": {
+      "LOW": 0.0001160730462288484,
+      "MEDIUM": 0.0002264802169520408,
+      "HIGH": 0.9995098114013672,
+      "CRITICAL": 0.00014762797218281776
+    }
+  },
+  {
+    "text": "A loan app is threatening my family contacts and demanding more money.",
+    "expected": "HIGH",
+    "predicted": "HIGH",
+    "confidence": 0.999666690826416,
+    "correct": true,
+    "probabilities": {
+      "LOW": 0.0001198395766550675,
+      "MEDIUM": 0.00010339994332753122,
+      "HIGH": 0.999666690826416,
+      "CRITICAL": 0.00011007108696503565
+    }
+  },
+  {
+    "text": "Police impersonators are keeping me on a video call and demanding \u20b95,00,000 immediately.",
+    "expected": "CRITICAL",
+    "predicted": "CRITICAL",
+    "confidence": 0.999591052532196,
+    "correct": true,
+    "probabilities": {
+      "LOW": 0.00014054583152756095,
+      "MEDIUM": 0.00014359598571900278,
+      "HIGH": 0.00012481822341214865,
+      "CRITICAL": 0.999591052532196
+    }
+  },
+  {
+    "text": "Ransomware has encrypted our office systems and operations are currently stopped.",
+    "expected": "CRITICAL",
+    "predicted": "CRITICAL",
+    "confidence": 0.9995781779289246,
+    "correct": true,
+    "probabilities": {
+      "LOW": 0.00014548185572493821,
+      "MEDIUM": 0.00011623451428022236,
+      "HIGH": 0.0001602171250851825,
+      "CRITICAL": 0.9995781779289246
+    }
+  }
+]

@@ -1,0 +1,91 @@
+{
+  "Shade63/scam-classification-multiclass": {
+    "status": "success",
+    "raw_file": "C:\\Users\\Admin\\Desktop\\CCIP\\training\\complaint_classifier\\data\\raw\\Shade63__scam-classification-multiclass.jsonl",
+    "num_rows": 14000,
+    "features": [
+      "id",
+      "text",
+      "label",
+      "category",
+      "category_name"
+    ],
+    "split": "train",
+    "synthetic": false,
+    "language": "en",
+    "description": "Curated sentinel scam multiclass dataset including legitimate and fraud categories."
+  },
+  "ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset": {
+    "status": "success",
+    "raw_file": "C:\\Users\\Admin\\Desktop\\CCIP\\training\\complaint_classifier\\data\\raw\\ysangam__Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset.jsonl",
+    "num_rows": 10000,
+    "features": [
+      "text",
+      "label",
+      "scam_category",
+      "caller_type",
+      "audio_duration",
+      "urgency_level",
+      "contains_blackmail",
+      "language_style"
+    ],
+    "split": "train",
+    "synthetic": true,
+    "language": "hi-en",
+    "description": "Simulated Hinglish phone call transcripts with scam categories and legitimate conversations."
+  },
+  "sidddd625/adaption-fraud-and-cyber-safety": {
+    "status": "success",
+    "raw_file": "C:\\Users\\Admin\\Desktop\\CCIP\\training\\complaint_classifier\\data\\raw\\sidddd625__adaption-fraud-and-cyber-safety.jsonl",
+    "num_rows": 2658,
+    "features": [
+      "user_query",
+      "combined_completition",
+      "enhanced_prompt",
+      "enhanced_completion",
+      "actions_suggestions_next_step",
+      "answer_guidance",
+      "domain_category",
+      "feedback",
+      "learning_outcome",
+      "source",
+      "subdomain",
+      "userprofile"
+    ],
+    "split": "train",
+    "synthetic": true,
+    "language": "multilingual",
+    "description": "Indian cyber fraud and safety citizen scenarios with detailed subdomains."
+  },
+  "anmolshrivastav/scam-hum-india": {
+    "status": "success",
+    "raw_file": "C:\\Users\\Admin\\Desktop\\CCIP\\training\\complaint_classifier\\data\\raw\\anmolshrivastav__scam-hum-india.jsonl",
+    "num_rows": 2272,
+    "features": [
+      "text",
+      "label"
+    ],
+    "split": "train",
+    "synthetic": false,
+    "language": "en",
+    "description": "Indian SMS ham vs spam dataset with scam alerts and real messages."
+  },
+  "vnovaai/INDIA_FRAUD_DETECTION_JSONL_V1": {
+    "status": "success",
+    "raw_file": "C:\\Users\\Admin\\Desktop\\CCIP\\training\\complaint_classifier\\data\\raw\\vnovaai__INDIA_FRAUD_DETECTION_JSONL_V1.jsonl",
+    "num_rows": 99,
+    "features": [
+      "fraud_type",
+      "scenario",
+      "steps",
+      "advice",
+      "severity",
+      "tags",
+      "source_type"
+    ],
+    "split": "train",
+    "synthetic": true,
+    "language": "en",
+    "description": "Fraud scenarios with step breakdowns covering modern Indian scam vectors."
+  }
+}

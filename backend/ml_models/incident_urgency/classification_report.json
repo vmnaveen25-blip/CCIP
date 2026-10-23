@@ -1,0 +1,59 @@
+{
+  "accuracy": 1.0,
+  "macro_precision": 1.0,
+  "macro_recall": 1.0,
+  "macro_f1": 1.0,
+  "per_class": {
+    "LOW": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 250
+    },
+    "MEDIUM": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 250
+    },
+    "HIGH": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 250
+    },
+    "CRITICAL": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 250
+    }
+  },
+  "confusion_matrix": [
+    [
+      250,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      250,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      250,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      250
+    ]
+  ],
+  "loss": 0.007260569315847187
+}

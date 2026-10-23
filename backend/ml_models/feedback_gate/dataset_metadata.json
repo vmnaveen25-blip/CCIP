@@ -1,0 +1,39 @@
+{
+  "name": "ccip-feedback-reliability-gate-bootstrap-v1",
+  "task": "continual-learning feedback reliability classification",
+  "labels": [
+    "REJECT",
+    "REQUIRES_REVIEW",
+    "APPROVE_CANDIDATE"
+  ],
+  "feature_names": [
+    "evidence_integrity_verified",
+    "reviewer_authorized",
+    "case_finalized",
+    "appeal_or_reopen_pending",
+    "audit_complete",
+    "provenance_completeness",
+    "reviewer_count_norm",
+    "reviewer_agreement_ratio",
+    "source_diversity_norm",
+    "supporting_evidence_norm",
+    "contradiction_rate",
+    "entity_consistency",
+    "human_model_agreement",
+    "manual_verification_ratio",
+    "feedback_age_norm",
+    "cross_case_support_norm",
+    "data_quality_score"
+  ],
+  "counts": {
+    "train": 9000,
+    "validation": 1800,
+    "test": 2400
+  },
+  "source": "controlled synthetic governance/provenance feedback records",
+  "limitations": [
+    "Synthetic/bootstrap governance data.",
+    "APPROVE_CANDIDATE does not authorize automatic retraining.",
+    "Real investigator-reviewed feedback decisions are required before production claims."
+  ]
+}

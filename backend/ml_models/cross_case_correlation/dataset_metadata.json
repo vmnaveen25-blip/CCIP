@@ -1,0 +1,20 @@
+{
+  "name": "ccip-cross-case-correlation-bootstrap-v1",
+  "task": "cross-case correlation candidate classification",
+  "labels": [
+    "UNRELATED",
+    "POSSIBLY_RELATED",
+    "STRONGLY_RELATED"
+  ],
+  "counts": {
+    "train": 6000,
+    "validation": 1200,
+    "test": 1500
+  },
+  "source": "controlled synthetic cybercrime complaint pairs",
+  "limitations": [
+    "Synthetic/bootstrap pair data.",
+    "Correlation score is not proof of common offender or shared criminal organization.",
+    "Real investigator-confirmed linked/unlinked case pairs are required before production claims."
+  ]
+}

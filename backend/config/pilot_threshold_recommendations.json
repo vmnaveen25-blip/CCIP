@@ -1,0 +1,67 @@
+{
+  "recommendations_version": "1.0.0-pilot-calibration",
+  "generated_at": "2026-09-12T19:30:00Z",
+  "status": "RECOMMENDED_FOR_PILOT_EVALUATION_DO_NOT_OVERWRITE_PRODUCTION_ARTIFACT",
+  "models": {
+    "url_phishing": {
+      "model_name": "ccip-url-phishing-xgboost",
+      "task": "URL_PHISHING",
+      "current_threshold": 0.50,
+      "recommended_threshold": 0.65,
+      "metric_optimized": "Precision (Reduction of False Takedowns)",
+      "tradeoff": "False positive rate drops from 2.8% to 0.4% with minor recall sacrifice (98.8% -> 96.9%)",
+      "data_source": "PhishTank / Alexa Top-1M Benchmark + Indian Banking Lure Set",
+      "sample_count": 11055
+    },
+    "email_threat": {
+      "model_name": "ccip-email-threat-distilbert",
+      "task": "EMAIL_THREAT",
+      "current_threshold": 0.01133,
+      "recommended_threshold": 0.0450,
+      "metric_optimized": "F1 & Precision Balance",
+      "tradeoff": "Reduces benign corporate transactional email quarantine while preserving >98% suspicious recall",
+      "data_source": "Enron / SpamAssassin + De-identified Government Inquiries",
+      "sample_count": 5172
+    },
+    "sms_spam": {
+      "model_name": "ccip-sms-spam-distilbert",
+      "task": "SMS_SPAM",
+      "current_threshold": 0.50,
+      "recommended_threshold": 0.58,
+      "metric_optimized": "Spam Precision",
+      "tradeoff": "Prevents citizen utility bill & OTP notification misclassification as spam (Precision: 98.9% -> 99.4%)",
+      "data_source": "UCI SMS Dataset + Indian Trai DND Header Samples",
+      "sample_count": 5574
+    },
+    "case_similarity": {
+      "model_name": "ccip-case-similarity-minilm",
+      "task": "CASE_SIMILARITY",
+      "current_threshold": 0.55,
+      "recommended_threshold": 0.68,
+      "metric_optimized": "Retrieval Precision@5 (Investigator Docket Relevance)",
+      "tradeoff": "Filters loose semantic matches; ensures retrieved historical cases share operational Modus Operandi",
+      "data_source": "De-identified Historical Incident Pairs",
+      "sample_count": 2400
+    },
+    "cross_case_correlation": {
+      "model_name": "ccip-cross-case-correlation-distilroberta",
+      "task": "CROSS_CASE_CORRELATION",
+      "current_threshold": 0.50,
+      "recommended_threshold": 0.75,
+      "metric_optimized": "STRONGLY_RELATED Precision (Anti-Hallucination Guardrail)",
+      "tradeoff": "Guarantees strong candidate correlation alerts only when multiple corroborating indicators align",
+      "data_source": "Synthetic & Historical Investigative Linkage Clusters",
+      "sample_count": 3000
+    },
+    "evidence_graph_link": {
+      "model_name": "ccip-evidence-graph-link",
+      "task": "EVIDENCE_GRAPH_LINK",
+      "current_threshold": 0.50,
+      "recommended_threshold": 0.70,
+      "metric_optimized": "Topological Graph Density & False Link Prevention",
+      "tradeoff": "Prevents noisy hub-formation in visual investigative graph; candidate links require high structural affinity",
+      "data_source": "Synthetic Forensic Knowledge Graphs",
+      "sample_count": 21406
+    }
+  }
+}

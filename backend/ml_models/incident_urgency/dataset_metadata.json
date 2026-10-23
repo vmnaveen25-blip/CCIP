@@ -1,0 +1,21 @@
+{
+  "name": "ccip-incident-urgency-bootstrap-v3",
+  "task": "incident urgency classification",
+  "counts": {
+    "train": 4000,
+    "validation": 800,
+    "test": 1000
+  },
+  "labels": [
+    "LOW",
+    "MEDIUM",
+    "HIGH",
+    "CRITICAL"
+  ],
+  "source": "controlled synthetic narratives with split-separated templates",
+  "limitations": [
+    "Synthetic/bootstrap data.",
+    "Operational triage labels, not legal conclusions.",
+    "Real investigator-reviewed complaints required before production claims."
+  ]
+}

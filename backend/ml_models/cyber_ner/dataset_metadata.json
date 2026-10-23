@@ -1,0 +1,21 @@
+{
+  "name": "ccip-cyber-ner-bootstrap-v2",
+  "seed": 42,
+  "source": "controlled synthetic complaint-style data using split-isolated templates/vocabularies",
+  "counts": {
+    "train": 2611,
+    "validation": 130,
+    "test": 317,
+    "total": 3058
+  },
+  "leakage_controls": {
+    "exact_text_disjoint": true,
+    "separate_template_families": true,
+    "partially_held_out_entity_values": true
+  },
+  "limitations": [
+    "Dataset remains primarily synthetic/bootstrap data.",
+    "Validation/test metrics are more conservative than v1 but still not real-world field accuracy.",
+    "Investigator-reviewed real complaint annotations remain required before production performance claims."
+  ]
+}

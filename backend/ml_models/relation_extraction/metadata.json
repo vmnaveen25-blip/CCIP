@@ -1,0 +1,60 @@
+{
+  "model_name": "ccip-cyber-relation-distilroberta-v1",
+  "base_model": "distilroberta-base",
+  "task": "entity-pair-relation-classification",
+  "version": "relation-extraction-bootstrap-v1.0.0",
+  "relations": [
+    "TRANSFERRED_TO",
+    "CONTACTED_VIA",
+    "IMPERSONATES",
+    "ASSOCIATED_WITH_BANK",
+    "PAID_AMOUNT",
+    "USES_ACCOUNT",
+    "SENT_MESSAGE_TO",
+    "OWNS_OR_CONTROLS",
+    "NO_RELATION"
+  ],
+  "max_length": 192,
+  "precision_mode": "FP32",
+  "training": {
+    "epochs": 4,
+    "learning_rate": 2e-05,
+    "training_seconds": 180.48,
+    "seed": 42
+  },
+  "dataset": {
+    "name": "ccip-cyber-relation-extraction-bootstrap-v1",
+    "task": "entity-pair relation classification",
+    "labels": [
+      "TRANSFERRED_TO",
+      "CONTACTED_VIA",
+      "IMPERSONATES",
+      "ASSOCIATED_WITH_BANK",
+      "PAID_AMOUNT",
+      "USES_ACCOUNT",
+      "SENT_MESSAGE_TO",
+      "OWNS_OR_CONTROLS",
+      "NO_RELATION"
+    ],
+    "counts": {
+      "train": 7200,
+      "validation": 1350,
+      "test": 1800
+    },
+    "source": "controlled synthetic cybercrime relation examples",
+    "limitations": [
+      "Synthetic/bootstrap training data.",
+      "Relations are model suggestions and require investigator review.",
+      "Real investigator-annotated entity-pair relations are required before production accuracy claims."
+    ]
+  },
+  "deployment_policy": {
+    "advisory_only": true,
+    "human_review_required": true
+  },
+  "limitations": [
+    "Synthetic/bootstrap relation data.",
+    "Relation predictions do not establish identity, guilt, or common offender.",
+    "Real investigator-annotated relations are required before production accuracy claims."
+  ]
+}

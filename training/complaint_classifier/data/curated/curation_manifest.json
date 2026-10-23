@@ -1,0 +1,24 @@
+{
+  "dataset_version": "complaint-dataset-v1.1.0",
+  "parent_dataset_version": "complaint-dataset-v1.0.0",
+  "curated_real_count": 15,
+  "curated_synthetic_count": 19000,
+  "total_curated": 19015,
+  "review_queue_size": 19015,
+  "target_weak_classes": [
+    "BUSINESS_EMAIL_COMPROMISE",
+    "CYBERSTALKING",
+    "MALWARE_RANSOMWARE",
+    "ACCOUNT_TAKEOVER",
+    "SEXTORTION",
+    "CARD_FRAUD",
+    "LOAN_APP_FRAUD",
+    "ONLINE_SHOPPING_FRAUD",
+    "IDENTITY_THEFT",
+    "JOB_SCAM",
+    "CRYPTO_FRAUD",
+    "UPI_FRAUD",
+    "INVESTMENT_SCAM",
+    "SOCIAL_MEDIA_CRIME"
+  ]
+}

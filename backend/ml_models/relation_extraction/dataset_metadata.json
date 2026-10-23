@@ -1,0 +1,26 @@
+{
+  "name": "ccip-cyber-relation-extraction-bootstrap-v1",
+  "task": "entity-pair relation classification",
+  "labels": [
+    "TRANSFERRED_TO",
+    "CONTACTED_VIA",
+    "IMPERSONATES",
+    "ASSOCIATED_WITH_BANK",
+    "PAID_AMOUNT",
+    "USES_ACCOUNT",
+    "SENT_MESSAGE_TO",
+    "OWNS_OR_CONTROLS",
+    "NO_RELATION"
+  ],
+  "counts": {
+    "train": 7200,
+    "validation": 1350,
+    "test": 1800
+  },
+  "source": "controlled synthetic cybercrime relation examples",
+  "limitations": [
+    "Synthetic/bootstrap training data.",
+    "Relations are model suggestions and require investigator review.",
+    "Real investigator-annotated entity-pair relations are required before production accuracy claims."
+  ]
+}

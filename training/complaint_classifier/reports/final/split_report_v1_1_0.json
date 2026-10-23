@@ -1,0 +1,122 @@
+{
+  "dataset_version": "complaint-dataset-v1.1.0",
+  "parent_dataset_version": "complaint-dataset-v1.0.0",
+  "train": {
+    "total_count": 26739,
+    "cybercrime_count": 21096,
+    "legitimate_count": 5643,
+    "synthetic_count": 13685,
+    "real_count": 13054,
+    "synthetic_ratio": 0.5118,
+    "real_ratio": 0.4882,
+    "source_distribution": {
+      "Shade63/scam-classification-multiclass": 11210,
+      "ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset": 657,
+      "sidddd625/adaption-fraud-and-cyber-safety": 2345,
+      "anmolshrivastav/scam-hum-india": 1831,
+      "vnovaai/INDIA_FRAUD_DETECTION_JSONL_V1": 90,
+      "ccip_curated_corpus": 10606
+    },
+    "label_distribution": {
+      "PHISHING": 4814,
+      "UPI_FRAUD": 2183,
+      "BANKING_FRAUD": 2974,
+      "CARD_FRAUD": 1171,
+      "INVESTMENT_SCAM": 1650,
+      "JOB_SCAM": 1453,
+      "LOAN_APP_FRAUD": 1594,
+      "DIGITAL_ARREST": 2547,
+      "IDENTITY_THEFT": 1494,
+      "ACCOUNT_TAKEOVER": 1104,
+      "SOCIAL_MEDIA_CRIME": 2374,
+      "ONLINE_SHOPPING_FRAUD": 1510,
+      "SEXTORTION": 1540,
+      "CYBERSTALKING": 2114,
+      "MALWARE_RANSOMWARE": 1104,
+      "CRYPTO_FRAUD": 1410,
+      "BUSINESS_EMAIL_COMPROMISE": 1325,
+      "OTHER": 2792
+    }
+  },
+  "validation": {
+    "total_count": 2384,
+    "cybercrime_count": 1664,
+    "legitimate_count": 720,
+    "synthetic_count": 787,
+    "real_count": 1597,
+    "synthetic_ratio": 0.3301,
+    "real_ratio": 0.6699,
+    "source_distribution": {
+      "Shade63/scam-classification-multiclass": 1392,
+      "ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset": 45,
+      "sidddd625/adaption-fraud-and-cyber-safety": 129,
+      "anmolshrivastav/scam-hum-india": 205,
+      "vnovaai/INDIA_FRAUD_DETECTION_JSONL_V1": 2,
+      "ccip_curated_corpus": 611
+    },
+    "label_distribution": {
+      "PHISHING": 459,
+      "UPI_FRAUD": 111,
+      "BANKING_FRAUD": 368,
+      "CARD_FRAUD": 105,
+      "INVESTMENT_SCAM": 56,
+      "JOB_SCAM": 64,
+      "LOAN_APP_FRAUD": 74,
+      "DIGITAL_ARREST": 252,
+      "IDENTITY_THEFT": 154,
+      "ACCOUNT_TAKEOVER": 61,
+      "SOCIAL_MEDIA_CRIME": 124,
+      "ONLINE_SHOPPING_FRAUD": 68,
+      "SEXTORTION": 113,
+      "CYBERSTALKING": 101,
+      "MALWARE_RANSOMWARE": 82,
+      "CRYPTO_FRAUD": 92,
+      "BUSINESS_EMAIL_COMPROMISE": 75,
+      "OTHER": 247
+    }
+  },
+  "test": {
+    "total_count": 2271,
+    "cybercrime_count": 1563,
+    "legitimate_count": 708,
+    "synthetic_count": 651,
+    "real_count": 1620,
+    "synthetic_ratio": 0.2867,
+    "real_ratio": 0.7133,
+    "source_distribution": {
+      "Shade63/scam-classification-multiclass": 1398,
+      "ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset": 41,
+      "sidddd625/adaption-fraud-and-cyber-safety": 124,
+      "anmolshrivastav/scam-hum-india": 220,
+      "vnovaai/INDIA_FRAUD_DETECTION_JSONL_V1": 7,
+      "ccip_curated_corpus": 481
+    },
+    "label_distribution": {
+      "PHISHING": 353,
+      "UPI_FRAUD": 130,
+      "BANKING_FRAUD": 298,
+      "CARD_FRAUD": 26,
+      "INVESTMENT_SCAM": 104,
+      "JOB_SCAM": 100,
+      "LOAN_APP_FRAUD": 79,
+      "DIGITAL_ARREST": 234,
+      "IDENTITY_THEFT": 126,
+      "ACCOUNT_TAKEOVER": 81,
+      "SOCIAL_MEDIA_CRIME": 128,
+      "ONLINE_SHOPPING_FRAUD": 51,
+      "SEXTORTION": 78,
+      "CYBERSTALKING": 117,
+      "MALWARE_RANSOMWARE": 88,
+      "CRYPTO_FRAUD": 100,
+      "BUSINESS_EMAIL_COMPROMISE": 66,
+      "OTHER": 295
+    }
+  },
+  "leakage_checks": {
+    "cross_split_id_overlaps": 0,
+    "train_val_group_overlaps": 0,
+    "train_test_group_overlaps": 0,
+    "val_test_group_overlaps": 0,
+    "passed_leakage_check": true
+  }
+}

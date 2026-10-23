@@ -1,0 +1,13 @@
+{
+  "model_name": "sms-spam-distilbert",
+  "model_version": "1.0.0",
+  "base_model": "distilbert/distilbert-base-uncased",
+  "labels": {
+    "0": "SAFE",
+    "1": "SPAM"
+  },
+  "spam_threshold": 0.2685096263885498,
+  "maximum_token_length": 128,
+  "training_seed": 42,
+  "dataset": "ucirvine/sms_spam"
+}

@@ -1,0 +1,10 @@
+{
+  "original_records": 18650,
+  "cleaned_records": 17513,
+  "conflicting_rows_removed": 0,
+  "duplicate_rows_removed": 585,
+  "class_counts": {
+    "SAFE_EMAIL": 10977,
+    "SUSPICIOUS_EMAIL": 6536
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "ccip-unified-enclave",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Cybercrime Intelligence Platform (CCIP / Astraea Enclave) - Unified Project Controller",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "frontend": "npm --prefix frontend run dev",
+    "backend": "node scripts/dev.mjs --backend-only",
+    "build": "npm --prefix frontend run build",
+    "test": "node scripts/test.mjs",
+    "preview": "npm --prefix frontend run preview"
+  },
+  "keywords": [
+    "cybercrime",
+    "intelligence",
+    "fastapi",
+    "react",
+    "vite",
+    "unified"
+  ],
+  "author": "CCIP Architecture Team",
+  "license": "UNLICENSED"
+}

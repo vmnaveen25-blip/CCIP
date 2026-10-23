@@ -1,0 +1,53 @@
+{
+  "model_name": "ccip-incident-urgency-distilroberta-v3",
+  "base_model": "distilroberta-base",
+  "task": "incident-urgency-classification",
+  "version": "incident-urgency-bootstrap-v3.0.0",
+  "labels": [
+    "LOW",
+    "MEDIUM",
+    "HIGH",
+    "CRITICAL"
+  ],
+  "max_length": 192,
+  "precision_mode": "FP32",
+  "training": {
+    "epochs": 4,
+    "learning_rate": 2e-05,
+    "training_seconds": 103.05,
+    "seed": 42
+  },
+  "dataset": {
+    "name": "ccip-incident-urgency-bootstrap-v3",
+    "task": "incident urgency classification",
+    "counts": {
+      "train": 4000,
+      "validation": 800,
+      "test": 1000
+    },
+    "labels": [
+      "LOW",
+      "MEDIUM",
+      "HIGH",
+      "CRITICAL"
+    ],
+    "source": "controlled synthetic narratives with split-separated templates",
+    "limitations": [
+      "Synthetic/bootstrap data.",
+      "Operational triage labels, not legal conclusions.",
+      "Real investigator-reviewed complaints required before production claims."
+    ]
+  },
+  "deployment_policy": {
+    "advisory_only": true,
+    "human_review_required": true,
+    "not_for_person_risk_scoring": true,
+    "not_for_criminality_scoring": true,
+    "not_for_autonomous_enforcement": true
+  },
+  "limitations": [
+    "Bootstrap synthetic data.",
+    "Incident urgency is not guilt/criminality/suspect risk.",
+    "Real investigator-reviewed complaints required before production claims."
+  ]
+}

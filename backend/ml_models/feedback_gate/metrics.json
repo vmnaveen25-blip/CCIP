@@ -1,0 +1,1533 @@
+{
+  "validation": {
+    "accuracy": 1.0,
+    "macro_precision": 1.0,
+    "macro_recall": 1.0,
+    "macro_f1": 1.0,
+    "per_class": {
+      "REJECT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 600
+      },
+      "REQUIRES_REVIEW": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 600
+      },
+      "APPROVE_CANDIDATE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 600
+      }
+    },
+    "confusion_matrix": [
+      [
+        600,
+        0,
+        0
+      ],
+      [
+        0,
+        600,
+        0
+      ],
+      [
+        0,
+        0,
+        600
+      ]
+    ],
+    "loss": 0.0044847215176559985
+  },
+  "heldout_test": {
+    "accuracy": 0.9995833333333334,
+    "macro_precision": 0.9995838535164377,
+    "macro_recall": 0.9995833333333334,
+    "macro_f1": 0.9995833331705729,
+    "per_class": {
+      "REJECT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 800
+      },
+      "REQUIRES_REVIEW": {
+        "precision": 1.0,
+        "recall": 0.99875,
+        "f1": 0.9993746091307067,
+        "support": 800
+      },
+      "APPROVE_CANDIDATE": {
+        "precision": 0.9987515605493134,
+        "recall": 1.0,
+        "f1": 0.9993753903810119,
+        "support": 800
+      }
+    },
+    "confusion_matrix": [
+      [
+        800,
+        0,
+        0
+      ],
+      [
+        0,
+        799,
+        1
+      ],
+      [
+        0,
+        0,
+        800
+      ]
+    ],
+    "loss": 0.004554757522419095
+  },
+  "challenge_accuracy": 1.0,
+  "training_history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.741358774403731,
+      "validation": {
+        "accuracy": 0.99,
+        "macro_precision": 0.9900611124547414,
+        "macro_recall": 0.9899999999999999,
+        "macro_f1": 0.9899789405795875,
+        "per_class": {
+          "REJECT": {
+            "precision": 0.9819078947368421,
+            "recall": 0.995,
+            "f1": 0.9884105960264901,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 0.9948979591836735,
+            "recall": 0.975,
+            "f1": 0.984848484848485,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 0.9933774834437086,
+            "recall": 1.0,
+            "f1": 0.9966777408637874,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            597,
+            3,
+            0
+          ],
+          [
+            11,
+            585,
+            4
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.2675337865948677
+      }
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.11728288378152582,
+      "validation": {
+        "accuracy": 0.9988888888888889,
+        "macro_precision": 0.9988898132741726,
+        "macro_recall": 0.9988888888888888,
+        "macro_f1": 0.9988888885030862,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 0.9983333333333333,
+            "f1": 0.9991659716430359,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 0.9983333333333333,
+            "recall": 0.9983333333333333,
+            "f1": 0.9983333333333333,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 0.9983361064891847,
+            "recall": 1.0,
+            "f1": 0.9991673605328892,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            599,
+            1,
+            0
+          ],
+          [
+            0,
+            599,
+            1
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.023993805050849915
+      }
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.024765711096632812,
+      "validation": {
+        "accuracy": 0.9988888888888889,
+        "macro_precision": 0.9988898132741726,
+        "macro_recall": 0.9988888888888888,
+        "macro_f1": 0.9988888885030862,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 0.9983333333333333,
+            "f1": 0.9991659716430359,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 0.9983333333333333,
+            "recall": 0.9983333333333333,
+            "f1": 0.9983333333333333,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 0.9983361064891847,
+            "recall": 1.0,
+            "f1": 0.9991673605328892,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            599,
+            1,
+            0
+          ],
+          [
+            0,
+            599,
+            1
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00883633631747216
+      }
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.012041546080985831,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0044847215176559985
+      }
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.007809496821007795,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0027482695877552032
+      }
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0062608251399878,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0019415323622524738
+      }
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.004720381748888435,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0015004478336777538
+      }
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0036685413765048403,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0015177309105638415
+      }
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0028684856256909873,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0006986400185269304
+      }
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0026096686956912484,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.000709460859070532
+      }
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.001974175895965244,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0005346426041796803
+      }
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0021110026120570386,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0005419620465545449
+      }
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.0016134395191329531,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00040403285674983636
+      }
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.0015528522203061988,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0004019176776637323
+      }
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.0010837006298566444,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00041104861884377897
+      }
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.0009366479541010145,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00035825407394440845
+      }
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.00192838072568217,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0006317755323834717
+      }
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.0012151928846530307,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0002022199405473657
+      }
+    },
+    {
+      "epoch": 19,
+      "train_loss": 0.0011305969633718228,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0003274148839409463
+      }
+    },
+    {
+      "epoch": 20,
+      "train_loss": 0.0016067423251418707,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00023630349824088626
+      }
+    },
+    {
+      "epoch": 21,
+      "train_loss": 0.0005521901839529164,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00015238655760185793
+      }
+    },
+    {
+      "epoch": 22,
+      "train_loss": 0.001017273155108948,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0001961240814125631
+      }
+    },
+    {
+      "epoch": 23,
+      "train_loss": 0.0009800369007280096,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0002852527832146734
+      }
+    },
+    {
+      "epoch": 24,
+      "train_loss": 0.0030130734840996512,
+      "validation": {
+        "accuracy": 0.9994444444444445,
+        "macro_precision": 0.9994453688297282,
+        "macro_recall": 0.9994444444444444,
+        "macro_f1": 0.9994444440586417,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 0.9983333333333333,
+            "f1": 0.9991659716430359,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 0.9983361064891847,
+            "recall": 1.0,
+            "f1": 0.9991673605328892,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            599,
+            1
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.001668993558268994
+      }
+    },
+    {
+      "epoch": 25,
+      "train_loss": 0.0014338923148089736,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00014592349180020392
+      }
+    },
+    {
+      "epoch": 26,
+      "train_loss": 0.0009577788108193394,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.0003151281889586244
+      }
+    },
+    {
+      "epoch": 27,
+      "train_loss": 0.0009746430104213585,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00020603466509783175
+      }
+    },
+    {
+      "epoch": 28,
+      "train_loss": 0.0003624489434312434,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00013337304153537843
+      }
+    },
+    {
+      "epoch": 29,
+      "train_loss": 0.0004946023236698238,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 7.226749403344002e-05
+      }
+    },
+    {
+      "epoch": 30,
+      "train_loss": 0.0004133001368447569,
+      "validation": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "per_class": {
+          "REJECT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "REQUIRES_REVIEW": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          },
+          "APPROVE_CANDIDATE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 600
+          }
+        },
+        "confusion_matrix": [
+          [
+            600,
+            0,
+            0
+          ],
+          [
+            0,
+            600,
+            0
+          ],
+          [
+            0,
+            0,
+            600
+          ]
+        ],
+        "loss": 0.00015914727828203468
+      }
+    }
+  ]
+}

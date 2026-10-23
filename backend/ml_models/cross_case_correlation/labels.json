@@ -1,0 +1,17 @@
+{
+  "labels": [
+    "UNRELATED",
+    "POSSIBLY_RELATED",
+    "STRONGLY_RELATED"
+  ],
+  "label2id": {
+    "UNRELATED": 0,
+    "POSSIBLY_RELATED": 1,
+    "STRONGLY_RELATED": 2
+  },
+  "id2label": {
+    "0": "UNRELATED",
+    "1": "POSSIBLY_RELATED",
+    "2": "STRONGLY_RELATED"
+  }
+}

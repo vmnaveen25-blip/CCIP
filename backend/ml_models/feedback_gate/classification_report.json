@@ -1,0 +1,44 @@
+{
+  "accuracy": 0.9995833333333334,
+  "macro_precision": 0.9995838535164377,
+  "macro_recall": 0.9995833333333334,
+  "macro_f1": 0.9995833331705729,
+  "per_class": {
+    "REJECT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 800
+    },
+    "REQUIRES_REVIEW": {
+      "precision": 1.0,
+      "recall": 0.99875,
+      "f1": 0.9993746091307067,
+      "support": 800
+    },
+    "APPROVE_CANDIDATE": {
+      "precision": 0.9987515605493134,
+      "recall": 1.0,
+      "f1": 0.9993753903810119,
+      "support": 800
+    }
+  },
+  "confusion_matrix": [
+    [
+      800,
+      0,
+      0
+    ],
+    [
+      0,
+      799,
+      1
+    ],
+    [
+      0,
+      0,
+      800
+    ]
+  ],
+  "loss": 0.004554757522419095
+}

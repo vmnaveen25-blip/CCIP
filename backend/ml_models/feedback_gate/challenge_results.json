@@ -1,0 +1,42 @@
+[
+  {
+    "name": "high quality finalized review",
+    "expected": "APPROVE_CANDIDATE",
+    "predicted": "APPROVE_CANDIDATE",
+    "source": "ML_RELIABILITY_GATE",
+    "reason": null,
+    "correct": true
+  },
+  {
+    "name": "unauthorized reviewer",
+    "expected": "REJECT",
+    "predicted": "REJECT",
+    "source": "DETERMINISTIC_POLICY",
+    "reason": "UNAUTHORIZED_REVIEWER",
+    "correct": true
+  },
+  {
+    "name": "appeal pending",
+    "expected": "REQUIRES_REVIEW",
+    "predicted": "REQUIRES_REVIEW",
+    "source": "DETERMINISTIC_POLICY",
+    "reason": "OUTCOME_STILL_CONTESTED",
+    "correct": true
+  },
+  {
+    "name": "integrity missing",
+    "expected": "REJECT",
+    "predicted": "REJECT",
+    "source": "DETERMINISTIC_POLICY",
+    "reason": "EVIDENCE_INTEGRITY_NOT_VERIFIED",
+    "correct": true
+  },
+  {
+    "name": "moderate conflicting feedback",
+    "expected": "REQUIRES_REVIEW",
+    "predicted": "REQUIRES_REVIEW",
+    "source": "ML_RELIABILITY_GATE",
+    "reason": null,
+    "correct": true
+  }
+]

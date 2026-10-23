@@ -1,0 +1,10 @@
+{
+  "dataset_version": "complaint-dataset-v1.1.0",
+  "curated_records_total": 11698,
+  "curated_real_count": 15,
+  "curated_synthetic_count": 11683,
+  "review_queue_total_candidates": 127,
+  "review_status_counts": {
+    "AUTO_ACCEPTED_HIGH_CONFIDENCE": 127
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "feature_names": [
+    "evidence_integrity_verified",
+    "reviewer_authorized",
+    "case_finalized",
+    "appeal_or_reopen_pending",
+    "audit_complete",
+    "provenance_completeness",
+    "reviewer_count_norm",
+    "reviewer_agreement_ratio",
+    "source_diversity_norm",
+    "supporting_evidence_norm",
+    "contradiction_rate",
+    "entity_consistency",
+    "human_model_agreement",
+    "manual_verification_ratio",
+    "feedback_age_norm",
+    "cross_case_support_norm",
+    "data_quality_score"
+  ],
+  "feature_dim": 17,
+  "labels": [
+    "REJECT",
+    "REQUIRES_REVIEW",
+    "APPROVE_CANDIDATE"
+  ],
+  "hard_gate_fields": [
+    "evidence_integrity_verified",
+    "reviewer_authorized",
+    "case_finalized",
+    "appeal_or_reopen_pending",
+    "audit_complete"
+  ]
+}

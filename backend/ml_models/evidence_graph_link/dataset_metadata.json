@@ -1,0 +1,20 @@
+{
+  "name": "ccip-evidence-graph-link-bootstrap-v1",
+  "task": "evidence graph candidate link prediction",
+  "labels": [
+    "NO_LINK",
+    "CANDIDATE_LINK"
+  ],
+  "feature_dim": 80,
+  "counts": {
+    "train": 69802,
+    "validation": 15994,
+    "test": 21406
+  },
+  "source": "controlled synthetic evidence graphs",
+  "limitations": [
+    "Synthetic/bootstrap graphs.",
+    "Predicted links are investigator-review candidates only.",
+    "Real confirmed graph edges/non-edges are required before production accuracy claims."
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "model_name": "ccip-cross-case-correlation-distilroberta-v1",
+  "base_model": "distilroberta-base",
+  "task": "cross-case-correlation-candidate-classification",
+  "version": "cross-case-correlation-bootstrap-v1.0.0",
+  "labels": [
+    "UNRELATED",
+    "POSSIBLY_RELATED",
+    "STRONGLY_RELATED"
+  ],
+  "max_length": 256,
+  "precision_mode": "FP32",
+  "training": {
+    "epochs": 4,
+    "learning_rate": 2e-05,
+    "training_seconds": 461.54,
+    "seed": 42
+  },
+  "dataset": {
+    "name": "ccip-cross-case-correlation-bootstrap-v1",
+    "task": "cross-case correlation candidate classification",
+    "labels": [
+      "UNRELATED",
+      "POSSIBLY_RELATED",
+      "STRONGLY_RELATED"
+    ],
+    "counts": {
+      "train": 6000,
+      "validation": 1200,
+      "test": 1500
+    },
+    "source": "controlled synthetic cybercrime complaint pairs",
+    "limitations": [
+      "Synthetic/bootstrap pair data.",
+      "Correlation score is not proof of common offender or shared criminal organization.",
+      "Real investigator-confirmed linked/unlinked case pairs are required before production claims."
+    ]
+  },
+  "deployment_policy": {
+    "advisory_only": true,
+    "human_review_required": true,
+    "not_proof_of_common_offender": true,
+    "not_for_autonomous_enforcement": true
+  },
+  "limitations": [
+    "Synthetic/bootstrap case-pair data.",
+    "Correlation prediction does not establish common offender, conspiracy, or guilt.",
+    "Real investigator-confirmed linked/unlinked case pairs required before production claims."
+  ]
+}

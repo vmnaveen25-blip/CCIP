@@ -1,0 +1,50 @@
+{
+  "Shade63/scam-classification-multiclass": {
+    "downloaded": 14000,
+    "accepted": 14000,
+    "rejected": 0,
+    "final_unique_count": 14000,
+    "percentage": 44.59,
+    "unmapped_records": 0
+  },
+  "ysangam/Indian_Cyber_Scam_PhoneCall_Hinglish_Dataset": {
+    "downloaded": 10000,
+    "accepted": 10000,
+    "rejected": 0,
+    "final_unique_count": 743,
+    "percentage": 2.37,
+    "unmapped_records": 0
+  },
+  "sidddd625/adaption-fraud-and-cyber-safety": {
+    "downloaded": 2658,
+    "accepted": 2658,
+    "rejected": 0,
+    "final_unique_count": 2598,
+    "percentage": 8.28,
+    "unmapped_records": 0
+  },
+  "anmolshrivastav/scam-hum-india": {
+    "downloaded": 2272,
+    "accepted": 2271,
+    "rejected": 1,
+    "final_unique_count": 2256,
+    "percentage": 7.19,
+    "unmapped_records": 0
+  },
+  "vnovaai/INDIA_FRAUD_DETECTION_JSONL_V1": {
+    "downloaded": 99,
+    "accepted": 99,
+    "rejected": 0,
+    "final_unique_count": 99,
+    "percentage": 0.32,
+    "unmapped_records": 0
+  },
+  "ccip_curated_corpus": {
+    "downloaded": 19015,
+    "accepted": 19015,
+    "rejected": 0,
+    "final_unique_count": 11698,
+    "percentage": 37.26,
+    "unmapped_records": 0
+  }
+}

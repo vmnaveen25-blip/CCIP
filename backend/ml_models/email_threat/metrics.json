@@ -1,0 +1,9 @@
+{
+  "test_accuracy": 0.9836315188427864,
+  "test_suspicious_precision": 0.969939879759519,
+  "test_suspicious_recall": 0.9867482161060143,
+  "test_f1": 0.9782718544719555,
+  "test_pr_auc": 0.9972480118786698,
+  "selected_threshold": 0.011331753805279732,
+  "validation_f1_at_selected_threshold": 0.9787018255573093
+}

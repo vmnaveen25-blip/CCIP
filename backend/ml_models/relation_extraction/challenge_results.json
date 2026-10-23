@@ -1,0 +1,182 @@
+[
+  {
+    "sentence": "Rahul transferred \u20b950,000 to fraud@oksbi.",
+    "entity_a": "Rahul",
+    "entity_b": "fraud@oksbi",
+    "expected": "TRANSFERRED_TO",
+    "predicted": "TRANSFERRED_TO",
+    "confidence": 0.9840265512466431,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.9840265512466431,
+      "CONTACTED_VIA": 0.0005260745529085398,
+      "IMPERSONATES": 0.00038669182686135173,
+      "ASSOCIATED_WITH_BANK": 0.0006694618496112525,
+      "PAID_AMOUNT": 0.009709331206977367,
+      "USES_ACCOUNT": 0.0017097786767408252,
+      "SENT_MESSAGE_TO": 0.0004377759469207376,
+      "OWNS_OR_CONTROLS": 0.0015698191709816456,
+      "NO_RELATION": 0.0009644688689149916
+    }
+  },
+  {
+    "sentence": "Priya was contacted through WhatsApp.",
+    "entity_a": "Priya",
+    "entity_b": "WhatsApp",
+    "expected": "CONTACTED_VIA",
+    "predicted": "CONTACTED_VIA",
+    "confidence": 0.9979739785194397,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.00018484627071302384,
+      "CONTACTED_VIA": 0.9979739785194397,
+      "IMPERSONATES": 0.00024214864242821932,
+      "ASSOCIATED_WITH_BANK": 0.00024021037097554654,
+      "PAID_AMOUNT": 0.0003024751495104283,
+      "USES_ACCOUNT": 0.0003054254048038274,
+      "SENT_MESSAGE_TO": 0.00030101873562671244,
+      "OWNS_OR_CONTROLS": 0.00014483756967820227,
+      "NO_RELATION": 0.00030506853363476694
+    }
+  },
+  {
+    "sentence": "SecurePay Solutions claimed to represent SBI.",
+    "entity_a": "SecurePay Solutions",
+    "entity_b": "SBI",
+    "expected": "IMPERSONATES",
+    "predicted": "IMPERSONATES",
+    "confidence": 0.9978607296943665,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.0002088696346618235,
+      "CONTACTED_VIA": 0.00024115607084240764,
+      "IMPERSONATES": 0.9978607296943665,
+      "ASSOCIATED_WITH_BANK": 0.00025852659018710256,
+      "PAID_AMOUNT": 0.0003158165200147778,
+      "USES_ACCOUNT": 0.00025071026175282896,
+      "SENT_MESSAGE_TO": 0.00030281138606369495,
+      "OWNS_OR_CONTROLS": 0.0002535748644731939,
+      "NO_RELATION": 0.0003077214059885591
+    }
+  },
+  {
+    "sentence": "Account 621004983271 is maintained with HDFC Bank.",
+    "entity_a": "621004983271",
+    "entity_b": "HDFC Bank",
+    "expected": "ASSOCIATED_WITH_BANK",
+    "predicted": "ASSOCIATED_WITH_BANK",
+    "confidence": 0.9972473978996277,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.000388084736187011,
+      "CONTACTED_VIA": 0.00037300537223927677,
+      "IMPERSONATES": 0.0004210766055621207,
+      "ASSOCIATED_WITH_BANK": 0.9972473978996277,
+      "PAID_AMOUNT": 0.0002872596960514784,
+      "USES_ACCOUNT": 0.00045155760017223656,
+      "SENT_MESSAGE_TO": 0.00022023935161996633,
+      "OWNS_OR_CONTROLS": 0.0003002719604410231,
+      "NO_RELATION": 0.000311010517179966
+    }
+  },
+  {
+    "sentence": "Arjun paid \u20b925,000 during the incident.",
+    "entity_a": "Arjun",
+    "entity_b": "\u20b925,000",
+    "expected": "PAID_AMOUNT",
+    "predicted": "PAID_AMOUNT",
+    "confidence": 0.9979727864265442,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.0001955656334757805,
+      "CONTACTED_VIA": 0.0002343759115319699,
+      "IMPERSONATES": 0.00027560690068639815,
+      "ASSOCIATED_WITH_BANK": 0.0002656366559676826,
+      "PAID_AMOUNT": 0.9979727864265442,
+      "USES_ACCOUNT": 0.000252602796535939,
+      "SENT_MESSAGE_TO": 0.0002195687557104975,
+      "OWNS_OR_CONTROLS": 0.00033602863550186157,
+      "NO_RELATION": 0.00024783966364338994
+    }
+  },
+  {
+    "sentence": "QuickTrade Capital used bank account 902145778812 to receive funds.",
+    "entity_a": "QuickTrade Capital",
+    "entity_b": "902145778812",
+    "expected": "USES_ACCOUNT",
+    "predicted": "USES_ACCOUNT",
+    "confidence": 0.9977551102638245,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.0003076017019338906,
+      "CONTACTED_VIA": 0.00031967947143130004,
+      "IMPERSONATES": 0.0002485922595951706,
+      "ASSOCIATED_WITH_BANK": 0.00036212863051332533,
+      "PAID_AMOUNT": 0.0003198090707883239,
+      "USES_ACCOUNT": 0.9977551102638245,
+      "SENT_MESSAGE_TO": 0.0003197111946064979,
+      "OWNS_OR_CONTROLS": 0.00015475742111448199,
+      "NO_RELATION": 0.0002125399769283831
+    }
+  },
+  {
+    "sentence": "Global Refund Desk sent a message to Meena.",
+    "entity_a": "Global Refund Desk",
+    "entity_b": "Meena",
+    "expected": "SENT_MESSAGE_TO",
+    "predicted": "SENT_MESSAGE_TO",
+    "confidence": 0.997940719127655,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.00025369893410243094,
+      "CONTACTED_VIA": 0.00023302959743887186,
+      "IMPERSONATES": 0.00037126874667592347,
+      "ASSOCIATED_WITH_BANK": 0.0001653388753766194,
+      "PAID_AMOUNT": 0.00019812851678580046,
+      "USES_ACCOUNT": 0.0002976105606649071,
+      "SENT_MESSAGE_TO": 0.997940719127655,
+      "OWNS_OR_CONTROLS": 0.00027477109688334167,
+      "NO_RELATION": 0.00026536910445429385
+    }
+  },
+  {
+    "sentence": "Ravi controls the UPI ID refund@paytm.",
+    "entity_a": "Ravi",
+    "entity_b": "refund@paytm",
+    "expected": "OWNS_OR_CONTROLS",
+    "predicted": "OWNS_OR_CONTROLS",
+    "confidence": 0.9978813529014587,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.0003757571685127914,
+      "CONTACTED_VIA": 0.00015520653687417507,
+      "IMPERSONATES": 0.0002907795424107462,
+      "ASSOCIATED_WITH_BANK": 0.0002635764831211418,
+      "PAID_AMOUNT": 0.00029730776441283524,
+      "USES_ACCOUNT": 0.00019011735275853425,
+      "SENT_MESSAGE_TO": 0.00029451033333316445,
+      "OWNS_OR_CONTROLS": 0.9978813529014587,
+      "NO_RELATION": 0.00025126957916654646
+    }
+  },
+  {
+    "sentence": "Telegram was mentioned while account 445566778899 was listed separately.",
+    "entity_a": "Telegram",
+    "entity_b": "445566778899",
+    "expected": "NO_RELATION",
+    "predicted": "NO_RELATION",
+    "confidence": 0.9978506565093994,
+    "correct": true,
+    "probabilities": {
+      "TRANSFERRED_TO": 0.00029438865021802485,
+      "CONTACTED_VIA": 0.0002854790654964745,
+      "IMPERSONATES": 0.00030871975468471646,
+      "ASSOCIATED_WITH_BANK": 0.00028841174207627773,
+      "PAID_AMOUNT": 0.00023898457584436983,
+      "USES_ACCOUNT": 0.00023327804228756577,
+      "SENT_MESSAGE_TO": 0.00026576328673399985,
+      "OWNS_OR_CONTROLS": 0.00023434498871210963,
+      "NO_RELATION": 0.9978506565093994
+    }
+  }
+]

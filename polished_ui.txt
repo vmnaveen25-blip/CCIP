@@ -1,0 +1,273 @@
+# CCIP / Astraea Enclave — Government-Grade UI Refinement Plan
+
+## Summary
+
+This plan elevates the existing CCIP/Astraea Enclave frontend into a polished, professional, government-grade cybercrime intelligence platform. The backend, APIs, authentication, and role portals are all working — this is a purely frontend UI/UX refinement pass.
+
+**Technology audit:**
+- React 18 + TypeScript + Vite
+- Tailwind CSS (no Framer Motion installed)
+- `lucide-react` icons, `recharts` charts, `clsx`, `tailwind-merge`
+- No animation library installed → will use **CSS transitions + keyframes exclusively**
+- Good design token foundation already exists in `index.css` + `tailwind.config.js`
+
+---
+
+## UI/UX Audit (Before Changes)
+
+### Critical Issues
+1. **No motion system** — page transitions are bare `animate-in` classes with no coordinated easing/timing system
+2. **No reduced-motion respect** — no `@media (prefers-reduced-motion)` handling
+3. **Sidebar** lacks active rail glow, hover brightness, smooth transitions
+4. **Header** missing live WebSocket-status-aware pulse, DEFCON indicator is static
+5. **Toasts** are single-line, no type variants, no queue system
+6. **Buttons** missing `focus-visible` ring, `loading` states, `active` press animation
+7. **Inputs** missing focus glow refinement, no inline validation animation
+8. **Notification drawer** appears with abrupt snap (class-based CSS animation only)
+9. **Portal switching** has no page-enter animation (just conditional render)
+10. **Glass panels** missing consistent `inset` top highlight across all usages
+11. **Tables** no sticky headers, no skeleton rows on load
+12. **Empty states** generic ("No data")
+13. **AI Detection Lab** probability bars are static (no animated fill)
+14. **Model status badges** use hardcoded color classes, not semantic token variants
+15. **AI triage** has no processing animation sequence
+16. **Evidence upload** missing SHA-256 hash reveal animation
+17. **Complaint timeline** steps appear statically
+18. **Investigation Assistant** typing indicator shown even when not generating
+19. **Cards** hover lift too aggressive (2px translateY works, but no scale micro-animation)
+20. **AuthModal** no enter animation (full page render)
+
+---
+
+## Proposed Changes
+
+### P0 — Global Motion System + Design Tokens
+
+---
+
+#### [MODIFY] [index.css](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/index.css)
+
+Add comprehensive motion token system:
+- CSS custom properties for animation durations: `--motion-instant`, `--motion-fast`, `--motion-standard`, `--motion-medium`, `--motion-slow`, `--motion-emphasis`
+- CSS easing variables: `--ease-out`, `--ease-enter`, `--ease-exit`
+- New keyframe animations: `page-enter`, `slide-up`, `slide-down`, `fade-in`, `pulse-dot`, `scan-bar`, `probability-fill`, `toast-enter`, `drawer-open`
+- `@media (prefers-reduced-motion: reduce)` block disabling all decorative transitions
+- Enhanced `.btn-primary` / `.btn-secondary` with `active:scale-[0.98]`, `focus-visible` rings
+- Enhanced `.op-input` with smooth focus glow
+- `.page-enter` utility class for portal transitions
+- `.skeleton-shimmer` for loading states
+- `.probability-bar` for animated AI result bars
+- `animate-pulse-dot` for live indicators
+- Sidebar active rail glow via CSS
+- Glass panel top-highlight normalization
+
+---
+
+#### [MODIFY] [tailwind.config.js](file:///c:/Users/Admin/Desktop/CCIP/frontend/tailwind.config.js)
+
+Add to theme.extend:
+- `transitionDuration` tokens mapped to motion variables
+- `keyframes` for `page-enter`, `skeleton-shimmer`, `probability-fill`, `pulse-status`
+- `animation` utilities for above keyframes
+
+---
+
+### P0 — Component Improvements
+
+---
+
+#### [MODIFY] [Header.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/Header.tsx)
+
+- Add live WebSocket connection status indicator (green pulse when connected)
+- DEFCON badge now renders level dynamically with correct color
+- Portal switcher dropdown uses CSS `transform-origin` + opacity transition
+- Current portal name animates on change (`opacity 0 → 1`)
+- Operator avatar badge: pulse animation on new notifications
+- `focus-visible` on all interactive elements
+- Notification count badge: small scale animation when count changes
+
+---
+
+#### [MODIFY] [Sidebar.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/Sidebar.tsx)
+
+- Active item: replace current `border-l-[3px]` with a glowing left rail using `box-shadow`
+- Active background transitions smoothly (`transition-all 180ms`)
+- Hover state: subtle brightness increase (`hover:bg-white/[0.07]`)
+- Icon: active state no longer abrupt — use color transition
+- Badge count: animate with scale when value changes
+- Group title: uppercase tracked label refined
+- Bottom status bar: live operational pulse dot animates
+
+---
+
+#### [MODIFY] [App.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/App.tsx)
+
+- Portal transition: wrap each portal render in a `div` with `page-enter` class applied on mount (via `key` prop to force re-mount on portal change)
+- Notification drawer: replace inline conditional with CSS transition (`opacity + translateY`) controlled by state
+- Toast system: extend to support `type` variants (success/warning/error/info), auto-dismiss queue, with proper slide+fade animation
+- Add `aria-live="polite"` region for toasts
+
+---
+
+### P0 — Authentication
+
+---
+
+#### [MODIFY] [AuthModal.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/AuthModal.tsx)
+
+- Modal backdrop: `opacity: 0 → 1` transition on open
+- Modal card: `scale(0.97) + translateY(8px) → scale(1) + translateY(0)` on open
+- Screen transitions between login/register/OTP use `opacity + translateY` fade
+- Input focus glow with orange border + `box-shadow` transition
+- Submit button: loading state with inline spinner SVG
+- Google auth button: subtle shimmer on hover
+
+---
+
+### P1 — Citizen Portal
+
+---
+
+#### [MODIFY] [CitizenPortal.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/views/CitizenPortal.tsx)
+
+- Complaint submission button: loading state → success state with animated reference number reveal
+- Evidence upload: file cards appear with `slide-up` transition; SHA-256 hash reveals with fade
+- "Calculating SHA-256..." state animation (scan bar under file card)
+- Complaint timeline: `IntersectionObserver` for progressive reveal of steps
+- Progress tracker: current step highlighted with animated border
+- Empty states replaced with contextual messages + icon
+- Skeleton loading for complaint list
+
+---
+
+### P1 — Specialist Portal
+
+---
+
+#### [MODIFY] [SpecialistPortal.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/views/SpecialistPortal.tsx)
+
+- Case card hover: `scale(1.008) + translateY(-1px) + shadow`
+- Case selection transition: smooth background transition
+- AI triage: button → "Analyzing complaint…" state → result card fade-in
+- Probability bars: CSS width animation from 0 to actual value
+- Investigation workspace: accordion expand is smooth (`max-height` transition)
+- AI assistant: typing indicator only when `isAiGenerating === true`
+- Response sections: staggered fade-in after response received
+- Filter panel: slide animation when filter applied
+
+---
+
+### P1 — Police Portal
+
+---
+
+#### [MODIFY] [PolicePortal.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/views/PolicePortal.tsx)
+
+- Assignment confirmation: button → animated state → success toast
+- Case severity chips: color-coded with correct semantic status badges
+- Escalation warning: pulsing border for CRITICAL cases
+- Officer dropdown: smooth dropdown animation
+- Case status transitions: smooth badge color change
+
+---
+
+### P1 — Admin Portal
+
+---
+
+#### [MODIFY] [AdminPortal.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/views/AdminPortal.tsx)
+
+- Audit log rows: new rows appear with `slide-up` animation
+- Department creation: modal confirmation slide/fade
+- System health indicators: reflect actual backend truth (no fake status)
+- User management table: skeleton rows while loading
+- Sticky table headers
+
+---
+
+### P2 — AI/ML Portal + Detection Lab
+
+---
+
+#### [MODIFY] [AIPortal.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/views/AIPortal.tsx)
+
+**Model status badges:** semantic variants using proper CSS classes per status:
+- `READY` / `PRODUCTION` → `chip-success`
+- `READY_FOR_LAZY_LOAD` → `chip-info`
+- `AVAILABLE_WITH_LIMITATIONS` → `chip-warning`
+- `NOT_DEPLOYED` → `chip-neutral`
+- `BROKEN` → danger chip
+
+**AI Detection Lab:**
+- Tabs animate between models with opacity transition
+- URL/Email/SMS/Complaint analysis: button → loading (scan pulse animation) → result card fade-in
+- Probability bars animate from 0 → actual value using CSS keyframe
+- Result cards use `slide-up` enter
+- Model name/version/latency display cleanly
+- Multi-label chips for complaint classifier appear sequentially (staggered CSS delay)
+- Benign result: calm green styling
+- Suspicious: orange/amber
+- Threat: red
+
+---
+
+### P3 — Graph/Correlation, Decorative Polish
+
+- Correlation graph nodes: no continuous bounce; only `selected` state has soft halo
+- Reduced motion respected for all graph animations
+
+---
+
+## New Reusable Components
+
+### [NEW] [src/components/ui/PageEnter.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/ui/PageEnter.tsx)
+Wrapper that applies page-enter animation via `useEffect` + class toggle.
+
+### [NEW] [src/components/ui/ProbabilityBar.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/ui/ProbabilityBar.tsx)
+Animated bar from 0 → value; color variant by confidence level.
+
+### [NEW] [src/components/ui/StatusBadge.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/ui/StatusBadge.tsx)
+Semantic status badge with correct color per status string.
+
+### [NEW] [src/components/ui/SkeletonRow.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/ui/SkeletonRow.tsx)
+Shimmer skeleton for table rows.
+
+### [NEW] [src/components/ui/EmptyState.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/ui/EmptyState.tsx)
+Contextual empty state with icon + message + optional action.
+
+### [NEW] [src/components/ui/Toast.tsx](file:///c:/Users/Admin/Desktop/CCIP/frontend/src/components/ui/Toast.tsx)
+Typed toast with variants, queue support, and slide+fade animation.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```
+cd frontend && npm run build
+```
+Zero TypeScript errors required.
+
+### Manual Verification
+- All 5 role portals navigate correctly
+- Authentication modal opens/closes with animation
+- Detection Lab runs real API calls and shows animated results
+- Probability bars animate on result arrival
+- Complaint submission shows loading → success states
+- Evidence upload shows SHA-256 hashing state
+- Reduced motion disables decorative transitions
+- No layout overflow at 1366×768
+- No console errors in browser
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> The existing codebase has no animation library installed (no Framer Motion). All motion will be implemented via CSS keyframes and Tailwind transitions. This is correct per spec ("prefer CSS transitions first"). No new npm packages will be added unless critical.
+
+> [!NOTE]
+> The `animate-in`, `fade-in`, `slide-in-from-top-2` classes used in the existing code are **Tailwind CSS Animate** utilities — these require the `tailwindcss-animate` plugin OR they work as custom Tailwind variants. We will verify if these are actually working or replace with explicit CSS keyframes.
+
+> [!NOTE]  
+> Portal page transitions will use React `key` prop on the portal wrapper to force re-mount, which triggers the CSS enter animation cleanly without requiring a state machine.

@@ -1,0 +1,11 @@
+{
+  "support_examples": 1620,
+  "micro_precision": 0.9747557003257329,
+  "micro_recall": 0.9779411764705882,
+  "micro_f1": 0.9763458401305057,
+  "macro_precision": 0.8261775103925715,
+  "macro_recall": 0.8061386334290136,
+  "macro_f1": 0.8130605084462317,
+  "hamming_loss": 0.001989026063100137,
+  "subset_accuracy": 0.9808641975308642
+}

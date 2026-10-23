@@ -1,0 +1,418 @@
+{
+  "metrics": {
+    "precision": 0.030303030303030304,
+    "recall": 0.034482758620689655,
+    "f1": 0.03225806451612904,
+    "tp": 1,
+    "fp": 32,
+    "fn": 28
+  },
+  "examples": [
+    {
+      "text": "Yesterday Rahul got a WhatsApp call from +91 90123 45678. The caller said he was from State Bank of India and asked him to transfer ₹85,000 to claimdesk@oksbi.",
+      "gold": [
+        [
+          "AMOUNT",
+          132,
+          139
+        ],
+        [
+          "BANK_NAME",
+          86,
+          105
+        ],
+        [
+          "PERSON_NAME",
+          10,
+          15
+        ],
+        [
+          "PHONE_NUMBER",
+          41,
+          56
+        ],
+        [
+          "PLATFORM_NAME",
+          22,
+          30
+        ],
+        [
+          "UPI_ID",
+          143,
+          158
+        ]
+      ],
+      "predicted": [
+        [
+          "AMOUNT",
+          131,
+          139
+        ],
+        [
+          "BANK_NAME",
+          85,
+          105
+        ],
+        [
+          "PERSON_NAME",
+          9,
+          15
+        ],
+        [
+          "PHONE_NUMBER",
+          40,
+          56
+        ],
+        [
+          "PLATFORM_NAME",
+          21,
+          30
+        ],
+        [
+          "UPI_ID",
+          142,
+          158
+        ]
+      ],
+      "tp": 0,
+      "fp": 6,
+      "fn": 6
+    },
+    {
+      "text": "A Telegram profile @crypto_returns convinced Sneha Patel to send INR 1,10,000 into account 771122334455.",
+      "gold": [
+        [
+          "AMOUNT",
+          65,
+          77
+        ],
+        [
+          "BANK_ACCOUNT",
+          91,
+          103
+        ],
+        [
+          "PERSON_NAME",
+          45,
+          56
+        ],
+        [
+          "PLATFORM_NAME",
+          2,
+          10
+        ],
+        [
+          "SOCIAL_HANDLE",
+          19,
+          34
+        ]
+      ],
+      "predicted": [
+        [
+          "AMOUNT",
+          64,
+          77
+        ],
+        [
+          "BANK_ACCOUNT",
+          90,
+          103
+        ],
+        [
+          "PERSON_NAME",
+          44,
+          50
+        ],
+        [
+          "PERSON_NAME",
+          50,
+          56
+        ],
+        [
+          "PLATFORM_NAME",
+          1,
+          10
+        ],
+        [
+          "SOCIAL_HANDLE",
+          18,
+          34
+        ]
+      ],
+      "tp": 0,
+      "fp": 6,
+      "fn": 5
+    },
+    {
+      "text": "The payment receipt shown by Ravi Kumar lists UTR 771234560001 and reference TXN556677889.",
+      "gold": [
+        [
+          "PERSON_NAME",
+          29,
+          39
+        ],
+        [
+          "TRANSACTION_ID",
+          77,
+          89
+        ],
+        [
+          "UTR",
+          50,
+          62
+        ]
+      ],
+      "predicted": [
+        [
+          "PERSON_NAME",
+          28,
+          33
+        ],
+        [
+          "TRANSACTION_ID",
+          76,
+          89
+        ],
+        [
+          "UTR",
+          49,
+          62
+        ]
+      ],
+      "tp": 0,
+      "fp": 3,
+      "fn": 3
+    },
+    {
+      "text": "BlueWave Technologies contacted Anil Sharma through Messenger and requested Rs. 10,500.",
+      "gold": [
+        [
+          "AMOUNT",
+          76,
+          86
+        ],
+        [
+          "ORGANIZATION",
+          0,
+          21
+        ],
+        [
+          "PERSON_NAME",
+          32,
+          43
+        ],
+        [
+          "PLATFORM_NAME",
+          52,
+          61
+        ]
+      ],
+      "predicted": [
+        [
+          "AMOUNT",
+          75,
+          86
+        ],
+        [
+          "ORGANIZATION",
+          0,
+          21
+        ],
+        [
+          "PERSON_NAME",
+          31,
+          36
+        ],
+        [
+          "PERSON_NAME",
+          36,
+          43
+        ],
+        [
+          "PLATFORM_NAME",
+          51,
+          61
+        ]
+      ],
+      "tp": 1,
+      "fp": 4,
+      "fn": 3
+    },
+    {
+      "text": "Kavya Menon received an Instagram message from @jobdesk_support asking her to pay ₹85,000.",
+      "gold": [
+        [
+          "AMOUNT",
+          82,
+          89
+        ],
+        [
+          "PERSON_NAME",
+          0,
+          11
+        ],
+        [
+          "PLATFORM_NAME",
+          24,
+          33
+        ],
+        [
+          "SOCIAL_HANDLE",
+          47,
+          63
+        ]
+      ],
+      "predicted": [
+        [
+          "AMOUNT",
+          81,
+          89
+        ],
+        [
+          "PERSON_NAME",
+          0,
+          5
+        ],
+        [
+          "PERSON_NAME",
+          5,
+          11
+        ],
+        [
+          "PLATFORM_NAME",
+          23,
+          33
+        ],
+        [
+          "SOCIAL_HANDLE",
+          46,
+          63
+        ]
+      ],
+      "tp": 0,
+      "fp": 5,
+      "fn": 4
+    },
+    {
+      "text": "The beneficiary account 606070809010 was said to be with Kotak Mahindra Bank.",
+      "gold": [
+        [
+          "BANK_ACCOUNT",
+          24,
+          36
+        ],
+        [
+          "BANK_NAME",
+          57,
+          76
+        ]
+      ],
+      "predicted": [
+        [
+          "BANK_ACCOUNT",
+          23,
+          36
+        ],
+        [
+          "BANK_NAME",
+          56,
+          76
+        ]
+      ],
+      "tp": 0,
+      "fp": 2,
+      "fn": 2
+    },
+    {
+      "text": "Mohammed Arif reported that Metro Capital Advisors gave him UPI ID cashback@upi.",
+      "gold": [
+        [
+          "ORGANIZATION",
+          28,
+          50
+        ],
+        [
+          "PERSON_NAME",
+          0,
+          13
+        ],
+        [
+          "UPI_ID",
+          67,
+          79
+        ]
+      ],
+      "predicted": [
+        [
+          "ORGANIZATION",
+          27,
+          50
+        ],
+        [
+          "PERSON_NAME",
+          0,
+          8
+        ],
+        [
+          "PERSON_NAME",
+          8,
+          13
+        ],
+        [
+          "UPI_ID",
+          66,
+          79
+        ]
+      ],
+      "tp": 0,
+      "fp": 4,
+      "fn": 3
+    },
+    {
+      "text": "The caller used +91-88990-11223 and provided transaction reference PAY202699887766.",
+      "gold": [
+        [
+          "PHONE_NUMBER",
+          16,
+          31
+        ],
+        [
+          "TRANSACTION_ID",
+          67,
+          82
+        ]
+      ],
+      "predicted": [
+        [
+          "PHONE_NUMBER",
+          15,
+          31
+        ],
+        [
+          "TRANSACTION_ID",
+          70,
+          82
+        ]
+      ],
+      "tp": 0,
+      "fp": 2,
+      "fn": 2
+    },
+    {
+      "text": "Good afternoon team, tomorrow's architecture meeting has been moved to 3 PM.",
+      "gold": [],
+      "predicted": [],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "text": "My salary was credited today and I moved money between my own accounts.",
+      "gold": [],
+      "predicted": [],
+      "tp": 0,
+      "fp": 0,
+      "fn": 0
+    }
+  ]
+}

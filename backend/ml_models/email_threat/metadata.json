@@ -1,0 +1,23 @@
+{
+  "model_name": "ccip-email-threat-distilbert",
+  "model_version": "1.0.0",
+  "base_model": "distilbert/distilbert-base-uncased",
+  "dataset": "zefang-liu/phishing-email-dataset",
+  "dataset_license": "LGPL-3.0",
+  "original_dataset_labels": {
+    "Safe Email": 0,
+    "Phishing Email": 1
+  },
+  "deployment_labels": {
+    "0": "SAFE_EMAIL",
+    "1": "SUSPICIOUS_EMAIL"
+  },
+  "positive_class_id": 1,
+  "decision_threshold": 0.011331753805279732,
+  "maximum_token_length": 256,
+  "training_seed": 42,
+  "training_records": 12259,
+  "validation_records": 2627,
+  "test_records": 2627,
+  "limitation": "The dataset's Phishing Email class contains phishing and general spam. The positive deployment label is therefore SUSPICIOUS_EMAIL."
+}

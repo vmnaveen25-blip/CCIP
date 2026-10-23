@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>
+  @layer base {
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #031427;
+      background-image: 
+        radial-gradient(at 15% 10%, rgba(37, 99, 235, 0.18) 0px, transparent 50%),
+        radial-gradient(at 85% 25%, rgba(79, 219, 200, 0.12) 0px, transparent 45%),
+        radial-gradient(at 50% 85%, rgba(49, 49, 192, 0.14) 0px, transparent 60%);
+      background-attachment: fixed;
+    }
+    body { overscroll-behavior: none; }
+    main > :first-child { margin-top: 0 !important; }
+    main > :last-child { margin-bottom: 0 !important; }
+  }
+  ::-webkit-scrollbar { display: none; }
+
+  /* Premium High-Fidelity Glassmorphism Styles based on Reference Image */
+  .glass-panel {
+    position: relative;
+    background: linear-gradient(135deg, rgba(30, 48, 70, 0.62) 0%, rgba(13, 27, 42, 0.72) 100%);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6), inset 0 1px 1px 0 rgba(255, 255, 255, 0.32);
+    overflow: hidden;
+  }
+
+  .glass-panel-subtle {
+    position: relative;
+    background: linear-gradient(145deg, rgba(22, 36, 54, 0.5) 0%, rgba(10, 20, 32, 0.65) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+  }
+
+  /* Specular Top Rim Glint and Diagonal Sheen from Reference Image */
+  .glass-sheen::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -40%;
+    width: 140%;
+    height: 100%;
+    background: linear-gradient(125deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 35%, transparent 60%);
+    pointer-events: none;
+    transform: rotate(-12deg);
+    z-index: 1;
+  }
+
+  .glass-glint-top {
+    position: relative;
+  }
+  .glass-glint-top::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.85) 50%, transparent 100%);
+    box-shadow: 0 0 10px 1px rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .glass-glint-corner {
+    position: relative;
+  }
+  .glass-glint-corner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 15%;
+    width: 60px;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .glass-pill {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-input {
+    background: rgba(5, 15, 28, 0.6) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"primary-fixed":"#dbe1ff","secondary-container":"#3131c0","on-secondary-fixed":"#07006c","on-primary-fixed":"#00174b","on-secondary":"#1000a9","on-secondary-fixed-variant":"#2f2ebe","error":"#ffb4ab","tertiary-fixed":"#71f8e4","secondary-fixed":"#e1e0ff","primary-fixed-dim":"#b4c5ff","on-error-container":"#ffdad6","surface-container-highest":"#26364a","surface-dim":"#031427","surface-bright":"#2a3a4f","primary":"#b4c5ff","inverse-surface":"#d3e4fe","on-primary-fixed-variant":"#003ea8","on-tertiary-container":"#b1fff1","surface-tint":"#b4c5ff","on-surface-variant":"#c3c6d7","on-error":"#690005","on-background":"#d3e4fe","tertiary-container":"#007b6e","inverse-primary":"#0053db","surface-container-high":"#1b2b3f","tertiary":"#4fdbc8","primary-container":"#2563eb","surface-container":"#102034","error-container":"#93000a","surface-variant":"#26364a","inverse-on-surface":"#213145","on-tertiary-fixed":"#00201c","on-surface":"#d3e4fe","on-primary-container":"#eeefff","on-tertiary":"#003731","outline-variant":"#434655","surface-container-low":"#0b1c30","tertiary-fixed-dim":"#4fdbc8","secondary":"#c0c1ff","surface":"#031427","on-primary":"#002a78","on-tertiary-fixed-variant":"#005048","surface-container-lowest":"#000f21","background":"#031427","secondary-fixed-dim":"#c0c1ff","outline":"#8d90a0","on-secondary-container":"#b0b2ff"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-2xl":"2rem","space-xs":"0.25rem","space-md":"0.75rem","layout-margin-mobile":"0.75rem","space-3xl":"3rem","space-2xs":"0.125rem","space-lg":"1rem","global-header-height":"4rem","space-sm":"0.5rem","sidebar-width-collapsed":"4.5rem","sidebar-width-expanded":"17.5rem","space-xl":"1.5rem","layout-margin-desktop":"1.5rem","layout-margin-tablet":"1rem"},"fontFamily":{"body-md":["Inter"],"display-xl":["Inter"],"headline-lg":["Inter"],"headline-sm":["Inter"],"mono-lg":["JetBrains Mono"],"caption":["Inter"],"mono-md":["JetBrains Mono"],"body-md-medium":["Inter"],"badge-label":["Inter"],"headline-lg-mobile":["Inter"],"body-lg":["Inter"],"mono-sm":["JetBrains Mono"],"headline-md":["Inter"]},"fontSize":{"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"display-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.015em","fontWeight":"700"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"600"}],"mono-lg":["14px",{"lineHeight":"20px","letterSpacing":"-0.01em","fontWeight":"500"}],"caption":["12px",{"lineHeight":"16px","fontWeight":"500"}],"mono-md":["12px",{"lineHeight":"18px","fontWeight":"400"}],"body-md-medium":["14px",{"lineHeight":"20px","fontWeight":"500"}],"badge-label":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"-0.01em","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"mono-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen">
+<!-- Ambient Glowing Orbs behind the Glass -->
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+<div class="absolute top-[8%] left-[22%] w-[450px] h-[450px] rounded-full bg-blue-600/15 blur-[120px]"></div>
+<div class="absolute top-[35%] right-[10%] w-[520px] h-[520px] rounded-full bg-teal-500/12 blur-[130px]"></div>
+<div class="absolute bottom-[10%] left-[30%] w-[600px] h-[600px] rounded-full bg-indigo-600/14 blur-[140px]"></div>
+</div>
+<header class="fixed top-0 left-0 right-0 z-50 flex flex-col">
+<!-- Top Ticker Bar -->
+<div class="h-6 w-full bg-surface-container-lowest/80 backdrop-blur-md border-b border-white/10 px-layout-margin-desktop flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-md">
+<span class="flex h-2 w-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-mono-sm text-mono-sm uppercase tracking-wider text-tertiary font-semibold">RESTRICTED // LAW ENFORCEMENT &amp; INTEL SENSITIVE</span>
+<span class="h-3 w-[1px] bg-outline-variant/60"></span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">OPSTATUS: LIVE MONITORING (DEFCON 4)</span>
+</div>
+<div class="flex items-center gap-space-md font-mono-sm text-mono-sm text-on-surface-variant">
+<span class="text-tertiary font-mono-sm text-mono-sm">HASH-VERIFIED ENCLAVE-ALPHA</span>
+<span>•</span>
+<span class="uppercase tracking-widest text-on-surface font-mono-sm text-mono-sm">TOP SECRET // NOFORN</span>
+</div>
+</div>
+<!-- Main Glass Header -->
+<div class="h-16 w-full glass-panel border-x-0 border-t-0 px-layout-margin-desktop flex items-center justify-between gap-space-lg shadow-xl glass-glint-top">
+<!-- Brand Emblem & Title -->
+<div class="flex items-center gap-space-md min-w-[280px] relative z-10">
+<div class="h-9 w-9 rounded-lg glass-pill p-1 flex items-center justify-center relative overflow-hidden shadow-inner border border-white/30">
+<img alt="Astraea Cyber Intel Emblem" class="h-7 w-7 object-contain drop-shadow" src="https://lh3.googleusercontent.com/aida/AEtjO1X31f6QGCrdU3BhK18uyEdrQ7VWKLkLovRuUhm5gjrBJAvUJWbgultsRZEhbCkhnqe4Hgk-yvuqDAxlO6QME86pxia2j8umWgIuOjzMcqLl8e9P3ZwwoEusWuPyQQWFEGNYGy2wac0qynGf70oVF9gWFD7kxjszpUS4IbVOSXBC9E235X7BY8Z504tl8tzdrua3sTqOqTpeZv-VCQ__dFfNOFGoI44FjGYdBpmE9n8Ipay9rGdMJ06k0gg"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold drop-shadow-sm">Astraea CyberIntel</span>
+<span class="bg-tertiary-container/80 text-on-tertiary-container font-badge-label text-badge-label px-space-xs py-space-2xs rounded border border-tertiary/40 uppercase tracking-wide shadow-sm">CIV-SPEC OPS</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant">AI Cybercrime Intelligence Platform</span>
+</div>
+</div>
+<!-- Portal Switcher Glass Pill -->
+<div class="flex items-center gap-space-sm glass-pill px-space-md py-space-xs rounded-xl shadow-md relative z-10 hover:border-white/30 transition-all cursor-pointer">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider">Portal:</span>
+<div class="relative flex items-center gap-space-xs">
+<span class="h-2 w-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Cybersecurity Specialist</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Global Omni-Search with Glass Glint -->
+<div class="flex-1 max-w-2xl mx-space-md relative z-10">
+<div class="flex items-center glass-input rounded-xl px-space-md py-space-xs gap-space-sm transition-all focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/40">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+<input class="bg-transparent w-full text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none" placeholder="Query Case ID, IP, Domain, IOC SHA-256, Suspect Alias, or BTC/ETH Wallet..." type="text"/>
+<div class="hidden xl:flex items-center gap-space-xs">
+<span class="glass-pill text-on-surface-variant font-mono-sm text-mono-sm px-space-xs py-space-2xs rounded">IOC</span>
+<span class="glass-pill text-on-surface-variant font-mono-sm text-mono-sm px-space-xs py-space-2xs rounded">CASE</span>
+<span class="glass-pill text-on-surface-variant font-mono-sm text-mono-sm px-space-xs py-space-2xs rounded">WALLET</span>
+</div>
+<kbd class="glass-pill px-space-xs py-space-2xs rounded text-on-surface-variant font-mono-sm text-mono-sm">⌘K</kbd>
+</div>
+</div>
+<!-- Actions & User Profile Badge -->
+<div class="flex items-center gap-space-lg relative z-10">
+<div class="flex items-center gap-space-xs">
+<button class="relative p-space-sm rounded-lg glass-pill hover:bg-white/10 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1 right-1 h-2 w-2 bg-error rounded-full ring-2 ring-surface-container-low"></span>
+</button>
+<button class="p-space-sm rounded-lg glass-pill hover:bg-white/10 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</button>
+<button class="p-space-sm rounded-lg glass-pill hover:bg-white/10 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+</div>
+<div class="h-6 w-[1px] bg-white/15"></div>
+<div class="flex items-center gap-space-md pl-space-xs">
+<div class="flex flex-col text-right">
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold drop-shadow-sm">Cmdr. S. Jenkins</span>
+<span class="font-caption text-caption text-tertiary">Chief Intel Officer (Specialist Ops)</span>
+</div>
+<!-- User Avatar with Verified Specular Ring -->
+<div class="relative w-9 h-9 rounded-full ring-2 ring-white/30 overflow-hidden shadow-lg border border-white/40">
+<img alt="Cmdr. S. Jenkins Portrait" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AEtjO1X31f6QGCrdU3BhK18uyEdrQ7VWKLkLovRuUhm5gjrBJAvUJWbgultsRZEhbCkhnqe4Hgk-yvuqDAxlO6QME86pxia2j8umWgIuOjzMcqLl8e9P3ZwwoEusWuPyQQWFEGNYGy2wac0qynGf70oVF9gWFD7kxjszpUS4IbVOSXBC9E235X7BY8Z504tl8tzdrua3sTqOqTpeZv-VCQ__dFfNOFGoI44FjGYdBpmE9n8Ipay9rGdMJ06k0gg';" src="https://lh3.googleusercontent.com/aida/AEtjO1U062m4uL2vjF13U_V3o7rQG0405kO6e_x_kX9j47352355555555555555_preview"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Glass Nav Sidebar -->
+<aside class="fixed left-0 top-[88px] bottom-0 w-sidebar-width-expanded glass-panel border-y-0 border-l-0 z-40 flex flex-col justify-between shadow-2xl overflow-y-auto glass-glint-corner">
+<div class="flex flex-col p-space-md relative z-10">
+<!-- Clearance Banner -->
+<div class="mb-space-md px-space-sm py-space-xs glass-pill rounded-lg flex items-center justify-between border border-tertiary/30">
+<span class="font-caption text-caption text-on-surface-variant">CLEARANCE LEVEL</span>
+<span class="font-mono-sm text-mono-sm text-tertiary font-bold tracking-wider">SIGINT LEVEL 5</span>
+</div>
+<!-- Navigation List -->
+<nav class="flex flex-col gap-space-lg" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-md border border-white/20">
+<div class="flex flex-col gap-space-2xs">
+<span class="px-space-sm font-caption text-caption uppercase tracking-wider text-outline font-semibold">Core Operations</span>
+<a aria-current="page" class="flex items-center gap-space-sm px-space-sm py-space-xs transition-all bg-primary-container/85 text-on-primary-container font-semibold rounded-lg shadow-md border border-white/25 relative overflow-hidden glass-glint-top" data-path="intelligence-overview" href="#">
+<span class="material-symbols-outlined text-[18px]">radar</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Intelligence Overview</span>
+<span class="glass-pill text-on-surface px-space-xs py-space-2xs rounded font-mono-sm text-mono-sm">24</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="live-threat-feeds" href="#">
+<span class="material-symbols-outlined text-[18px]">stream</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Live Threat Feeds</span>
+<span class="h-2 w-2 rounded-full bg-error animate-pulse"></span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="case-correlator" href="#">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Case Correlator</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="investigation-workbench" href="#">
+<span class="material-symbols-outlined text-[18px]">biotech</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Workbench</span>
+</a>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<span class="px-space-sm font-caption text-caption uppercase tracking-wider text-outline font-semibold">Evidence &amp; Forensics</span>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="evidence-vault" href="#">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Evidence Vault</span>
+<span class="text-tertiary material-symbols-outlined text-[16px]">verified</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="ioc-repository" href="#">
+<span class="material-symbols-outlined text-[18px]">fingerprint</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">IOC Repository</span>
+<span class="glass-pill text-on-surface px-space-xs py-space-2xs rounded font-mono-sm text-mono-sm">18.4k</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="blockchain-wallet-tracer" href="#">
+<span class="material-symbols-outlined text-[18px]">currency_bitcoin</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Wallet Tracer</span>
+</a>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<span class="px-space-sm font-caption text-caption uppercase tracking-wider text-outline font-semibold">AI Reasoning &amp; Models</span>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="neural-graph-explorer" href="#">
+<span class="material-symbols-outlined text-[18px]">grain</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Neural Graph Explorer</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="threat-predictive-engine" href="#">
+<span class="material-symbols-outlined text-[18px]">psychology</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Predictive Engine</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="model-drift-learning-audits" href="#">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Drift &amp; Learning</span>
+</a>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<span class="px-space-sm font-caption text-caption uppercase tracking-wider text-outline font-semibold">Governance</span>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="chain-of-custody" href="#">
+<span class="material-symbols-outlined text-[18px]">policy</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Chain of Custody</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="audit-log" href="#">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Audit Log</span>
+</a>
+<a class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition-all" data-path="multi-agency-access-gateway" href="#">
+<span class="material-symbols-outlined text-[18px]">vpn_lock</span>
+<span class="font-body-md-medium text-body-md-medium flex-1">Agency Gateway</span>
+</a>
+</div>
+</nav>
+</div>
+<!-- Footer Cryptographic Integrity Widget -->
+<div class="p-space-md m-space-sm rounded-xl glass-panel-subtle flex flex-col gap-space-xs shadow-lg relative z-10 border border-white/20">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-on-surface-variant">CRYPTOGRAPHIC INTEGRITY</span>
+<span class="font-mono-sm text-mono-sm text-tertiary font-bold">99.98%</span>
+</div>
+<div class="w-full bg-surface-container-highest/80 h-1.5 rounded-full overflow-hidden p-0.5 border border-white/10">
+<div class="bg-gradient-to-r from-teal-400 to-tertiary h-full w-[99.98%] rounded-full shadow-[0_0_8px_rgba(79,219,200,0.8)]"></div>
+</div>
+<div class="flex items-center justify-between pt-space-2xs text-outline font-mono-sm text-mono-sm">
+<span>VERIFIED NODES</span>
+<span class="text-on-surface font-semibold">1,420 ONLINE</span>
+</div>
+</div>
+</aside>
+<!-- Main Body Area -->
+<div class="pl-sidebar-width-expanded">
+<main class="relative pt-[88px] min-h-screen px-layout-margin-desktop py-space-xl z-10">
+<div class="flex flex-col w-full">
+<!-- Master Design System Hero Glass Banner -->
+<section class="relative overflow-hidden rounded-2xl glass-panel glass-sheen glass-glint-top p-space-2xl shadow-2xl">
+<div class="relative z-10 flex flex-col gap-space-lg">
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-space-xs rounded-full glass-pill px-space-md py-space-xs font-mono-sm text-mono-sm uppercase text-tertiary border border-tertiary/40 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">shield_locked</span>
+                GovSpec-MIL-STD-882E Validated
+              </span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">DS-REV: 4.8.1-B</span>
+</div>
+<div class="flex items-center gap-space-xs glass-pill px-space-md py-space-xs rounded-full border border-tertiary/30">
+<span class="h-2 w-2 rounded-full bg-tertiary animate-ping"></span>
+<span class="font-mono-sm text-mono-sm font-semibold text-tertiary">CHAIN-OF-CUSTODY AUDIT ACTIVE</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs max-w-4xl">
+<p class="font-mono-sm text-mono-sm font-semibold uppercase tracking-widest text-primary">Sovereign Architecture &amp; Component Token Bible</p>
+<h1 class="font-headline-lg text-headline-lg tracking-tight text-white font-bold drop-shadow-md">AI Cybercrime Intelligence Platform</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Institutional, government-grade operational architecture engineered for cross-jurisdictional defense, forensic ledger integrity, autonomous neural reasoning, and strict evidentiary segregation.</p>
+</div>
+<!-- Core Tagline Badge Strip -->
+<div class="flex flex-wrap items-center gap-space-xs pt-space-xs">
+<div class="flex items-center gap-space-xs rounded-xl glass-pill px-space-md py-space-xs hover:border-primary/50 transition-all">
+<span class="font-mono-sm text-mono-sm font-bold text-primary">01</span>
+<span class="font-badge-label text-badge-label uppercase tracking-widest text-on-surface">DETECT</span>
+</div>
+<span class="text-outline font-mono-sm">•</span>
+<div class="flex items-center gap-space-xs rounded-xl glass-pill px-space-md py-space-xs hover:border-tertiary/50 transition-all">
+<span class="font-mono-sm text-mono-sm font-bold text-tertiary">02</span>
+<span class="font-badge-label text-badge-label uppercase tracking-widest text-on-surface">INVESTIGATE</span>
+</div>
+<span class="text-outline font-mono-sm">•</span>
+<div class="flex items-center gap-space-xs rounded-xl glass-pill px-space-md py-space-xs hover:border-secondary/50 transition-all">
+<span class="font-mono-sm text-mono-sm font-bold text-secondary">03</span>
+<span class="font-badge-label text-badge-label uppercase tracking-widest text-on-surface">CORRELATE</span>
+</div>
+<span class="text-outline font-mono-sm">•</span>
+<div class="flex items-center gap-space-xs rounded-xl glass-pill px-space-md py-space-xs hover:border-tertiary-fixed/50 transition-all">
+<span class="font-mono-sm text-mono-sm font-bold text-tertiary-fixed">04</span>
+<span class="font-badge-label text-badge-label uppercase tracking-widest text-on-surface">VERIFY</span>
+</div>
+<span class="text-outline font-mono-sm">•</span>
+<div class="flex items-center gap-space-xs rounded-xl glass-pill px-space-md py-space-xs hover:border-primary-fixed/50 transition-all">
+<span class="font-mono-sm text-mono-sm font-bold text-primary-fixed">05</span>
+<span class="font-badge-label text-badge-label uppercase tracking-widest text-on-surface">LEARN</span>
+</div>
+<span class="text-outline font-mono-sm">•</span>
+<div class="flex items-center gap-space-xs rounded-xl glass-pill px-space-md py-space-xs hover:border-error/50 transition-all">
+<span class="font-mono-sm text-mono-sm font-bold text-error">06</span>
+<span class="font-badge-label text-badge-label uppercase tracking-widest text-on-surface">PROTECT</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 1. Multi-Portal Architecture Overview (Glass Card Plates) -->
+<section class="flex flex-col gap-space-lg pt-space-3xl">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-primary uppercase font-bold tracking-wider">SECTION 01 // TAXONOMY</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface drop-shadow-sm">Role-Gated Multi-Portal Architecture</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">Five isolated security zones ensuring strict role-based access control (RBAC), differential zero-trust clearance, and purpose-built evidentiary telemetry.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-space-md">
+<!-- Portal 1 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all">
+<div class="flex flex-col gap-space-md relative z-10">
+<div class="flex items-center justify-between">
+<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-container/70 border border-primary/40 text-on-primary-container shadow-md">
+<span class="material-symbols-outlined text-[20px]">public</span>
+</span>
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-primary border-primary/30">PORTAL 01</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Citizen Portal</h3>
+<span class="font-caption text-caption text-primary">Public Facing &amp; Intake</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Direct scam incident submission, anonymized whistleblower intake, encrypted telemetry handoff, and consumer threat advisories.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs pt-space-lg font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span>Clearance: UNRESTRICTED</span>
+</div>
+</div>
+<!-- Portal 2 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all ring-1 ring-tertiary/20">
+<div class="flex flex-col gap-space-md relative z-10">
+<div class="flex items-center justify-between">
+<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-container/70 border border-tertiary/40 text-on-tertiary-container shadow-md">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+</span>
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-tertiary border-tertiary/30">PORTAL 02</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Specialist Portal</h3>
+<span class="font-caption text-caption text-tertiary">Forensics &amp; Malware Lab</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Sandbox dynamic execution, memory dump triage, automated IOC extraction pipelines, and MITRE ATT&amp;CK matrix mapping.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs pt-space-lg font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span>Clearance: TS/SCI-TI</span>
+</div>
+</div>
+<!-- Portal 3 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all">
+<div class="flex flex-col gap-space-md relative z-10">
+<div class="flex items-center justify-between">
+<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-container/70 border border-secondary/40 text-on-secondary-container shadow-md">
+<span class="material-symbols-outlined text-[20px]">local_police</span>
+</span>
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-secondary border-secondary/30">PORTAL 03</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Police Portal</h3>
+<span class="font-caption text-caption text-secondary">Sworn Investigative Operations</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Chain-of-custody tracking, judicial warrant filing, crypto seizure escrows, and suspect dossier compilation for prosecution.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs pt-space-lg font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span>Clearance: LAW ENF SENSITIVE</span>
+</div>
+</div>
+<!-- Portal 4 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all">
+<div class="flex flex-col gap-space-md relative z-10">
+<div class="flex items-center justify-between">
+<span class="flex h-10 w-10 items-center justify-center rounded-xl glass-pill text-primary shadow-md border-primary/30">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</span>
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-primary-fixed">PORTAL 04</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">AI/ML Maintenance</h3>
+<span class="font-caption text-caption text-primary-fixed">Cognitive Health &amp; Weights</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Continuous drift telemetry, adversarial evasion detection, synthetic false-positive pruning, and model weight validation logs.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs pt-space-lg font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span>Clearance: ENCLAVE-CORE-ENG</span>
+</div>
+</div>
+<!-- Portal 5 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all">
+<div class="flex flex-col gap-space-md relative z-10">
+<div class="flex items-center justify-between">
+<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-error-container/70 border border-error/40 text-on-error shadow-md">
+<span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+</span>
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-error border-error/30">PORTAL 05</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Admin Portal</h3>
+<span class="font-caption text-caption text-error">Governance &amp; Multi-Agency</span>
+<p class="font-body-md text-body-md text-on-surface-variant">Federated cross-jurisdiction gateways, hardware security module (HSM) rotation, and tamper-evident immutable access logs.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs pt-space-lg font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span>Clearance: GLOBAL ROOT KEY</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Critical Investigation UI Rule Showcase -->
+<section class="flex flex-col gap-space-lg pt-space-3xl">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-error uppercase font-bold tracking-wider">SECTION 02 // CRITICAL LEGAL REQUIREMENT</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface drop-shadow-sm">Evidentiary Distinction Engine</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">The platform enforces an immutable legal partition between verified local case evidence (court-admissible) and cross-case AI correlations (contextual, non-admissible).</p>
+</div>
+<!-- Mandatory Warning Banner Display (Glass Alert Plate) -->
+<div class="rounded-xl glass-panel p-space-lg shadow-xl border-warning/40 relative overflow-hidden glass-glint-top">
+<div class="flex items-start gap-space-md relative z-10">
+<span class="material-symbols-outlined text-warning text-[28px] shrink-0 drop-shadow">warning</span>
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-sm">
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm font-bold text-warning border-warning/40">STATUTE COMPLIANT NOTICE</span>
+<span class="font-caption text-caption text-on-surface uppercase tracking-widest font-bold">MANDATORY RULE 403 / FED. R. EVID. 901 COMPLIANCE</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">Cross-case context is purely informational correlation. AI-generated reasoning is <strong class="text-error font-bold underline decoration-error/50">NOT EVIDENCE</strong>. Only independently verified observations, corroborated cryptographic signatures, and sworn investigator affidavits create legal evidence.</p>
+</div>
+</div>
+</div>
+<!-- Comparative Side-by-Side Glass Showcase -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-xl">
+<!-- Card A: LOCAL EVIDENCE -->
+<div class="flex flex-col rounded-2xl glass-panel glass-sheen glass-glint-top p-space-xl shadow-2xl border-tertiary/40">
+<div class="flex items-center justify-between pb-space-md relative z-10">
+<div class="inline-flex items-center gap-space-xs rounded-lg glass-pill px-space-sm py-space-xs border border-tertiary/40">
+<span class="material-symbols-outlined text-tertiary text-[18px]">verified_user</span>
+<span class="font-badge-label text-badge-label font-bold text-tertiary uppercase tracking-wider">LOCAL EVIDENCE (COURT ADMISSIBLE)</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-tertiary font-bold">PROVENANCE: 100%</span>
+</div>
+<div class="flex flex-col gap-space-md relative z-10">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-caption text-caption text-on-surface-variant">ARTIFACT IDENTIFIER &amp; TYPE</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Physical Memory Dump (RAM Extract)</h3>
+<span class="font-mono-sm text-mono-sm text-tertiary">TAG: MEM-VOL-CASE-2026-9012</span>
+</div>
+<div class="flex flex-col gap-space-xs rounded-xl glass-panel-subtle p-space-md">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-on-surface-variant">IMMUTABLE SHA-256 HASH</span>
+<span class="font-mono-sm text-mono-sm text-tertiary font-bold">MATCHED</span>
+</div>
+<code class="font-mono-sm text-mono-sm text-on-surface glass-input p-space-xs rounded truncate">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-caption text-caption text-on-surface-variant">CUSTODY LEDGER</span>
+<span class="font-mono-sm text-mono-sm text-on-surface font-semibold">Det. M. Alvarez (Badge #8831)</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-on-surface-variant">TIMESTAMP</span>
+<span class="font-mono-sm text-mono-sm text-on-surface">2026-03-30T04:12:09Z (UTC)</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary">lock</span>
+<span class="font-caption text-caption text-on-surface font-semibold">Cryptographically Sealed in Enclave Vault</span>
+</div>
+<button class="rounded-lg bg-tertiary-container/80 px-space-md py-space-xs font-body-md-medium text-body-md-medium text-on-tertiary-container border border-tertiary/50 hover:bg-tertiary-container shadow-md transition-all">
+                  Export Evidence Brief
+                </button>
+</div>
+</div>
+</div>
+<!-- Card B: CROSS-CASE CONTEXT -->
+<div class="flex flex-col rounded-2xl glass-panel glass-sheen glass-glint-top p-space-xl shadow-2xl border-warning/30">
+<div class="flex items-center justify-between pb-space-md relative z-10">
+<div class="inline-flex items-center gap-space-xs rounded-lg glass-pill px-space-sm py-space-xs border border-warning/40">
+<span class="material-symbols-outlined text-warning text-[18px]">hub</span>
+<span class="font-badge-label text-badge-label font-bold text-warning uppercase tracking-wider">CROSS-CASE CONTEXT (CONTEXT — NOT EVIDENCE)</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-warning font-bold">AI INFERENCE: 86.4%</span>
+</div>
+<div class="flex flex-col gap-space-md relative z-10">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-caption text-caption text-on-surface-variant">NEURAL CORRELATION CLUSTER</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">ShadowBroker Ransomware Infrastructure</h3>
+<span class="font-mono-sm text-mono-sm text-warning font-semibold">MATCH: LATENT C2 BEACONING PATTERNS</span>
+</div>
+<div class="flex flex-col gap-space-xs rounded-xl glass-panel-subtle p-space-md">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-on-surface-variant">LINKED DOSSIERS (SIMILARITY RANK)</span>
+<span class="font-mono-sm text-mono-sm text-warning">UNCONFIRMED</span>
+</div>
+<div class="flex flex-col gap-space-2xs pt-space-2xs">
+<div class="flex items-center justify-between text-on-surface text-body-md font-mono-sm glass-pill p-1.5 rounded">
+<span>INTERPOL-CASE-EUR-2025-77</span>
+<span class="text-tertiary font-bold">91.8% Weight</span>
+</div>
+<div class="flex items-center justify-between text-on-surface text-body-md font-mono-sm glass-pill p-1.5 rounded">
+<span>FBI-CY-OP-BLACKBEARD</span>
+<span class="text-tertiary font-bold">84.2% Weight</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-caption text-caption text-on-surface-variant">MODEL ITERATION</span>
+<span class="font-mono-sm text-mono-sm text-on-surface">NeuralCorrelator-v4.1.2-Quant</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-warning">visibility_off</span>
+<span class="font-caption text-caption text-on-surface font-semibold">Requires Investigator Subpoena for Ingestion</span>
+</div>
+<button class="rounded-lg glass-pill px-space-md py-space-xs font-body-md-medium text-body-md-medium text-on-surface hover:bg-white/10 hover:border-white/40 transition-all shadow">
+                  Spawn Deep Inquiry
+                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Color Foundations & Palette Grid (Glass Specimen Tiles) -->
+<section class="flex flex-col gap-space-lg pt-space-3xl">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-secondary uppercase font-bold tracking-wider">SECTION 03 // CHROMATIC SPECIFICATION</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface drop-shadow-sm">Sovereign Color Foundations &amp; Tokens</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">Engineered with high-luminance specular glass accents without pure blacks to completely eliminate eye fatigue over 12-hour shifts while preserving minimum WCAG 2.1 AAA contrast.</p>
+</div>
+<!-- Surfaces & Grounding Tier -->
+<div class="flex flex-col gap-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Surface &amp; Canvas Hierarchy (Polished Glass Plates)</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-space-md">
+<div class="flex flex-col rounded-xl glass-panel p-space-md shadow-lg glass-sheen">
+<div class="h-12 w-full rounded bg-surface-container-lowest/80 border border-white/10 mb-space-sm"></div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Lowest Surface</span>
+<span class="font-mono-sm text-mono-sm text-outline">#000F21</span>
+<span class="font-caption text-caption text-on-surface-variant pt-space-xs">Canvas Ground</span>
+</div>
+<div class="flex flex-col rounded-xl glass-panel p-space-md shadow-lg glass-sheen">
+<div class="h-12 w-full rounded bg-surface/80 border border-white/10 mb-space-sm"></div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Surface</span>
+<span class="font-mono-sm text-mono-sm text-outline">#031427</span>
+<span class="font-caption text-caption text-on-surface-variant pt-space-xs">Workspace Root</span>
+</div>
+<div class="flex flex-col rounded-xl glass-panel p-space-md shadow-lg glass-sheen">
+<div class="h-12 w-full rounded bg-surface-container-low/80 border border-white/15 mb-space-sm"></div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Container Low</span>
+<span class="font-mono-sm text-mono-sm text-outline">#0B1C30</span>
+<span class="font-caption text-caption text-on-surface-variant pt-space-xs">Panels / Sidebars</span>
+</div>
+<div class="flex flex-col rounded-xl glass-panel p-space-md shadow-lg glass-sheen">
+<div class="h-12 w-full rounded bg-surface-container/80 border border-white/20 mb-space-sm"></div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Container Base</span>
+<span class="font-mono-sm text-mono-sm text-outline">#102034</span>
+<span class="font-caption text-caption text-on-surface-variant pt-space-xs">Standard Data Cards</span>
+</div>
+<div class="flex flex-col rounded-xl glass-panel p-space-md shadow-lg glass-sheen">
+<div class="h-12 w-full rounded bg-surface-container-high/80 border border-white/25 mb-space-sm"></div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Container High</span>
+<span class="font-mono-sm text-mono-sm text-outline">#1B2B3F</span>
+<span class="font-caption text-caption text-on-surface-variant pt-space-xs">Hovered Layers</span>
+</div>
+<div class="flex flex-col rounded-xl glass-panel p-space-md shadow-lg glass-sheen">
+<div class="h-12 w-full rounded bg-surface-container-highest/80 border border-white/30 mb-space-sm"></div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface">Container Top</span>
+<span class="font-mono-sm text-mono-sm text-outline">#26364A</span>
+<span class="font-caption text-caption text-on-surface-variant pt-space-xs">Elevated Command Bar</span>
+</div>
+</div>
+</div>
+<!-- Semantic & Operational Tokens -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Operational Semantics &amp; Signal State Tokens</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Primary Blue -->
+<div class="flex flex-col rounded-xl glass-panel p-space-lg shadow-lg glass-glint-corner">
+<div class="flex items-center justify-between mb-space-md">
+<span class="h-8 w-8 rounded-lg bg-primary-container shadow-md border border-primary/50"></span>
+<span class="font-mono-sm text-mono-sm text-primary font-bold">WCAG: 9.2:1</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Primary Blue (Investigative)</span>
+<code class="font-mono-sm text-mono-sm text-outline">primary-container (#2563EB)</code>
+<p class="font-caption text-caption text-on-surface-variant pt-space-xs">Primary user actions, focus rings, and confirmed evidentiary milestones.</p>
+</div>
+<!-- Forensic Teal -->
+<div class="flex flex-col rounded-xl glass-panel p-space-lg shadow-lg glass-glint-corner">
+<div class="flex items-center justify-between mb-space-md">
+<span class="h-8 w-8 rounded-lg bg-tertiary shadow-md border border-teal-300"></span>
+<span class="font-mono-sm text-mono-sm text-tertiary font-bold">WCAG: 11.4:1</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Forensic Teal (Telemetry)</span>
+<code class="font-mono-sm text-mono-sm text-outline">tertiary (#4FDBC8)</code>
+<p class="font-caption text-caption text-on-surface-variant pt-space-xs">Cryptographic seals, verified chain of custody, and live node health.</p>
+</div>
+<!-- Neural Purple -->
+<div class="flex flex-col rounded-xl glass-panel p-space-lg shadow-lg glass-glint-corner">
+<div class="flex items-center justify-between mb-space-md">
+<span class="h-8 w-8 rounded-lg bg-secondary-container shadow-md border border-indigo-400"></span>
+<span class="font-mono-sm text-mono-sm text-secondary font-bold">WCAG: 7.8:1</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Cognitive Purple (AI Models)</span>
+<code class="font-mono-sm text-mono-sm text-outline">secondary-container (#3131C0)</code>
+<p class="font-caption text-caption text-on-surface-variant pt-space-xs">Latent neural reasoning, correlation engines, and semantic inferences.</p>
+</div>
+<!-- Breach Red -->
+<div class="flex flex-col rounded-xl glass-panel p-space-lg shadow-lg glass-glint-corner">
+<div class="flex items-center justify-between mb-space-md">
+<span class="h-8 w-8 rounded-lg bg-error-container shadow-md border border-red-400"></span>
+<span class="font-mono-sm text-mono-sm text-error font-bold">WCAG: 8.5:1</span>
+</div>
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Critical Red (Alert / Breach)</span>
+<code class="font-mono-sm text-mono-sm text-outline">error-container (#93000A)</code>
+<p class="font-caption text-caption text-on-surface-variant pt-space-xs">Active intrusions, compromised nodes, and destructive forensic operations.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Glassmorphism System vs. Elevated Transient Overlays -->
+<section class="flex flex-col gap-space-lg pt-space-3xl">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-tertiary uppercase font-bold tracking-wider">SECTION 04 // SURFACE GOVERNANCE</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface drop-shadow-sm">High-Fidelity Frosted Glass Architecture</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">Directly translated from https://lh3.googleusercontent.com/aida-public/AB6AXuDk1sxe4aiyOWUTmldluBEhBfl_qhduZjIhkIKvKa6gto2-ZtskeeiVxkkbYgKibeghxzEK-x6jNPwVm_dXjNJrnj-yiZ_yz_e9u4vLBQoQXyC6_m2Rrel9gxosELT38NbEu5XdfbLfI-uZ71oytZYD0Qaea4YmJatYYTqF-iVKs5b1r0J6uXcc1CcD-YIdoRCaLEGqWRzLZ8C85-VdERw7HW3BgZ8suidMdLdF5MsDWFuQvDcaEr9yggCPDItUvulBUg with illuminated specular rim glints, multi-layer blur saturation, and diagonal sheen lines.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-xl items-start">
+<!-- Left: Solid Core UI Rules (Workspace) -->
+<div class="flex flex-col gap-space-md rounded-2xl glass-panel glass-sheen glass-glint-top p-space-xl shadow-xl">
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-space-sm">
+<span class="flex h-8 w-8 items-center justify-center rounded-lg glass-pill text-tertiary">
+<span class="material-symbols-outlined text-[18px]">table_rows</span>
+</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">High-Density Telemetry Plate</h3>
+</div>
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-tertiary border-tertiary/40">FROSTED 24PX BLUR</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant relative z-10">Tables, logs, node graphs, and forensic traces are nested in polarized glass slabs with subtle dark underlays. This guarantees crisp subpixel legibility under crisis operations.</p>
+<!-- Solid Preview Snippet -->
+<div class="flex flex-col rounded-xl glass-panel-subtle p-space-md gap-space-xs relative z-10">
+<div class="flex items-center justify-between text-caption font-mono-sm text-outline">
+<span>PACKET INGEST STREAM</span>
+<span>HEX OFFSET [0x00A40]</span>
+</div>
+<div class="rounded-lg glass-input p-space-md font-mono-sm text-mono-sm text-on-surface flex flex-col gap-space-2xs">
+<div class="flex justify-between">
+<span class="text-tertiary font-semibold">45 00 00 3c 1c 46 40 00</span>
+<span class="text-outline">E..&lt;.F@.</span>
+</div>
+<div class="flex justify-between">
+<span class="text-tertiary font-semibold">40 06 b1 e6 c0 a8 01 69</span>
+<span class="text-outline">@......i</span>
+</div>
+<div class="flex justify-between">
+<span class="text-tertiary font-semibold">0a 00 02 0f 9c 40 00 50</span>
+<span class="text-outline">.....@.P</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-caption text-caption text-tertiary flex items-center gap-space-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]">check</span> Crystal High-Contrast Anti-Aliasing
+                </span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">1,492 BYTES INGESTED</span>
+</div>
+</div>
+</div>
+<!-- Right: Selective Glassmorphism (Transient Overlays) -->
+<div class="relative flex flex-col gap-space-md rounded-2xl glass-panel glass-sheen glass-glint-top p-space-xl shadow-2xl">
+<div class="relative z-10 flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="flex h-8 w-8 items-center justify-center rounded-lg glass-pill text-primary">
+<span class="material-symbols-outlined text-[18px]">layers</span>
+</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Elevated Modal Glass Plate</h3>
+</div>
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-primary border-primary/40">SPECULAR RIM: 1.5PX</span>
+</div>
+<p class="relative z-10 font-body-md text-body-md text-on-surface-variant">Floating dialog with luminous top edge reflection, specular glint spot, and physical drop elevation as seen in the reference glass sheet.</p>
+<!-- Glass Dialog Sample (Exact Replica of Floating Glass Slate) -->
+<div class="relative z-10 flex flex-col rounded-xl glass-panel p-space-lg shadow-2xl gap-space-md border border-white/30 glass-glint-corner">
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-warning text-[20px] drop-shadow">gavel</span>
+<span class="font-body-md-medium text-body-md-medium text-white font-bold drop-shadow-sm">Judicial Seizure Warrant Confirmation</span>
+</div>
+<span class="rounded-full glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-on-surface-variant">ESC to Cancel</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant relative z-10">You are about to issue an emergency freeze order across 14 identified cold wallets under Cross-Jurisdiction Warrant #WAR-2026-US-DE-092. Action is irreversible.</p>
+<div class="flex items-center justify-end gap-space-sm pt-space-xs relative z-10">
+<button class="rounded-lg glass-pill px-space-md py-space-xs font-body-md text-body-md text-on-surface hover:bg-white/10 transition-colors">
+                  Abort Action
+                </button>
+<button class="rounded-lg bg-primary-container/90 px-space-md py-space-xs font-body-md-medium text-body-md-medium text-on-primary-container border border-white/30 shadow-lg hover:bg-primary-container transition-all">
+                  Sign with CAC Token
+                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Common Reusable Component Matrix -->
+<section class="flex flex-col gap-space-lg pt-space-3xl pb-space-3xl">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-primary uppercase font-bold tracking-wider">SECTION 05 // DESIGN SYSTEM ATOMS &amp; MOLECULES</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface drop-shadow-sm">Mission-Critical Component Matrix</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">Operational UI components tested under stress conditions, rendered with realistic glass reflections and sharp specular borders.</p>
+</div>
+<!-- Sub-section: Telemetry & KPI Cards -->
+<div class="flex flex-col gap-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">1. Telemetry KPI Glass Cards with Sparklines</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- KPI 1 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all">
+<div class="flex items-center justify-between relative z-10">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">ACTIVE INTEL INGESTION</span>
+<span class="material-symbols-outlined text-primary text-[20px]">rss_feed</span>
+</div>
+<div class="flex items-baseline gap-space-xs pt-space-xs relative z-10">
+<span class="font-headline-lg text-headline-lg text-white font-bold drop-shadow">412.8</span>
+<span class="font-mono-sm text-mono-sm text-primary font-bold">GB/s</span>
+</div>
+<div class="pt-space-md relative z-10">
+<svg class="w-full h-8 text-primary overflow-visible drop-shadow-[0_0_6px_rgba(180,197,255,0.6)]" preserveaspectratio="none" viewbox="0 0 100 25">
+<path d="M0 20 Q 15 5, 30 14 T 60 8 T 85 18 L 100 4" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span>SIGINT NODE #4</span>
+<span class="text-tertiary font-bold">+12.4% vs 1h avg</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all border-error/30">
+<div class="flex items-center justify-between relative z-10">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">CONFIRMED RANSOMWARE C2s</span>
+<span class="material-symbols-outlined text-error text-[20px]">dangerous</span>
+</div>
+<div class="flex items-baseline gap-space-xs pt-space-xs relative z-10">
+<span class="font-headline-lg text-headline-lg text-white font-bold drop-shadow">89</span>
+<span class="font-mono-sm text-mono-sm text-error font-bold">CRITICAL</span>
+</div>
+<div class="pt-space-md relative z-10">
+<svg class="w-full h-8 text-error overflow-visible drop-shadow-[0_0_6px_rgba(255,180,171,0.6)]" preserveaspectratio="none" viewbox="0 0 100 25">
+<path d="M0 18 L 20 15 L 40 22 L 60 10 L 80 14 L 100 2" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span>22 QUARANTINED</span>
+<span class="text-error font-bold">+4 detected now</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all border-tertiary/30">
+<div class="flex items-center justify-between relative z-10">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">LEDGER SEIZURES TOTAL</span>
+<span class="material-symbols-outlined text-tertiary text-[20px]">account_balance_wallet</span>
+</div>
+<div class="flex items-baseline gap-space-xs pt-space-xs relative z-10">
+<span class="font-headline-lg text-headline-lg text-white font-bold drop-shadow">$142.9</span>
+<span class="font-mono-sm text-mono-sm text-tertiary font-bold">M USD</span>
+</div>
+<div class="pt-space-md relative z-10">
+<svg class="w-full h-8 text-tertiary overflow-visible drop-shadow-[0_0_6px_rgba(79,219,200,0.6)]" preserveaspectratio="none" viewbox="0 0 100 25">
+<path d="M0 22 Q 25 18, 50 12 T 75 8 L 100 3" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span>ESCROW HELD</span>
+<span class="text-tertiary font-bold">100% AUDITED</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="flex flex-col justify-between rounded-xl glass-panel glass-sheen glass-glint-corner p-space-lg shadow-xl hover:border-white/40 transition-all border-secondary/30">
+<div class="flex items-center justify-between relative z-10">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">MODEL DRIFT INDEX</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">tune</span>
+</div>
+<div class="flex items-baseline gap-space-xs pt-space-xs relative z-10">
+<span class="font-headline-lg text-headline-lg text-white font-bold drop-shadow">0.014</span>
+<span class="font-mono-sm text-mono-sm text-secondary font-bold">DELTA</span>
+</div>
+<div class="pt-space-md relative z-10">
+<svg class="w-full h-8 text-secondary overflow-visible drop-shadow-[0_0_6px_rgba(192,193,255,0.6)]" preserveaspectratio="none" viewbox="0 0 100 25">
+<path d="M0 12 Q 20 10, 40 14 T 70 12 T 100 13" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-mono-sm text-mono-sm text-on-surface-variant relative z-10">
+<span>CORRELATOR-4</span>
+<span class="text-on-surface font-semibold">NOMINAL BAND</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sub-section: Interactive Action Controls -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">2. Glass Action Controls &amp; Buttons</h3>
+<div class="flex flex-wrap items-center gap-space-md p-space-lg rounded-2xl glass-panel glass-sheen shadow-xl">
+<!-- Primary Button -->
+<button class="relative flex items-center gap-space-xs rounded-xl bg-primary-container/85 px-space-lg py-space-sm font-body-md-medium text-body-md-medium text-on-primary-container shadow-lg border border-white/30 hover:bg-primary-container hover:border-white/50 active:scale-95 transition-all overflow-hidden glass-glint-top">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Submit Intelligence Packet</span>
+</button>
+<!-- Secondary Button -->
+<button class="flex items-center gap-space-xs rounded-xl glass-pill px-space-lg py-space-sm font-body-md-medium text-body-md-medium text-on-surface hover:bg-white/10 hover:border-white/40 active:scale-95 transition-all shadow-md">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Filter Telemetry Logs</span>
+</button>
+<!-- Ghost Button -->
+<button class="flex items-center gap-space-xs rounded-xl px-space-lg py-space-sm font-body-md-medium text-body-md-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+<span>Sync Node Clock</span>
+</button>
+<!-- Destructive Button -->
+<button class="flex items-center gap-space-xs rounded-xl bg-error-container/80 border border-error/40 px-space-lg py-space-sm font-body-md-medium text-body-md-medium text-on-error-container hover:bg-error-container shadow-lg active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">delete_forever</span>
+<span>Revoke Keyring Certificate</span>
+</button>
+<!-- AI Assist Action Variant -->
+<button class="relative flex items-center gap-space-xs rounded-xl bg-secondary-container/80 border border-secondary/40 px-space-lg py-space-sm font-body-md-medium text-body-md-medium text-on-secondary-container shadow-lg hover:bg-secondary-container active:scale-95 transition-all overflow-hidden glass-glint-top">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>Run Neural Case Correlator</span>
+</button>
+</div>
+</div>
+<!-- Sub-section: Badges & Evidence Tagging -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">3. Evidentiary Badges &amp; Status Indicators</h3>
+<div class="flex flex-wrap items-center gap-space-md p-space-lg rounded-2xl glass-panel shadow-xl">
+<!-- Verified Status -->
+<span class="inline-flex items-center gap-space-xs rounded-lg glass-pill px-space-sm py-space-xs font-badge-label text-badge-label text-tertiary border-tertiary/40">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+<span>CRYPTOGRAPHICALLY SEALED</span>
+</span>
+<!-- Pending Signature -->
+<span class="inline-flex items-center gap-space-xs rounded-lg glass-pill px-space-sm py-space-xs font-badge-label text-badge-label text-warning border-warning/40">
+<span class="material-symbols-outlined text-[14px]">pending_actions</span>
+<span>PENDING WARRANTEE SIGN-OFF</span>
+</span>
+<!-- Quarantined Status -->
+<span class="inline-flex items-center gap-space-xs rounded-lg glass-pill px-space-sm py-space-xs font-badge-label text-badge-label text-error border-error/40">
+<span class="material-symbols-outlined text-[14px]">block</span>
+<span>QUARANTINED ARTIFACT</span>
+</span>
+<!-- AI Probabilistic Inference -->
+<span class="inline-flex items-center gap-space-xs rounded-lg glass-pill px-space-sm py-space-xs font-badge-label text-badge-label text-primary border-primary/40">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+<span>NEURAL INFERENCE (94.2% CONFIDENCE)</span>
+</span>
+<!-- Prov Hash Inline Pill -->
+<div class="inline-flex items-center gap-space-xs rounded-lg glass-input px-space-sm py-space-xs font-mono-sm text-mono-sm text-on-surface shadow-inner">
+<span class="h-2 w-2 rounded-full bg-tertiary animate-pulse"></span>
+<span>SHA256: 9b2d...f410</span>
+<span class="material-symbols-outlined text-outline hover:text-on-surface cursor-pointer text-[14px]" onclick="navigator.clipboard.writeText('9b2d881902fc410')">content_copy</span>
+</div>
+</div>
+</div>
+<!-- Sub-section: Live Data Table Preview (Glass Table Plate) -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">4. Data-Dense Forensic Audit Glass Table</h3>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">SHOWING 3 OF 4,291 ACTIVE THREAT LEDGERS</span>
+</div>
+<div class="overflow-x-auto rounded-2xl glass-panel glass-glint-top shadow-2xl">
+<table class="w-full text-left font-body-md text-body-md text-on-surface">
+<thead class="bg-white/5 border-b border-white/10 text-caption font-mono-sm text-on-surface-variant uppercase tracking-wider">
+<tr>
+<th class="py-space-md px-space-lg">Case ID &amp; Designation</th>
+<th class="py-space-md px-space-lg">Threat Actor Vector</th>
+<th class="py-space-md px-space-lg">Severity Tier</th>
+<th class="py-space-md px-space-lg">Chain-of-Custody SHA</th>
+<th class="py-space-md px-space-lg">Status</th>
+<th class="py-space-md px-space-lg text-right">Operational Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/10">
+<!-- Row 1 -->
+<tr class="hover:bg-white/5 transition-colors">
+<td class="py-space-md px-space-lg font-mono-sm text-mono-sm">
+<div class="flex flex-col">
+<span class="font-bold text-primary">CASE-2026-004281</span>
+<span class="text-caption text-on-surface-variant">Interpol Operation Hyperion</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-error text-[16px]">bug_report</span>
+<span>DarkGate Loader v6.2 (Banking Trojan)</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-error font-bold border-error/30">DEFCON 2</span>
+</td>
+<td class="py-space-md px-space-lg font-mono-sm text-mono-sm text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="h-2 w-2 rounded-full bg-tertiary"></span>
+<span>78af91c...bb42</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<span class="rounded-lg glass-pill px-space-xs py-space-2xs font-badge-label text-badge-label text-tertiary uppercase border-tertiary/40">Active Triage</span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="rounded-lg glass-pill px-space-md py-space-xs font-caption text-caption text-on-surface hover:bg-white/10 hover:border-white/30 transition-all">Inspect Dossier</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white/5 transition-colors">
+<td class="py-space-md px-space-lg font-mono-sm text-mono-sm">
+<div class="flex flex-col">
+<span class="font-bold text-primary">CASE-2026-003890</span>
+<span class="text-caption text-on-surface-variant">FinCEN Multi-Jurisdictional</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-warning text-[16px]">currency_bitcoin</span>
+<span>Tornado Cash Bridge Splinter (BTC $4.2M)</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-warning font-bold border-warning/30">DEFCON 3</span>
+</td>
+<td class="py-space-md px-space-lg font-mono-sm text-mono-sm text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="h-2 w-2 rounded-full bg-tertiary"></span>
+<span>34de618...120f</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<span class="rounded-lg glass-pill px-space-xs py-space-2xs font-badge-label text-badge-label text-warning uppercase border-warning/40">Warrant Pending</span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="rounded-lg glass-pill px-space-md py-space-xs font-caption text-caption text-on-surface hover:bg-white/10 hover:border-white/30 transition-all">Track Ledger</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/5 transition-colors">
+<td class="py-space-md px-space-lg font-mono-sm text-mono-sm">
+<div class="flex flex-col">
+<span class="font-bold text-primary">CASE-2026-005011</span>
+<span class="text-caption text-on-surface-variant">Critical Infrastructure Sector 9</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-error text-[16px]">electrical_services</span>
+<span>SCADA Stux-Variant PLC Zero-Day</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<span class="rounded glass-pill px-space-xs py-space-2xs font-mono-sm text-mono-sm text-error font-bold border-error/30">DEFCON 1</span>
+</td>
+<td class="py-space-md px-space-lg font-mono-sm text-mono-sm text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="h-2 w-2 rounded-full bg-error"></span>
+<span>41bb330...99ae</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg">
+<span class="rounded-lg glass-pill px-space-xs py-space-2xs font-badge-label text-badge-label text-error uppercase border-error/40">Breached</span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="rounded-lg bg-error-container/80 border border-error/50 px-space-md py-space-xs font-caption text-caption text-on-error-container hover:bg-error-container transition-all shadow-md">Engage Killswitch</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Sub-section: Notification Toasts (Floating Glass Toasts) -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">5. Floating Glass Notification Toasts</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Toast 1: Success -->
+<div class="flex items-start gap-space-sm rounded-xl glass-panel glass-glint-corner p-space-md shadow-xl border-tertiary/40">
+<span class="material-symbols-outlined text-tertiary text-[20px] shrink-0 drop-shadow">check_circle</span>
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Evidence Ingested</span>
+<span class="font-caption text-caption text-on-surface-variant">Evidence successfully added to CASE-2026-004281 with valid signature.</span>
+</div>
+</div>
+<!-- Toast 2: Warning -->
+<div class="flex items-start gap-space-sm rounded-xl glass-panel glass-glint-corner p-space-md shadow-xl border-warning/40">
+<span class="material-symbols-outlined text-warning text-[20px] shrink-0 drop-shadow">warning</span>
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Context Unverified</span>
+<span class="font-caption text-caption text-on-surface-variant">Verification is required before this context can influence legal analysis.</span>
+</div>
+</div>
+<!-- Toast 3: Critical -->
+<div class="flex items-start gap-space-sm rounded-xl glass-panel glass-glint-corner p-space-md shadow-xl border-error/40">
+<span class="material-symbols-outlined text-error text-[20px] shrink-0 drop-shadow">error</span>
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Gateway Timeout</span>
+<span class="font-caption text-caption text-on-surface-variant">Unable to connect to the threat intelligence service enclave node.</span>
+</div>
+</div>
+<!-- Toast 4: Info -->
+<div class="flex items-start gap-space-sm rounded-xl glass-panel glass-glint-corner p-space-md shadow-xl border-primary/40">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 drop-shadow">info</span>
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md-medium text-body-md-medium text-on-surface font-semibold">Correlations Discovered</span>
+<span class="font-caption text-caption text-on-surface-variant">Three related cases were found matching the submitted IP subnet.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sub-section: Form Inputs & Fields -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">6. Precision Glass Form Inputs &amp; Optics</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md p-space-lg rounded-2xl glass-panel shadow-xl">
+<!-- Input Normal / Inactive -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-caption text-caption text-on-surface-variant uppercase font-semibold">Standard Ingest Target</label>
+<input class="h-[42px] rounded-xl glass-input px-space-md text-on-surface placeholder:text-outline font-body-md text-body-md focus:outline-none focus:border-primary/50" placeholder="e.g. 192.168.100.1 or domain.tld" type="text"/>
+<span class="font-caption text-caption text-outline">Default resting glass state</span>
+</div>
+<!-- Monospace Regex / Hash Input Focused -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-caption text-caption text-primary uppercase font-semibold">IOC Monospace Query (Active)</label>
+<div class="flex items-center rounded-xl glass-input px-space-md h-[42px] border-primary/50 shadow-inner">
+<input class="w-full bg-transparent text-primary font-mono-sm text-mono-sm focus:outline-none" type="text" value="^([a-fA-F0-9]{64})$"/>
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+</div>
+<span class="font-caption text-caption text-primary">Regex pattern evaluated</span>
+</div>
+<!-- Error Input -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-caption text-caption text-error uppercase font-semibold">Chain Checksum (Tampered)</label>
+<div class="flex items-center rounded-xl glass-input px-space-md h-[42px] border-error/50 shadow-inner">
+<input class="w-full bg-transparent text-error font-mono-sm text-mono-sm focus:outline-none" type="text" value="CHECKSUM_MISMATCH_BLOCK_49"/>
+<span class="material-symbols-outlined text-error text-[18px]">gpp_maybe</span>
+</div>
+<span class="font-caption text-caption text-error font-semibold">Cryptographic mismatch detected</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Micro-Interactions Script -->
+<script>
+        (() => {
+          document.querySelectorAll('[onclick*="navigator.clipboard"]').forEach(el => {
+            el.addEventListener('click', () => {
+              const originalText = el.textContent;
+              el.textContent = 'done';
+              setTimeout(() => {
+                el.textContent = originalText;
+              }, 1500);
+            });
+          });
+        })();
+      </script>
+</div>
+</main>
+</div>
+</body></html>

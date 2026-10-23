@@ -1,0 +1,61 @@
+{
+  "model_name": "ccip-evidence-graph-link-mlp-v1",
+  "task": "candidate graph link prediction",
+  "version": "evidence-graph-link-bootstrap-v1.0.0",
+  "node_types": [
+    "COMPLAINT",
+    "CASE",
+    "PHONE_NUMBER",
+    "UPI_ID",
+    "BANK_ACCOUNT",
+    "BANK_NAME",
+    "ORGANIZATION",
+    "PLATFORM_NAME",
+    "PERSON_NAME",
+    "EMAIL_ADDRESS",
+    "DOMAIN",
+    "IP_ADDRESS"
+  ],
+  "labels": [
+    "NO_LINK",
+    "CANDIDATE_LINK"
+  ],
+  "feature_dim": 80,
+  "training": {
+    "epochs": 20,
+    "learning_rate": 0.002,
+    "training_seconds": 22.55,
+    "seed": 42
+  },
+  "dataset": {
+    "name": "ccip-evidence-graph-link-bootstrap-v1",
+    "task": "evidence graph candidate link prediction",
+    "labels": [
+      "NO_LINK",
+      "CANDIDATE_LINK"
+    ],
+    "feature_dim": 80,
+    "counts": {
+      "train": 69802,
+      "validation": 15994,
+      "test": 21406
+    },
+    "source": "controlled synthetic evidence graphs",
+    "limitations": [
+      "Synthetic/bootstrap graphs.",
+      "Predicted links are investigator-review candidates only.",
+      "Real confirmed graph edges/non-edges are required before production accuracy claims."
+    ]
+  },
+  "deployment_policy": {
+    "advisory_only": true,
+    "human_review_required": true,
+    "not_proof_of_identity_or_guilt": true,
+    "not_for_autonomous_enforcement": true
+  },
+  "limitations": [
+    "Bootstrap model trained on synthetic evidence graphs.",
+    "Graph link predictions are candidate links only.",
+    "Real investigator-confirmed edges/non-edges are required before production claims."
+  ]
+}

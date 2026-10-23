@@ -1,0 +1,86 @@
+{
+  "model_name": "ccip-feedback-reliability-gate-v1",
+  "task": "continual-learning feedback reliability gating",
+  "version": "feedback-gate-bootstrap-v1.0.0",
+  "labels": [
+    "REJECT",
+    "REQUIRES_REVIEW",
+    "APPROVE_CANDIDATE"
+  ],
+  "feature_names": [
+    "evidence_integrity_verified",
+    "reviewer_authorized",
+    "case_finalized",
+    "appeal_or_reopen_pending",
+    "audit_complete",
+    "provenance_completeness",
+    "reviewer_count_norm",
+    "reviewer_agreement_ratio",
+    "source_diversity_norm",
+    "supporting_evidence_norm",
+    "contradiction_rate",
+    "entity_consistency",
+    "human_model_agreement",
+    "manual_verification_ratio",
+    "feedback_age_norm",
+    "cross_case_support_norm",
+    "data_quality_score"
+  ],
+  "feature_dim": 17,
+  "training": {
+    "epochs": 30,
+    "learning_rate": 0.002,
+    "training_seconds": 5.63,
+    "seed": 42
+  },
+  "dataset": {
+    "name": "ccip-feedback-reliability-gate-bootstrap-v1",
+    "task": "continual-learning feedback reliability classification",
+    "labels": [
+      "REJECT",
+      "REQUIRES_REVIEW",
+      "APPROVE_CANDIDATE"
+    ],
+    "feature_names": [
+      "evidence_integrity_verified",
+      "reviewer_authorized",
+      "case_finalized",
+      "appeal_or_reopen_pending",
+      "audit_complete",
+      "provenance_completeness",
+      "reviewer_count_norm",
+      "reviewer_agreement_ratio",
+      "source_diversity_norm",
+      "supporting_evidence_norm",
+      "contradiction_rate",
+      "entity_consistency",
+      "human_model_agreement",
+      "manual_verification_ratio",
+      "feedback_age_norm",
+      "cross_case_support_norm",
+      "data_quality_score"
+    ],
+    "counts": {
+      "train": 9000,
+      "validation": 1800,
+      "test": 2400
+    },
+    "source": "controlled synthetic governance/provenance feedback records",
+    "limitations": [
+      "Synthetic/bootstrap governance data.",
+      "APPROVE_CANDIDATE does not authorize automatic retraining.",
+      "Real investigator-reviewed feedback decisions are required before production claims."
+    ]
+  },
+  "governance": {
+    "deterministic_hard_gates_required": true,
+    "automatic_retraining_allowed": false,
+    "human_approval_required_before_learning_queue": true,
+    "production_model_replacement_requires_separate_validation": true
+  },
+  "limitations": [
+    "Bootstrap model trained on synthetic governance feedback records.",
+    "APPROVE_CANDIDATE only queues a potential learning sample.",
+    "Real investigator-review and model-governance decisions are required before production claims."
+  ]
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "text_a": "The victim lost \u20b950,000 after joining a WhatsApp investment group promising guaranteed returns.",
+    "text_b": "A Telegram trading group convinced the complainant to deposit money into a fake investment platform.",
+    "expected": 1,
+    "score": 0.5983880162239075,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "text_a": "A fake bank SMS asked the victim to enter credentials on a phishing page.",
+    "text_b": "The victim received a fraudulent KYC link pretending to be from the bank.",
+    "expected": 1,
+    "score": 0.6375744342803955,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "text_a": "The complainant transferred money after a caller threatened digital arrest.",
+    "text_b": "A person impersonating police demanded payment during a video call.",
+    "expected": 1,
+    "score": 0.8134526610374451,
+    "predicted": 1,
+    "correct": true
+  },
+  {
+    "text_a": "The victim sent money through a fraudulent UPI collect request.",
+    "text_b": "The victim's Instagram account was hacked and recovery details were changed.",
+    "expected": 0,
+    "score": -0.05168040469288826,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "text_a": "A fake recruiter charged an advance fee for a nonexistent job.",
+    "text_b": "Files were encrypted by ransomware and cryptocurrency was demanded.",
+    "expected": 0,
+    "score": -0.09051737189292908,
+    "predicted": 0,
+    "correct": true
+  },
+  {
+    "text_a": "Someone used private photographs to blackmail the complainant for money.",
+    "text_b": "An unknown person repeatedly stalked and harassed the complainant online.",
+    "expected": 0,
+    "score": 0.20484603941440582,
+    "predicted": 0,
+    "correct": true
+  }
+]

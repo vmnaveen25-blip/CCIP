@@ -1,0 +1,31 @@
+{
+  "node_types": [
+    "COMPLAINT",
+    "CASE",
+    "PHONE_NUMBER",
+    "UPI_ID",
+    "BANK_ACCOUNT",
+    "BANK_NAME",
+    "ORGANIZATION",
+    "PLATFORM_NAME",
+    "PERSON_NAME",
+    "EMAIL_ADDRESS",
+    "DOMAIN",
+    "IP_ADDRESS"
+  ],
+  "feature_dim": 80,
+  "pair_features": [
+    "node_a_type_onehot",
+    "node_a_degree",
+    "node_a_neighbor_type_histogram",
+    "node_b_type_onehot",
+    "node_b_degree",
+    "node_b_neighbor_type_histogram",
+    "absolute_feature_difference",
+    "shared_neighbor_count",
+    "same_case",
+    "same_complaint",
+    "same_value",
+    "same_type"
+  ]
+}
