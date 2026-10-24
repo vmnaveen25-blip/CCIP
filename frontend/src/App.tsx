@@ -37,7 +37,7 @@ export const App: React.FC = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [initialAuthScreen, setInitialAuthScreen] = useState<AuthScreenType>('selection');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
 
   // Toast system (replaces single toastMessage state)
   const { toasts, push: pushToast, dismiss: dismissToast } = useToastManager();
@@ -387,7 +387,7 @@ export const App: React.FC = () => {
         case 'citizen':    setActiveTab('citizen-dashboard'); break;
         case 'specialist': setActiveTab('intel-overview');    break;
         case 'aiml':       setActiveTab('ai-dashboard');      break;
-        case 'admin':      setActiveTab('rbac-matrix');       break;
+        case 'admin':      setActiveTab('admin-dashboard');   break;
         case 'landing':
         default:           setActiveTab('landing-overview');  break;
       }

@@ -169,20 +169,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             groupTitle: 'Governance & Access',
             items: [
               { id: 'admin-dashboard',   label: 'Admin Dashboard',      icon: <Compass className="w-4 h-4" /> },
-              { id: 'users-management',  label: 'Users Management',     icon: <Users className="w-4 h-4" /> },
+              { id: 'users-management',  label: 'Users & Access',       icon: <Users className="w-4 h-4" /> },
               { id: 'roles-permissions', label: 'Roles & Permissions',  icon: <KeyRound className="w-4 h-4" /> },
-              { id: 'departments-units', label: 'Departments / Units',  icon: <Building2 className="w-4 h-4" /> },
             ]
           },
           {
-            groupTitle: 'System & Infra',
+            groupTitle: 'System & Infrastructure',
             items: [
-              { id: 'system-health',       label: 'System Health',           icon: <Activity className="w-4 h-4" />, badge: 'LIVE' },
-              { id: 'system-configuration',label: 'System Configuration',    icon: <Sliders className="w-4 h-4" /> },
-              { id: 'security',            label: 'Security & Auth Enclave', icon: <ShieldCheck className="w-4 h-4" /> },
-              { id: 'api-integrations',    label: 'API Integrations',        icon: <Network className="w-4 h-4" /> },
-              { id: 'database-management', label: 'Database Management',     icon: <Database className="w-4 h-4" /> },
-              { id: 'audit-logs',          label: 'Audit Logs Trail',        icon: <FileText className="w-4 h-4" /> },
+              { id: 'system-health',       label: 'System Health',        icon: <Activity className="w-4 h-4" /> },
+              { id: 'security',            label: 'Security & Audit',     icon: <ShieldCheck className="w-4 h-4" /> },
+              { id: 'api-integrations',    label: 'API Integrations',     icon: <Share2 className="w-4 h-4" /> },
+              { id: 'database-management', label: 'Database & Storage',  icon: <Database className="w-4 h-4" /> },
+              { id: 'audit-logs',          label: 'Audit Logs',           icon: <FileText className="w-4 h-4" /> },
+              { id: 'system-configuration',label: 'System Configuration', icon: <Sliders className="w-4 h-4" /> },
             ]
           }
         ];
@@ -216,9 +215,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={item.id}
                     onClick={() => onSelectTab(item.id)}
                     className={`
-                      flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-left text-xs
+                      flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-full text-left text-xs
                       relative overflow-hidden transition-all duration-fast
-                      ${isActive ? 'bg-[#00e676]/10 border border-[#00e676]/60 text-white font-bold shadow-[0_0_16px_rgba(0,230,118,0.15)]' : 'border border-transparent hover:bg-white/[0.04] text-[#8fa396] hover:text-white'}
+                      ${isActive ? 'bg-[#00e676]/10 border border-[#00e676]/70 text-white font-bold shadow-[0_0_16px_rgba(0,230,118,0.2)]' : 'border border-transparent hover:bg-white/[0.04] text-[#8fa396] hover:text-white'}
                     `}
                     aria-current={isActive ? 'page' : undefined}
                   >

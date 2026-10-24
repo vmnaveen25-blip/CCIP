@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   GitBranch, 
   ChevronDown, 
@@ -683,6 +683,21 @@ export const AIMLModelVersionsView: React.FC<AIMLModelVersionsViewProps> = ({
   const [selectedModelId, setSelectedModelId] = useState<string>(initialModelId || 'url-phishing');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<'lineage' | 'evaluation' | 'deployment' | 'dataset' | 'config' | 'cases'>('lineage');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   // Selected Version for Detail Drawer
   const [inspectingVersion, setInspectingVersion] = useState<ModelVersionItem | null>(null);
@@ -803,9 +818,9 @@ export const AIMLModelVersionsView: React.FC<AIMLModelVersionsViewProps> = ({
       )}
 
       {/* 2. TOP DUAL CARDS */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className={`grid grid-cols-1 lg:grid-cols-12 gap-4 relative transition-all ${isDropdownOpen ? 'z-50' : 'z-20'}`}>
         {/* Left Card: Select Model */}
-        <div className="lg:col-span-4 rounded-2xl bg-[#0c1310]/95 border border-emerald-900/40 p-5 flex flex-col justify-between shadow-xl relative backdrop-blur-md">
+        <div className={`lg:col-span-4 rounded-2xl bg-[#0c1310]/95 border border-emerald-900/40 p-5 flex flex-col justify-between shadow-xl relative ${isDropdownOpen ? 'z-50' : 'z-20'}`}>
           <div className="flex items-start gap-3.5 mb-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
               <GitBranch className="w-5 h-5 text-emerald-400" />
@@ -817,8 +832,9 @@ export const AIMLModelVersionsView: React.FC<AIMLModelVersionsViewProps> = ({
           </div>
 
           {/* Custom Select Dropdown matching reference image */}
-          <div className="relative">
+          <div ref={dropdownRef} className="relative z-50">
             <button
+              type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-full bg-[#121c17] border border-emerald-900/40 hover:border-emerald-500/60 rounded-xl px-3.5 py-2.5 text-xs text-white font-sans flex items-center justify-between transition-colors cursor-pointer"
             >
@@ -827,29 +843,24 @@ export const AIMLModelVersionsView: React.FC<AIMLModelVersionsViewProps> = ({
             </button>
 
             {isDropdownOpen && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setIsDropdownOpen(false)} 
-                />
-                <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl bg-[#0e1713] border border-emerald-500/40 shadow-2xl overflow-hidden py-1 divide-y divide-emerald-900/20 font-sans">
-                  {modelOptions.map((opt) => {
-                    const isSelected = opt.id === selectedModelId;
-                    return (
-                      <button
-                        key={opt.id}
-                        onClick={() => handleSelectModel(opt.id)}
-                        className={`w-full px-3.5 py-2.5 text-xs text-left flex items-center justify-between transition-colors ${
-                          isSelected ? 'bg-emerald-950/60 text-emerald-400 font-bold' : 'text-slate-300 hover:bg-[#16231d] hover:text-white'
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                        {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
+              <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl bg-[#0a140f] border border-[#00e676]/60 shadow-[0_15px_50px_rgba(0,0,0,0.95)] overflow-hidden py-1 divide-y divide-emerald-900/30 font-sans max-h-72 overflow-y-auto">
+                {modelOptions.map((opt) => {
+                  const isSelected = opt.id === selectedModelId;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleSelectModel(opt.id)}
+                      className={`w-full px-3.5 py-2.5 text-xs text-left flex items-center justify-between transition-colors cursor-pointer ${
+                        isSelected ? 'bg-emerald-950/70 text-emerald-400 font-bold' : 'text-slate-300 hover:bg-[#16231d] hover:text-white'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                      {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>
@@ -919,7 +930,7 @@ export const AIMLModelVersionsView: React.FC<AIMLModelVersionsViewProps> = ({
 
       {/* 3. MAIN SECTION: VERSION LINEAGE & METRIC PROGRESSION */}
       {activeSubTab === 'lineage' && (
-        <div className="rounded-2xl bg-[#0c1310]/95 border border-emerald-900/40 p-6 flex flex-col gap-6 shadow-xl backdrop-blur-md">
+        <div className="rounded-2xl bg-[#0c1310]/95 border border-emerald-900/40 p-6 flex flex-col gap-6 shadow-xl backdrop-blur-md relative z-10">
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">

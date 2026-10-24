@@ -274,10 +274,10 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-white leading-tight max-w-[120px] truncate">
-                  {currentUser?.full_name || (currentPortal === 'specialist' || currentPortal === 'citizen' ? 'Naveen' : 'Authorized Operator')}
+                  {currentUser?.full_name || 'Naveen'}
                 </span>
-                <span className="text-[10px] text-[#00e676]/80 font-mono font-medium truncate max-w-[120px]">
-                  {currentPortal === 'specialist' ? 'SPECIALIST' : (currentUser?.clearance_level || (currentPortal === 'citizen' ? 'Citizen Tier' : 'OPERATOR'))}
+                <span className="text-[10px] text-[#00e676] font-mono font-medium truncate max-w-[120px]">
+                  {currentPortal === 'admin' ? 'ADMIN' : currentPortal === 'specialist' ? 'SPECIALIST' : (currentUser?.clearance_level || (currentPortal === 'citizen' ? 'CITIZEN' : 'OPERATOR'))}
                 </span>
               </div>
 
