@@ -1,0 +1,14 @@
+{
+  "os": "Windows 11",
+  "python_version": "3.12.7",
+  "node_version": "v20.18.0",
+  "playwright_version": "1.57.0",
+  "vite_version": "5.4.19",
+  "aiosqlite_version": "0.20.0",
+  "git_head_commit": "883950c8c24b4fd6e54d76691bcc44f658004f62",
+  "git_branch": "main",
+  "remediation_patch": "TESTING FILES/remediation_patch.diff",
+  "patch_sha256_lf": "aa8c4b507d510e7ed4ba38119a083fb1e60050213dadbb411b51c73fbe9f0b90",
+  "patch_sha256_crlf": "ed2bc5131443c44fc7c6b45309ee20ea870450c15b815ebb78910f3b55c65973",
+  "captured_at": "2026-10-25T17:40:00Z"
+}

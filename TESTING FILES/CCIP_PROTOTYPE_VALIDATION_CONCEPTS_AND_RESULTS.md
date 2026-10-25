@@ -2,21 +2,21 @@
 
 **Document Type:** Comprehensive Architectural Guide & Test Validation Report (Reconciled)  
 **Platform:** Citizen Cybercrime Intelligence Platform (CCIP / Astraea Enclave)  
-**Version:** 1.0.0 (Pre-Deployment Prototype Validation)  
-**Date:** 2026-10-25  
-**Evaluation Scope:** 219 Master Test Cases across 18 Architectural Domains (A through R)  
-**Audit Reference:** Finding-by-Finding Reconciled Against Independent Audit Report (`AUD-001` through `AUD-013`)  
+**Version:** 2.0.0 (Post-Second-Pass Audit Reconciliation)  
+**Date:** 2026-10-26  
+**Evaluation Scope:** 219 Master Test Requirements across 18 Architectural Domains (A through R)  
+**Audit Reference:** Fully Reconciled Against Independent Audit (`AUD-001`..`013`) and Residual Review (`REV-001`..`014`)  
 
 ---
 
 ## 1. Executive Overview & Mission
 
-The **Citizen Cybercrime Intelligence Platform (CCIP / Astraea Enclave)** is a sovereign, high-integrity digital infrastructure designed to provide end-to-end cybercrime reporting, automated threat triage, cross-case entity correlation, and collaborative case management for law enforcement, cyber specialists, and citizens.
+The **Citizen Cybercrime Intelligence Platform (CCIP / Astraea Enclave)** is a sovereign digital infrastructure designed to provide end-to-end cybercrime reporting, automated threat triage, cross-case entity correlation, and collaborative case management for law enforcement, cyber specialists, and citizens.
 
 In modern cybercrime investigation environments, data integrity, citizen privacy, and auditability are paramount. The platform must satisfy rigorous security mandates:
 - Protecting citizen personally identifiable information (PII) before any narrative reaches AI/ML processing pipelines.
 - Enforcing strict tenant and role isolation across public citizens, sworn investigative specialists, and system administrators.
-- Providing verifiable cryptographic content-integrity digests (SHA-256) for investigation reports to detect tampering.
+- Providing verifiable cryptographic content-integrity digests (SHA-256) for investigation reports to detect tampering against a stored reference value.
 - Providing deterministic resilience and graceful offline degradation when external neural models, containerized malware scanners, or network services are unavailable.
 
 This document provides an exhaustive explanation of the core architectural concepts of CCIP, the multi-tiered validation methodology employed during testing, a detailed domain-by-domain comparison between planned specifications and currently developed features, and the root-cause analysis of defects identified and resolved during the validation campaign.
@@ -65,12 +65,16 @@ The Astraea Enclave architecture isolates core intelligence assets and investiga
 2. Unauthenticated external callers are completely barred from accessing case files or internal identifiers.
 3. System administrators have configuration and user management rights but cannot tamper with immutable audit trails.
 
-### 2.2 4-Tier Role-Based Access Control (RBAC) & Object-Level Authorization
-The platform enforces four explicit security personas across backend route guards (`get_current_user`, `require_role`) and frontend UI route guards:
-- **`citizen`**: Restricted to filing complaints, tracking their own complaints using assigned tracking tokens, and managing their account profile.
-- **`specialist`**: Authorized to view assigned investigation queues, review evidence in quarantine, execute entity correlation queries, query the AI Investigation Assistant, and generate investigation reports.
-- **`admin`**: Authorized to manage system users, modify portal feature flags, inspect system health metrics, and audit system logs.
-- **`system / superadmin`**: Retains root-level administrative authority for infrastructure migrations and disaster recovery.
+### 2.2 Canonical Role Taxonomy & Privilege Hierarchy (REV-010)
+To eliminate ambiguity between the platform's **4 architectural privilege tiers** and the **5 concrete application roles**, CCIP defines the following canonical role matrix:
+
+| Privilege Tier | Concrete Role Enum (`RoleEnum`) | Display Name | Scope of Authority | Case Visibility | Evidence Access | AI Assistant Access | Administrative Actions |
+|---|---|---|---|---|---|---|---|
+| **Tier 1 (Public)** | `citizen` | Verified Citizen | Self-service intake & tracking | Own complaints only | Upload evidence; view own uploads | Threat analyzer self-check | Profile management only |
+| **Tier 2 (Law Enforcement)** | `cybercrime_police` | Police Officer | Field triage & case intake | Assigned precinct cases | Download approved evidence | Advisory chat queries | File charges; reassign case |
+| **Tier 3 (Specialist)** | `cybersecurity_specialist` | Cyber Specialist | Forensic analysis & correlation | Assigned task force cases | Full quarantine inspection | Contextual RAG investigation chat | Entity correlation; draft reports |
+| **Tier 4 (Governance)** | `admin` | System Administrator | User & system governance | Audit view across all cases | Metadata audit inspection | Telemetry monitoring | User provisioning; feature flags |
+| **Tier 4 (Engineering)** | `aiml_system_lead` | AI/ML System Lead | Model operations & retraining | Anonymized training cases | Evaluated training datasets | Model tuning & evaluation | Gate overrides; retrain jobs |
 
 Object-level authorization is validated at the database query layer: even with a valid JWT token, a user cannot query another user's complaint by brute-forcing sequential complaint IDs.
 
@@ -98,12 +102,12 @@ CCIP adheres to strict operational truthfulness:
 - The system automatically triggers its **Rule-Based Heuristic Fallback Engine** (`backend/app/services/ai_service.py`), utilizing keyword density, threat taxonomy dictionaries, and rule heuristics to calculate threat severity, category classification, and suggested action items.
 - Telemetry explicitly flags the inference mode as `HEURISTIC_FALLBACK`, preventing false marketing or inaccurate compliance reporting.
 
-### 2.7 Sovereign Integrity Seals vs Digital Signatures
+### 2.7 Sovereign Integrity Seals vs Digital Signatures (REV-009)
 CCIP investigation reports include a cryptographic seal. In strict adherence to technical precision:
 - The platform labels report seals as **"SHA-256 Sovereign Integrity Digest"** rather than "Digital Signature", since an asymmetric PKI / X.509 signature is not utilized.
-- The digest binds the report content, case ID, investigator ID, and timestamp into an immutable 64-character hexadecimal hash. If any character in the generated report is altered, the verification checksum fails against the stored database value.
+- The digest binds the report content, case ID, investigator ID, and timestamp into a 64-character hexadecimal hash. If any character in the generated report is altered, the verification checksum fails against the stored database reference value.
 
-### 2.8 Access-Controlled Append-Only Audit Trail
+### 2.8 Access-Controlled Append-Only Audit Trail (REV-009)
 Every authentication attempt, role transition, case assignment, evidence download, and report generation triggers an append-only audit event in the database (`audit_logs` table). Audit logs capture:
 - Timestamp (UTC)
 - Actor ID and role
@@ -141,7 +145,7 @@ flowchart LR
 ### 3.1 Multi-Layered Validation Strategy
 The validation campaign was conducted across three distinct technical tiers:
 1. **Backend Service & Security Layer:** Evaluated using Pytest 9.1.1 on Python 3.12.7 against an isolated SQLite in-memory database (`sqlite+aiosqlite:///:memory:`). Reconciled test inventory comprises **61 unique test nodes** across 11 test files.
-2. **Persistence & Build Layer:** Evaluated using Alembic migration head verification (`b4c19d28e7f1`), TypeScript compiler checks (`tsc`), and Vite 5.4.19 production asset bundling.
+2. **Persistence & Build Layer:** Evaluated using Alembic migration head verification (`b4c19d28e7f1`), TypeScript compiler checks (`tsc`), and Vite 5.4.19 production asset bundling (`frontend/dist/` deterministic manifest SHA-256: `7e02f0fc...`).
 3. **Frontend Application & User Journey Layer:** Evaluated using Playwright 1.57.0 driving headless Chromium (1920x1080) and simulated Mobile Chrome (Pixel 5, 393x851 viewport) against active local servers (Vite port 5173, FastAPI port 8000), covering **35 unique test scenarios**.
 
 ### 3.2 Safe Test Enclave & Data Guardrails
@@ -157,7 +161,12 @@ All testing was executed in strict accordance with the following safety guardrai
 
 The master test specification contains **219 test cases** structured across **18 distinct functional domains (A through R)**. Below is the comprehensive comparison between the planned test case specifications and the currently developed working prototype features, with priority counts directly derived from [`CCIP_Test_Case_Index.csv`](file:///c:/CCIP-main/CCIP-main/TESTING%20FILES/CCIP_Test_Case_Index.csv):
 
-### Domain Breakdown & Verification Matrix
+### Two Explicit Pass-Rate Metrics (REV-002):
+- **Decisive Executed Test Pass Rate:** $\frac{\text{PASS}}{\text{PASS} + \text{FAIL}} = \frac{209}{209 + 0} = \mathbf{100.0\%}$
+- **Master Requirement Pass Coverage:** $\frac{\text{PASS}}{\text{PLANNED}} = \frac{209}{219} = \mathbf{95.43\%}$
+- **Total Master Disposition:** **209 PASS (95.43%), 2 BLOCKED (0.91%), 8 NOT RUN (3.65%), 0 FAIL (0.0%)**
+
+### Domain Breakdown & Verification Matrix (REV-003, AUD-012)
 
 | Domain ID | Domain Description | Test Case Count | Priority (P0 / P1 / P2) | Planned Requirement | Developed Feature & Working Mechanism | Execution Status | Observed Evidence |
 |---|---|---:|---|---|---|:---:|---|
@@ -179,7 +188,7 @@ The master test specification contains **219 test cases** structured across **18
 | **P** | Performance & Resource Bounds | 8 | 1 / 5 / 2 | Fast API response times, non-blocking asynchronous operations, bounded DB queries. | Asynchronous SQLAlchemy (`asyncpg`/`aiosqlite`), lazy loading of relations, indexed tracking queries. | **PASS: 1<br>NOT RUN: 7** | `PERF-001` PASS (p50=10.14ms); `PERF-002`..`008` NOT RUN (staging cluster). |
 | **Q** | CI/CD & Migrations | 10 | 6 / 3 / 1 | Alembic schema migrations, TypeScript bundle build, automated GitHub Actions workflow. | Alembic migration script `b4c19d28e7f1`, clean `npm run build` (0 TS errors), `.github/workflows/ci.yml`. | **PASS: 9<br>NOT RUN: 1** | `CI-008` NOT RUN (coverage flags omitted in CI YAML). |
 | **R** | End-to-End Complete Journeys | 10 | 9 / 1 / 0 | Complete citizen filing -> specialist triage -> report generation journeys. | Full workflow passing across backend test client and Playwright interactive browser test suites. | **PASS: 9<br>BLOCKED: 1** | `E2E-003` BLOCKED (live ClamAV); mock journey PASS. |
-| **TOTAL** | **All 18 Functional Domains** | **219** | **130 / 83 / 6** | **Full CCIP Platform Functional & Security Specification** | **Fully Developed, Integrated, and Verified Prototype Platform** | **209 PASS<br>2 BLOCKED<br>8 NOT RUN** | **219 / 219 Reconciled** |
+| **TOTAL** | **All 18 Functional Domains** | **219** | **130 / 83 / 6** | **Full CCIP Platform Functional & Security Specification** | **Fully Reconciled Prototype Implementation** | **209 PASS<br>2 BLOCKED<br>8 NOT RUN** | **219 Reconciled** |
 
 ---
 
@@ -255,39 +264,21 @@ The CCIP / Astraea Enclave codebase has achieved an exceptional level of functio
 - **Database Migrations:** Schema revision `b4c19d28e7f1` verified; `tracking_token` successfully added to complaints.
 - **Master Test Specification:** 219/219 test cases reconciled with explicit node IDs, durations, and timestamps in [`CCIP_TEST_RESULTS.csv`](file:///c:/CCIP-main/CCIP-main/TESTING%20FILES/CCIP_TEST_RESULTS.csv).
 
-### 6.2 Operational Gating Prerequisites for Live Production
-While the software application layer is fully verified, live production deployment requires the resolution of the operational infrastructure prerequisites:
-
-1. **Production Secrets Management (BLK-001):**
-   - *Requirement:* Replace local development secret keys (`SECRET_KEY`, `POSTGRES_PASSWORD`, `REDIS_PASSWORD`) with cryptographically secure, high-entropy secrets provisioned via a dedicated Cloud Key Vault or Secrets Manager.
-   - *Owner Action:* DevOps / Cloud Infrastructure Team must inject these environment variables prior to container deployment.
-
-2. **ClamAV Anti-Malware Daemon (BLK-002):**
-   - *Requirement:* Deploy the ClamAV container service alongside the backend application and configure `MALWARE_SCANNER_TYPE=clamav`.
-   - *Owner Action:* Start the ClamAV daemon container, verify connectivity on port 3310, and validate virus definition updates using an EICAR test file.
-
-3. **Neural Model Artifacts Provisioning (BLK-003):**
-   - *Requirement:* The platform currently operates in its verified offline rule-based heuristic fallback mode. If live neural inference (transformer-based entity extraction and contextual embeddings) is required in production, the approved model weight binaries must be downloaded from the private model registry into the `/models` directory.
-   - *Owner Action:* Machine Learning Operations (MLOps) must mount the model weights volume.
-
-4. **Multi-Disciplinary Operational Gates (OP-001 to OP-004):**
-   - *Requirement:* Completion of automated disaster recovery / database restore drills, CI code coverage threshold enforcement ($\ge 80\%$), production reverse-proxy TLS termination auditing, and multi-user load benchmarking on the staging cluster.
-
-### 6.3 Final Release Recommendation
+### 6.2 Consolidated Release Gate Status & Recommendation (REV-013, REV-014)
 
 ```
 ========================================================================================
-CCIP / ASTRAEA ENCLAVE RELEASE STATUS:
+CCIP / ASTRAEA ENCLAVE CONSOLIDATED RELEASE STATUS:
 ========================================================================================
-[√] APPLICATION SOURCE CODE:       100% VERIFIED (209 PASS, 0 FAIL)
-[√] FRONTEND BUILD & TYPES:        CLEAN (0 TS ERRORS, 35/35 PLAYWRIGHT PASS)
+[√] APPLICATION SOURCE CODE:       209 REQUISITES PASSED (0 FAILURES, 100% EXECUTED RATE)
+[√] FRONTEND BUILD & TYPES:        CLEAN (0 TS ERRORS, 35/35 PLAYWRIGHT SCENARIOS PASS)
 [√] DATA INTEGRITY & MIGRATIONS:   VERIFIED (ALEMBIC HEAD b4c19d28e7f1)
-[!] EXTERNAL SECRETS & INFRA:      PENDING DEPLOYMENT SECRETS & CONTAINER DAEMONS
-[!] OPERATIONAL READINESS GATES:   PENDING DISASTER RECOVERY & CAPACITY DRILLS
+[!] PRIMARY GATES (BLK-001..003):  PENDING CLOUD SECRETS, CLAMAV DAEMON, NEURAL WEIGHTS
+[!] SECONDARY GATES (OP-001..004): PENDING BACKUP RESTORE DRILL, CI COV, STAGING CAPACITY
 
 FINAL VERDICT: CONDITIONAL GO — NOT CLEARED FOR LIVE DEPLOYMENT
 (Cleared for Pre-Production Staging, Security Auditing, and Prototype Demonstrations)
 ========================================================================================
 ```
 
-The system is fully validated, functionally complete, and verified for pre-production environments. Unconditional live deployment (`GO`) is deferred until the staging deployment review confirms that all primary infrastructure blockers and secondary operational gates have been formally validated.
+The master suite reports **209 passing, 2 blocked, 8 not run, and 0 failed**. Release status remains strictly **`CONDITIONAL GO — NOT CLEARED FOR LIVE DEPLOYMENT`** until the consolidated release gates ([`BLK-001`](file:///c:/CCIP-main/CCIP-main/TESTING%20FILES/CCIP_FINAL_BLOCKERS.md#1-consolidated-release-gate-register), [`BLK-002`](file:///c:/CCIP-main/CCIP-main/TESTING%20FILES/CCIP_FINAL_BLOCKERS.md#1-consolidated-release-gate-register), [`BLK-003`](file:///c:/CCIP-main/CCIP-main/TESTING%20FILES/CCIP_FINAL_BLOCKERS.md#1-consolidated-release-gate-register), and [`OP-001` through `OP-004`](file:///c:/CCIP-main/CCIP-main/TESTING%20FILES/CCIP_FINAL_BLOCKERS.md#1-consolidated-release-gate-register)) are formally satisfied in the staging environment.
