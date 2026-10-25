@@ -56,7 +56,7 @@ interface NavItem {
   id: string;
   label: string;
   icon: React.ReactNode;
-  badge?: string | number;
+  badge?: string;
   badgeColor?: string;
   highlight?: boolean;
 }
@@ -85,9 +85,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'citizen-dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
               { id: 'ai-shield', label: 'AI Cyber Shield', icon: <Shield className="w-4 h-4" />, badge: 'AI', badgeColor: 'bg-[#00e676]/15 text-[#00e676] border border-[#00e676]/30' },
               { id: 'file-complaint', label: 'File Complaint', icon: <PlusCircle className="w-4 h-4" /> },
-              { id: 'my-complaints', label: 'My Complaints', icon: <FileText className="w-4 h-4" />, badge: 4 },
+              { id: 'my-complaints', label: 'My Complaints', icon: <FileText className="w-4 h-4" /> },
               { id: 'track-status', label: 'Status Tracker', icon: <Search className="w-4 h-4" /> },
-              { id: 'documents', label: 'Documents & Evidence', icon: <FolderOpen className="w-4 h-4" />, badge: 6 },
+              { id: 'documents', label: 'Documents & Evidence', icon: <FolderOpen className="w-4 h-4" /> },
               { id: 'safety-hub', label: 'Safety Hub', icon: <ShieldCheck className="w-4 h-4" /> },
               { id: 'awareness', label: 'Awareness & Resources', icon: <BookOpen className="w-4 h-4" /> },
             ]
@@ -95,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {
             groupTitle: 'Account & Support',
             items: [
-              { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" />, badge: 3 },
+              { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
               { id: 'profile', label: 'Citizen Profile', icon: <User className="w-4 h-4" /> },
               { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
               { id: 'help-support', label: 'Help & Advisory', icon: <HelpCircle className="w-4 h-4" /> },
@@ -116,11 +116,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {
             groupTitle: 'Case Forensics',
             items: [
-              { id: 'assigned-cases',          label: 'Assigned Cases',          icon: <FileText className="w-4 h-4" />, badge: 8 },
+              { id: 'assigned-cases',          label: 'Assigned Cases',          icon: <FileText className="w-4 h-4" /> },
               { id: 'investigation-workspace', label: 'Investigation Workspace', icon: <BrainCircuit className="w-4 h-4" /> },
               { id: 'evidence-repository',     label: 'Evidence Repository',     icon: <Lock className="w-4 h-4" /> },
               { id: 'cross-case-correlation',  label: 'Cross-Case Correlation',  icon: <Network className="w-4 h-4" /> },
-              { id: 'validation-queue',        label: 'Validation Queue',        icon: <FileCheck className="w-4 h-4" />, badge: 3 },
+              { id: 'validation-queue',        label: 'Validation Queue',        icon: <FileCheck className="w-4 h-4" /> },
             ]
           },
           {
@@ -140,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'ai-dashboard',        label: 'AI Dashboard',           icon: <Activity className="w-4 h-4" /> },
               { id: 'model-registry',      label: 'Model Registry',         icon: <Cpu className="w-4 h-4" /> },
               { id: 'model-versions',      label: 'Model Versions',         icon: <GitBranch className="w-4 h-4" /> },
-              { id: 'model-approval',      label: 'Model Approval',         icon: <CheckCircle2 className="w-4 h-4" />, badge: 2 },
+              { id: 'model-approval',      label: 'Model Approval',         icon: <CheckCircle2 className="w-4 h-4" /> },
               { id: 'deployment-rollback', label: 'Deployment & Rollback',  icon: <Layers className="w-4 h-4" /> },
             ]
           },
@@ -232,12 +232,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       </span>
                       <span className="truncate">{item.label}</span>
                     </div>
-                    {item.badge && (
+                    {item.badge && typeof item.badge !== 'number' && (
                       <span
                         className={`
                           text-[9px] font-mono px-1.5 py-0.5 rounded-md flex-shrink-0 font-bold
                           ${item.badgeColor ? item.badgeColor : isActive ? 'bg-[#00e676]/20 text-[#00e676] border border-[#00e676]/40' : 'bg-[#07170e] text-[#6e8d7a] border border-white/[0.08]'}
-                          ${typeof item.badge === 'number' && item.badge > 0 ? 'animate-badge-pop' : ''}
                         `}
                       >
                         {item.badge}
@@ -275,13 +274,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </a>
             </div>
 
-            <button
-              onClick={() => onSelectTab('file-complaint')}
-              className="w-full py-2 px-3 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/40 text-red-400 text-xs font-bold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.15)] hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all"
-            >
-              <AlertTriangle className="w-4 h-4 text-red-400" />
-              <span>Report Emergency</span>
-            </button>
+            <p className="text-[11px] text-[#6e8d7a] leading-tight">
+              Report cyber fraud, seek guidance and get support.
+            </p>
           </div>
 
           <div className="text-center mt-2.5">

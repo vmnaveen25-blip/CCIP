@@ -550,12 +550,12 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
       {/* ========================================================================= */}
       {/* MAIN 3-COLUMN WORKSPACE: LEFT SELECTOR + CENTER ASSISTANT + RIGHT CONTEXT */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-3.5 items-start">
 
         {/* ----------------------------------------------------------------------- */}
-        {/* COLUMN 1: 1. SELECT A CASE (Left Column, 3.2 cols)                      */}
+        {/* COLUMN 1: 1. SELECT A CASE (Left Column)                                */}
         {/* ----------------------------------------------------------------------- */}
-        <div className="lg:col-span-3 xl:col-span-3 flex flex-col gap-3 p-3.5 rounded-2xl bg-[#040e08] border border-primary/20 shadow-xl">
+        <div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-3 p-3.5 rounded-2xl bg-[#040e08] border border-primary/20 shadow-xl min-w-0">
           
           {/* Section Title */}
           <div>
@@ -567,41 +567,42 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
             </p>
           </div>
 
-          {/* Navigation Tabs: My Cases 12 | All Assigned 48 | Recent */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#06170e] border border-white/[0.06] text-xs font-mono">
+          {/* Navigation Tabs: My Cases | All Assigned | Recent */}
+          <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#06170e] border border-white/[0.06] text-[11px] font-mono">
             <button
               onClick={() => setActiveTabSection('my-cases')}
-              className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 transition-all cursor-pointer min-w-0 ${
                 activeTabSection === 'my-cases'
                   ? 'bg-[#00e676]/20 text-[#00e676] font-bold border border-[#00e676]/40 shadow-sm'
                   : 'text-content-muted hover:text-white'
               }`}
+              title="My Cases"
             >
-              <span>My Cases</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#00e676]/30 text-[#00e676] font-bold">12</span>
+              <span className="truncate">My Cases</span>
             </button>
 
             <button
               onClick={() => setActiveTabSection('all-assigned')}
-              className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              className={`py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 transition-all cursor-pointer min-w-0 ${
                 activeTabSection === 'all-assigned'
                   ? 'bg-[#00e676]/20 text-[#00e676] font-bold border border-[#00e676]/40 shadow-sm'
                   : 'text-content-muted hover:text-white'
               }`}
+              title="All Assigned"
             >
-              <span>All Assigned</span>
-              <span className="text-[10px] text-content-muted">48</span>
+              <span className="truncate">Assigned</span>
             </button>
 
             <button
               onClick={() => setActiveTabSection('recent')}
-              className={`py-1.5 px-2.5 rounded-lg transition-all cursor-pointer ${
+              className={`py-1.5 px-1.5 rounded-lg flex items-center justify-center transition-all cursor-pointer min-w-0 ${
                 activeTabSection === 'recent'
                   ? 'bg-[#00e676]/20 text-[#00e676] font-bold border border-[#00e676]/40 shadow-sm'
                   : 'text-content-muted hover:text-white'
               }`}
+              title="Recent Cases"
             >
-              Recent
+              <span className="truncate">Recent</span>
             </button>
           </div>
 
@@ -690,8 +691,8 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                   }`}
                 >
                   {/* Top line: Folder Icon + Case ID + Status Badge */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-start justify-between gap-1.5 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
                         c.statusColor === 'cyan' ? 'bg-[#00e676]/20 text-[#00e676]' :
                         c.statusColor === 'amber' ? 'bg-amber-500/20 text-amber-400' :
@@ -699,12 +700,12 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                       }`}>
                         <Folder className="w-3.5 h-3.5" />
                       </div>
-                      <span className="font-mono font-bold text-xs text-white truncate">
+                      <span className="font-mono font-bold text-xs text-white truncate" title={c.referenceNumber}>
                         {c.referenceNumber}
                       </span>
                     </div>
 
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider shrink-0 ${
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider shrink-0 whitespace-nowrap ${
                       c.statusColor === 'cyan' ? 'bg-[#052918] text-[#00e676] border border-[#00e676]/40' :
                       c.statusColor === 'amber' ? 'bg-[#2d1e07] text-[#f59e0b] border border-[#f59e0b]/40' :
                       'bg-zinc-900 text-zinc-400 border border-zinc-700'
@@ -714,8 +715,8 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                   </div>
 
                   {/* Title & Date */}
-                  <div>
-                    <h3 className="text-xs font-bold text-white leading-snug line-clamp-1">
+                  <div className="min-w-0">
+                    <h3 className="text-xs font-bold text-white leading-snug line-clamp-1" title={c.title}>
                       {c.title}
                     </h3>
                     <p className="text-[11px] text-content-muted font-mono mt-0.5">
@@ -724,16 +725,16 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                   </div>
 
                   {/* Bottom Metadata Badges */}
-                  <div className="flex items-center gap-3 pt-1 border-t border-white/[0.04] text-[10px] font-mono text-content-secondary">
-                    <span className="flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-1.5 border-t border-white/[0.04] text-[10px] font-mono text-content-secondary">
+                    <span className="flex items-center gap-1 shrink-0">
                       <FileText className="w-3 h-3 text-cyan-400" />
                       <span>{c.evidenceCount} Evidence</span>
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 shrink-0">
                       <Search className="w-3 h-3 text-amber-400" />
                       <span>{c.indicatorsCount} Indicators</span>
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 shrink-0">
                       <LinkIcon className="w-3 h-3 text-indigo-400" />
                       <span>{c.linksCount} Links</span>
                     </span>
@@ -767,16 +768,16 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
         {/* ----------------------------------------------------------------------- */}
         {/* COLUMN 2: CENTER WORKSPACE (ACTIVE CASE BANNER + AI ASSISTANT CHAT)     */}
         {/* ----------------------------------------------------------------------- */}
-        <div className="lg:col-span-6 xl:col-span-6 flex flex-col gap-3">
+        <div className="lg:col-span-8 xl:col-span-6 flex flex-col gap-3 min-w-0">
 
           {/* TOP ACTIVE CASE BANNER matching screenshot */}
-          <div className="p-3.5 rounded-2xl bg-[#040e08] border border-primary/25 shadow-xl flex items-center justify-between gap-4 font-mono text-xs">
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-11 h-11 rounded-xl bg-[#072414] border border-[#00e676]/40 flex items-center justify-center text-[#00e676] shrink-0 shadow-[0_0_12px_rgba(0,230,118,0.2)]">
+          <div className="p-3.5 rounded-2xl bg-[#040e08] border border-primary/25 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 font-mono text-xs">
+            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+              <div className="w-10 h-10 rounded-xl bg-[#072414] border border-[#00e676]/40 flex items-center justify-center text-[#00e676] shrink-0 shadow-[0_0_12px_rgba(0,230,118,0.2)] mt-0.5 sm:mt-0">
                 <Folder className="w-5 h-5 text-[#00e676]" />
               </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-[#00e676] font-bold uppercase tracking-wider">
                     ACTIVE CASE
@@ -784,34 +785,34 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                  <span className="text-sm font-bold text-white font-sans truncate">
+                  <span className="text-sm font-bold text-white font-sans break-words line-clamp-2">
                     {activeCase.referenceNumber} — {activeCase.title}
                   </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#052918] text-[#00e676] border border-[#00e676]/40">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#052918] text-[#00e676] border border-[#00e676]/40 shrink-0">
                     {activeCase.statusLabel}
                   </span>
                 </div>
 
                 {/* Sub-bar chips */}
-                <div className="flex items-center gap-3 text-[11px] text-content-muted font-sans mt-1 flex-wrap">
-                  <span className="flex items-center gap-1 font-mono text-[10px]">
+                <div className="flex items-center gap-x-2.5 gap-y-1 text-[11px] text-content-muted font-sans mt-1.5 flex-wrap">
+                  <span className="flex items-center gap-1 font-mono text-[10px] shrink-0">
                     <Clock className="w-3 h-3" />
                     <span>{activeCase.date}</span>
                   </span>
-                  <span>•</span>
-                  <span>Complainant: <strong className="text-white">{activeCase.complainant}</strong></span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
+                  <span className="text-white/20 hidden sm:inline">•</span>
+                  <span className="shrink-0">Complainant: <strong className="text-white">{activeCase.complainant}</strong></span>
+                  <span className="text-white/20 hidden sm:inline">•</span>
+                  <span className="flex items-center gap-1 shrink-0">
                     <FileText className="w-3 h-3 text-cyan-400" />
                     <span className="text-white font-bold">{activeCase.evidenceCount}</span> Evidence Files
                   </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
+                  <span className="text-white/20 hidden sm:inline">•</span>
+                  <span className="flex items-center gap-1 shrink-0">
                     <Search className="w-3 h-3 text-amber-400" />
                     <span className="text-white font-bold">{activeCase.indicatorsCount}</span> Indicators
                   </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
+                  <span className="text-white/20 hidden sm:inline">•</span>
+                  <span className="flex items-center gap-1 shrink-0">
                     <LinkIcon className="w-3 h-3 text-indigo-400" />
                     <span className="text-white font-bold">{activeCase.linksCount}</span> Related Cases
                   </span>
@@ -974,31 +975,31 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                       </div>
 
                       {/* 3-Column Structured Information Grid matching screenshot */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3 pt-1">
                         
                         {/* Box 1: Recorded Facts */}
-                        <div className="p-3 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col justify-between gap-2.5">
+                        <div className="p-3.5 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col justify-between gap-2.5 xl:col-span-2 2xl:col-span-1 min-w-0">
                           <div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-2">
-                              <FileText className="w-3.5 h-3.5 text-cyan-400" />
-                              <span>Recorded Facts</span>
-                              <span className="text-[10px] text-content-muted font-normal">(from case records)</span>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-2 min-w-0">
+                              <FileText className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                              <span className="truncate">Recorded Facts</span>
+                              <span className="text-[10px] text-content-muted font-normal shrink-0">(from case records)</span>
                             </div>
 
                             <ul className="flex flex-col gap-1.5 text-[11px] text-content-secondary leading-snug">
-                              <li>• {activeCase.recordedFacts.incidentReport}</li>
+                              <li className="break-words">• {activeCase.recordedFacts.incidentReport}</li>
                               {activeCase.recordedFacts.reportedUrl && (
-                                <li className="flex items-center gap-1 flex-wrap">
-                                  <span>• Reported URL:</span>
-                                  <span className="px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[10px] border border-cyan-800">
+                                <li className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                  <span className="shrink-0 text-content-muted">• Reported URL:</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[10px] border border-cyan-800 break-all select-all">
                                     {activeCase.recordedFacts.reportedUrl}
                                   </span>
                                 </li>
                               )}
                               {activeCase.recordedFacts.transactionRef && (
-                                <li className="flex items-center gap-1 flex-wrap">
-                                  <span>• Transaction Reference:</span>
-                                  <span className="px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[10px] border border-cyan-800">
+                                <li className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                  <span className="shrink-0 text-content-muted">• Transaction Ref:</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-[10px] border border-cyan-800 break-all select-all">
                                     {activeCase.recordedFacts.transactionRef}
                                   </span>
                                 </li>
@@ -1007,11 +1008,11 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                                 • Uploaded Documents: {activeCase.recordedFacts.uploadedDocsCount} files
                                 <ul className="pl-3 pt-0.5 flex flex-col gap-0.5 text-content-muted text-[10px]">
                                   {activeCase.recordedFacts.docDetails.map((d, i) => (
-                                    <li key={i}>• {d}</li>
+                                    <li key={i} className="break-words">• {d}</li>
                                   ))}
                                 </ul>
                               </li>
-                              <li>• Incident Type: {activeCase.recordedFacts.incidentType}</li>
+                              <li className="break-words">• Incident Type: {activeCase.recordedFacts.incidentType}</li>
                             </ul>
                           </div>
 
@@ -1020,34 +1021,42 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                             className="text-[11px] text-[#00e676] hover:underline flex items-center gap-1 font-mono pt-1 cursor-pointer"
                           >
                             <span>Based on {activeCase.recordedFacts.sourceCount} source records</span>
-                            <ArrowRight className="w-3 h-3" />
+                            <ArrowRight className="w-3 h-3 shrink-0" />
                           </button>
                         </div>
 
                         {/* Box 2: Key Indicators (5) */}
-                        <div className="p-3 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col justify-between gap-2.5">
+                        <div className="p-3.5 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col justify-between gap-2.5 min-w-0">
                           <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-                                <Search className="w-3.5 h-3.5 text-amber-400" />
-                                <span>Key Indicators ({activeCase.keyIndicators.length})</span>
+                            <div className="flex items-center justify-between mb-2 min-w-0">
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-white min-w-0">
+                                <Search className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                <span className="truncate">Key Indicators ({activeCase.keyIndicators.length})</span>
                               </div>
                             </div>
 
-                            <div className="flex flex-col gap-1.5 text-xs font-mono">
+                            <div className="flex flex-col gap-2 text-xs font-mono">
                               {activeCase.keyIndicators.map((ind) => (
-                                <div key={ind.id} className="flex items-center justify-between gap-2 text-[11px]">
-                                  <div className="flex items-center gap-1.5 min-w-0">
-                                    {ind.icon === 'globe' && <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                                    {ind.icon === 'server' && <Lock className="w-3.5 h-3.5 text-red-400 shrink-0" />}
-                                    {ind.icon === 'mail' && <Mail className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
-                                    {ind.icon === 'mobile' && <Smartphone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
-                                    {ind.icon === 'bank' && <Landmark className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                                    <span className="text-white truncate font-medium">{ind.value}</span>
-                                    <span className="text-[10px] text-content-muted font-sans hidden sm:inline">{ind.type}</span>
+                                <div key={ind.id} className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-black/25 border border-white/[0.04] text-[11px] min-w-0 hover:border-white/10 transition-colors">
+                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-white/[0.04] border border-white/[0.06]">
+                                      {ind.icon === 'globe' && <Globe className="w-3.5 h-3.5 text-amber-400" />}
+                                      {ind.icon === 'server' && <Lock className="w-3.5 h-3.5 text-red-400" />}
+                                      {ind.icon === 'mail' && <Mail className="w-3.5 h-3.5 text-purple-400" />}
+                                      {ind.icon === 'mobile' && <Smartphone className="w-3.5 h-3.5 text-emerald-400" />}
+                                      {ind.icon === 'bank' && <Landmark className="w-3.5 h-3.5 text-amber-400" />}
+                                    </div>
+                                    <div className="flex flex-col min-w-0 flex-1 leading-tight">
+                                      <span className="text-white text-[11px] font-mono font-medium truncate" title={ind.value}>
+                                        {ind.value}
+                                      </span>
+                                      <span className="text-[10px] text-content-muted font-sans truncate mt-0.5">
+                                        {ind.type}
+                                      </span>
+                                    </div>
                                   </div>
 
-                                  <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase shrink-0 ${
+                                  <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase shrink-0 whitespace-nowrap self-center ${
                                     ind.badgeType === 'danger' ? 'bg-red-500/20 text-red-400 border border-red-500/40' :
                                     ind.badgeType === 'success' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
                                     'bg-amber-500/20 text-amber-300 border border-amber-500/40'
@@ -1067,26 +1076,35 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                             className="text-[11px] text-[#00e676] hover:underline flex items-center gap-1 font-mono pt-1 cursor-pointer"
                           >
                             <span>View all {activeCase.keyIndicators.length} indicators</span>
-                            <ArrowRight className="w-3 h-3" />
+                            <ArrowRight className="w-3 h-3 shrink-0" />
                           </button>
                         </div>
 
                         {/* Box 3: Evidence Overview (3) */}
-                        <div className="p-3 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col justify-between gap-2.5">
+                        <div className="p-3.5 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col justify-between gap-2.5 min-w-0">
                           <div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-2">
-                              <Folder className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>Evidence Overview ({activeCase.evidenceFiles.length})</span>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-2 min-w-0">
+                              <Folder className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              <span className="truncate">Evidence Overview ({activeCase.evidenceFiles.length})</span>
                             </div>
 
-                            <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-col gap-2">
                               {activeCase.evidenceFiles.map((ev) => (
-                                <div key={ev.id} className="flex items-center justify-between gap-2 text-[11px]">
-                                  <div className="flex items-center gap-1.5 min-w-0">
-                                    {ev.type === 'Image' ? <ImageIcon className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> : <FileText className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
-                                    <span className="text-white truncate">{ev.name}</span>
+                                <div key={ev.id} className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-black/25 border border-white/[0.04] text-[11px] min-w-0 hover:border-white/10 transition-colors">
+                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-white/[0.04] border border-white/[0.06]">
+                                      {ev.type === 'Image' ? <ImageIcon className="w-3.5 h-3.5 text-cyan-400" /> : <FileText className="w-3.5 h-3.5 text-emerald-400" />}
+                                    </div>
+                                    <div className="flex flex-col min-w-0 flex-1 leading-tight">
+                                      <span className="text-white text-[11px] font-medium truncate" title={ev.name}>
+                                        {ev.name}
+                                      </span>
+                                      <span className="text-[10px] text-content-muted font-mono mt-0.5">
+                                        {ev.timestamp}
+                                      </span>
+                                    </div>
                                   </div>
-                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.06] text-content-muted shrink-0">
+                                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.06] text-content-muted border border-white/10 shrink-0 whitespace-nowrap self-center">
                                     {ev.type}
                                   </span>
                                 </div>
@@ -1102,86 +1120,86 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                             className="text-[11px] text-[#00e676] hover:underline flex items-center gap-1 font-mono pt-1 cursor-pointer"
                           >
                             <span>Open evidence repository</span>
-                            <ArrowRight className="w-3 h-3" />
+                            <ArrowRight className="w-3 h-3 shrink-0" />
                           </button>
                         </div>
 
                       </div>
 
                       {/* Bottom 3-Card Summary Grid matching screenshot */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3 pt-1">
                         
                         {/* Card 1: Current Status */}
-                        <div className="p-3 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col gap-1.5 font-mono text-[11px]">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans mb-1">
-                            <Info className="w-3.5 h-3.5 text-[#00e676]" />
-                            <span>Current Status</span>
+                        <div className="p-3.5 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col gap-2 font-mono text-[11px] xl:col-span-2 2xl:col-span-1 min-w-0">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans mb-1 min-w-0">
+                            <Info className="w-3.5 h-3.5 text-[#00e676] shrink-0" />
+                            <span className="truncate">Current Status</span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-content-muted font-sans">Case Status:</span>
-                            <span className="text-white font-bold">{activeCase.statusLabel}</span>
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="text-content-muted font-sans shrink-0">Case Status:</span>
+                            <span className="text-white font-bold truncate">{activeCase.statusLabel}</span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-content-muted font-sans">Assigned To:</span>
-                            <span className="text-white font-sans">Naveen (Specialist)</span>
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="text-content-muted font-sans shrink-0">Assigned To:</span>
+                            <span className="text-white font-sans truncate">Naveen (Specialist)</span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-content-muted font-sans">Priority:</span>
-                            <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="text-content-muted font-sans shrink-0">Priority:</span>
+                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40 shrink-0">
                               {activeCase.priority}
                             </span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-content-muted font-sans">Evidence Files:</span>
-                            <span className="text-white font-bold">{activeCase.evidenceCount}</span>
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="text-content-muted font-sans shrink-0">Evidence Files:</span>
+                            <span className="text-white font-bold shrink-0">{activeCase.evidenceCount}</span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-content-muted font-sans">Indicators Extracted:</span>
-                            <span className="text-white font-bold">{activeCase.indicatorsCount}</span>
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="text-content-muted font-sans shrink-0">Indicators Extracted:</span>
+                            <span className="text-white font-bold shrink-0">{activeCase.indicatorsCount}</span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-content-muted font-sans">Related Cases (Unverified):</span>
-                            <span className="text-white font-bold">{activeCase.linksCount}</span>
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="text-content-muted font-sans shrink-0">Related Cases (Unverified):</span>
+                            <span className="text-white font-bold shrink-0">{activeCase.linksCount}</span>
                           </div>
 
-                          <div className="flex justify-between">
-                            <span className="text-content-muted font-sans">Verifications Pending:</span>
-                            <span className="text-amber-400 font-bold">{activeCase.pendingVerifications}</span>
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <span className="text-content-muted font-sans shrink-0">Verifications Pending:</span>
+                            <span className="text-amber-400 font-bold shrink-0">{activeCase.pendingVerifications}</span>
                           </div>
                         </div>
 
                         {/* Card 2: Verification Needs */}
-                        <div className="p-3 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col gap-1.5 text-[11px]">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1">
-                            <ShieldAlert className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>Verification Needs</span>
-                            <span className="text-[10px] text-content-muted font-normal">(Suggestions)</span>
+                        <div className="p-3.5 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col gap-2 text-[11px] min-w-0">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1 min-w-0">
+                            <ShieldAlert className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span className="truncate">Verification Needs</span>
+                            <span className="text-[10px] text-content-muted font-normal shrink-0">(Suggestions)</span>
                           </div>
 
                           <ul className="flex flex-col gap-1.5 text-content-secondary leading-snug">
                             {activeCase.verificationNeeds.map((need, idx) => (
-                              <li key={idx} className="flex items-start gap-1.5">
-                                <span className="text-emerald-400 shrink-0">•</span>
-                                <span>{need}</span>
+                              <li key={idx} className="flex items-start gap-1.5 min-w-0">
+                                <span className="text-emerald-400 shrink-0 font-bold">•</span>
+                                <span className="break-words">{need}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
 
                         {/* Card 3: Suggested Next Checks */}
-                        <div className="p-3 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col gap-1.5 text-[11px]">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                            <span>Suggested Next Checks</span>
+                        <div className="p-3.5 rounded-xl bg-[#040e08] border border-white/[0.08] flex flex-col gap-2 text-[11px] min-w-0">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1 min-w-0">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="truncate">Suggested Next Checks</span>
                           </div>
 
-                          <div className="flex flex-col gap-1.5">
+                          <div className="flex flex-col gap-1">
                             {activeCase.suggestedNextChecks.map((check, idx) => (
                               <button
                                 key={idx}
@@ -1189,9 +1207,9 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                                   handleShortcutQuery('verification');
                                   showToast(`Dispatched investigation inquiry: ${check}`);
                                 }}
-                                className="text-left text-content-secondary hover:text-white flex items-center justify-between gap-1 p-1 rounded hover:bg-white/[0.04] transition-colors cursor-pointer group"
+                                className="text-left text-content-secondary hover:text-white flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer group min-w-0"
                               >
-                                <span className="truncate group-hover:text-primary transition-colors">• {check}</span>
+                                <span className="truncate group-hover:text-primary transition-colors text-[11px] min-w-0 flex-1" title={check}>• {check}</span>
                                 <ArrowRight className="w-3 h-3 text-content-muted group-hover:text-primary shrink-0" />
                               </button>
                             ))}
@@ -1369,19 +1387,19 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
         {/* ----------------------------------------------------------------------- */}
         {/* COLUMN 3: CASE CONTEXT PANEL (Right Column, 2.8 cols)                   */}
         {/* ----------------------------------------------------------------------- */}
-        <div className="lg:col-span-3 xl:col-span-3 flex flex-col gap-3.5 p-4 rounded-2xl bg-[#040e08] border border-primary/20 shadow-xl">
+        <div className="lg:col-span-12 xl:col-span-3 flex flex-col gap-3.5 p-4 rounded-2xl bg-[#040e08] border border-primary/20 shadow-xl min-w-0">
           
           {/* Header: Info Icon + Case Context + Chevron */}
-          <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
-            <div className="flex items-center gap-2">
-              <Info className="w-4 h-4 text-[#00e676]" />
-              <span className="text-xs font-bold text-white tracking-wide">
+          <div className="flex items-center justify-between pb-2 border-b border-white/[0.08] min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <Info className="w-4 h-4 text-[#00e676] shrink-0" />
+              <span className="text-xs font-bold text-white tracking-wide truncate">
                 Case Context
               </span>
             </div>
             <button 
               onClick={() => setIsCaseContextCollapsed(prev => !prev)}
-              className="text-content-muted hover:text-white transition-colors"
+              className="text-content-muted hover:text-white transition-colors shrink-0 p-0.5"
             >
               <ChevronDown className={`w-4 h-4 transition-transform ${isCaseContextCollapsed ? '-rotate-90' : ''}`} />
             </button>
@@ -1390,14 +1408,14 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
           {!isCaseContextCollapsed && (
             <>
               {/* Key-Value Details List matching screenshot */}
-              <div className="flex flex-col gap-2 text-xs font-sans">
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Case ID</span>
-                  <div className="flex items-center gap-1 text-white font-mono font-bold">
+              <div className="flex flex-col gap-2.5 text-xs font-sans">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Case ID</span>
+                  <div className="flex items-center gap-1 text-white font-mono font-bold text-[11px] shrink-0">
                     <span>{activeCase.referenceNumber}</span>
                     <button
                       onClick={() => handleCopy(activeCase.referenceNumber)}
-                      className="text-content-muted hover:text-primary transition-colors cursor-pointer"
+                      className="text-content-muted hover:text-primary transition-colors cursor-pointer p-0.5"
                       title="Copy Case ID"
                     >
                       <Copy className="w-3 h-3" />
@@ -1405,119 +1423,119 @@ export const AIAssistantInvestigationPortalView: React.FC<AIAssistantInvestigati
                   </div>
                 </div>
 
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-content-muted shrink-0">Title</span>
-                  <span className="text-white font-medium text-right text-[11px] leading-tight">
+                <div className="flex items-start justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Title</span>
+                  <span className="text-white font-medium text-right text-[11px] leading-tight break-words min-w-0" title={activeCase.title}>
                     {activeCase.title}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Source</span>
-                  <span className="text-white">{activeCase.source}</span>
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Source</span>
+                  <span className="text-white text-[11px] text-right truncate" title={activeCase.source}>{activeCase.source}</span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Submitted</span>
-                  <span className="text-white font-mono text-[11px]">{activeCase.date}</span>
+                <div className="flex items-baseline justify-between gap-2 min-w-0 flex-wrap sm:flex-nowrap">
+                  <span className="text-content-muted text-[11px] shrink-0">Submitted</span>
+                  <span className="text-white font-mono text-[11px] text-right whitespace-nowrap shrink-0">{activeCase.date}</span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Status</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#052918] text-[#00e676] border border-[#00e676]/40">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Status</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#052918] text-[#00e676] border border-[#00e676]/40 shrink-0 whitespace-nowrap">
                     {activeCase.statusLabel}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Priority</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Priority</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0 whitespace-nowrap">
                     {activeCase.priority}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Assigned To</span>
-                  <span className="text-white">Naveen (Specialist)</span>
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Assigned To</span>
+                  <span className="text-white text-[11px] text-right truncate">Naveen (Specialist)</span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Department</span>
-                  <span className="text-white">{activeCase.department}</span>
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Department</span>
+                  <span className="text-white text-[11px] text-right truncate">{activeCase.department}</span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Complainant Type</span>
-                  <span className="text-white">{activeCase.complainant}</span>
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Complainant Type</span>
+                  <span className="text-white text-[11px] text-right truncate">{activeCase.complainant}</span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Incident Type</span>
-                  <span className="text-white">{activeCase.incidentType}</span>
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-content-muted text-[11px] shrink-0">Incident Type</span>
+                  <span className="text-white text-[11px] text-right truncate">{activeCase.incidentType}</span>
                 </div>
 
                 {/* Clickable record counts with links matching screenshot */}
-                <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
-                  <span className="text-content-muted">Evidence Files</span>
+                <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-white/[0.04] min-w-0 flex-wrap">
+                  <span className="text-content-muted text-[11px] shrink-0">Evidence Files</span>
                   <button 
                     onClick={() => onSelectTab('evidence-repository')}
-                    className="flex items-center gap-1 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono"
+                    className="flex items-center gap-1 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono shrink-0 whitespace-nowrap"
                   >
                     <span className="text-white font-bold">{activeCase.evidenceCount}</span>
                     <span>View Evidence →</span>
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Indicators</span>
+                <div className="flex items-center justify-between gap-2 min-w-0 flex-wrap">
+                  <span className="text-content-muted text-[11px] shrink-0">Indicators</span>
                   <button 
                     onClick={() => onSelectTab('cross-case-correlation')}
-                    className="flex items-center gap-1 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono"
+                    className="flex items-center gap-1 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono shrink-0 whitespace-nowrap"
                   >
                     <span className="text-white font-bold">{activeCase.indicatorsCount}</span>
                     <span>View Indicators →</span>
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Related Cases</span>
+                <div className="flex items-center justify-between gap-2 min-w-0 flex-wrap">
+                  <span className="text-content-muted text-[11px] shrink-0">Related Cases</span>
                   <button 
                     onClick={() => onSelectTab('cross-case-correlation')}
-                    className="flex items-center gap-1 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono"
+                    className="flex items-center gap-1.5 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono shrink-0 whitespace-nowrap"
                   >
-                    <span className="text-amber-400 font-bold">{activeCase.linksCount} (Unverified)</span>
-                    <span>View Cases →</span>
+                    <span className="text-amber-400 font-bold whitespace-nowrap">{activeCase.linksCount} (Unverified)</span>
+                    <span className="whitespace-nowrap">View Cases →</span>
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-content-muted">Verifications Pending</span>
+                <div className="flex items-center justify-between gap-2 min-w-0 flex-wrap">
+                  <span className="text-content-muted text-[11px] shrink-0">Verifications Pending</span>
                   <button 
                     onClick={() => onSelectTab('validation-queue')}
-                    className="flex items-center gap-1 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono"
+                    className="flex items-center gap-1.5 text-[11px] text-[#00e676] hover:underline cursor-pointer font-mono shrink-0 whitespace-nowrap"
                   >
                     <span className="text-amber-400 font-bold">{activeCase.pendingVerifications}</span>
-                    <span>View Tasks →</span>
+                    <span className="whitespace-nowrap">View Tasks →</span>
                   </button>
                 </div>
               </div>
 
               {/* Case Timeline (Key Events) matching screenshot */}
-              <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-white font-mono">
-                  <Clock className="w-3.5 h-3.5 text-[#00e676]" />
-                  <span>Case Timeline (Key Events)</span>
+              <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2 min-w-0">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-white font-mono min-w-0">
+                  <Clock className="w-3.5 h-3.5 text-[#00e676] shrink-0" />
+                  <span className="truncate">Case Timeline (Key Events)</span>
                 </div>
 
-                <div className="relative pl-3 flex flex-col gap-3 font-mono text-[10px]">
+                <div className="relative pl-3 flex flex-col gap-3 font-mono text-[10px] min-w-0">
                   {/* Vertical Timeline Guide Line */}
                   <div className="absolute left-1 top-2 bottom-2 w-[1px] bg-primary/30" />
 
                   {activeCase.timeline.map((item, idx) => (
-                    <div key={idx} className="relative flex flex-col gap-0.5">
+                    <div key={idx} className="relative flex flex-col gap-0.5 min-w-0">
                       <div className="absolute -left-3 top-1 w-2 h-2 rounded-full bg-[#00e676] shadow-[0_0_6px_#00e676]" />
-                      <span className="text-content-muted">{item.time}</span>
-                      <span className="text-white font-sans text-[11px] leading-tight">{item.event}</span>
+                      <span className="text-content-muted text-[10px]">{item.time}</span>
+                      <span className="text-white font-sans text-[11px] leading-tight break-words">{item.event}</span>
                     </div>
                   ))}
                 </div>

@@ -1917,6 +1917,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const fetchAuditLogs = useCallback(async () => {
     setIsLoadingAuditLogs(true);
     try {
+      if (!apiClient.getToken()) return;
       const params: any = { limit: 100 };
       if (auditSearch.trim()) params.search = auditSearch.trim();
       if (auditActor.trim()) params.actor = auditActor.trim();
@@ -1926,7 +1927,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const logs = await apiClient.getAdminAuditLogs(params);
       if (logs) setAdminAuditLogs(logs);
     } catch (e) {
-      console.error('Failed to load audit logs:', e);
+      // In unauthenticated preview mode, audit logs are secured
     } finally {
       setIsLoadingAuditLogs(false);
     }

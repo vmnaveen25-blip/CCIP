@@ -286,6 +286,145 @@ export const INITIAL_COMPLAINTS: Complaint[] = [
         actor: 'Auto Triage Worker #3'
       }
     ]
+  },
+  {
+    id: 'case-7033',
+    referenceNumber: 'CYBER-2026-7033',
+    title: 'Online Shopping Fraud & Mule Account Scam (₹48,500)',
+    category: 'Financial Fraud',
+    severity: 'HIGH',
+    status: 'UNDER_INVESTIGATION',
+    citizenName: 'Rahul Verma',
+    citizenEmail: 'rahul.verma@outlook.com',
+    citizenPhone: '+91 98112 87654',
+    incidentDate: '11 Jun 2026, 03:18 PM',
+    reportedDate: '11 Jun 2026, 03:18 PM',
+    financialLoss: 48500,
+    suspectInfo: {
+      alias: 'Mega Deal Electronics Storefront',
+      website: 'https://mega-deal-electronics.shop',
+      ipAddress: '185.220.101.44'
+    },
+    description: 'Victim purchased luxury electronics on counterfeit discount portal. Payment intercepted via deceptive payment gateway mimicking Razorpay with zero product delivery.',
+    evidenceFiles: [
+      {
+        name: 'invoice_copy.pdf',
+        size: '1.1 MB',
+        type: 'application/pdf',
+        sha256Hash: '4a1b88c199023485761234908123490182349018234901823490182349018234',
+        verified: true
+      },
+      {
+        name: 'chat_transcript.png',
+        size: '850 KB',
+        type: 'image/png',
+        sha256Hash: '7b2c99d21234567890abcdef1234567890abcdef1234567890abcdef12345678',
+        verified: true
+      }
+    ],
+    aiTriageScore: 82,
+    assignedUnit: 'Special Cell Intelligence',
+    assignedOfficer: 'Naveen (Specialist)',
+    timeline: [
+      {
+        timestamp: '11 Jun 2026, 03:18 PM',
+        title: 'Complaint Filed Online',
+        description: 'Transaction advice and bogus gateway URL ingested.',
+        actor: 'Citizen Portal'
+      },
+      {
+        timestamp: '11 Jun 2026, 04:00 PM',
+        title: 'Mule Account Identified',
+        description: 'Cross-referenced beneficiary with Axis Bank mule pool.',
+        actor: 'Special Cell'
+      }
+    ]
+  },
+  {
+    id: 'case-2788',
+    referenceNumber: 'CYBER-2026-2788',
+    title: 'Executive Social Media Impersonation & Crypto Lure',
+    category: 'Identity Theft',
+    severity: 'MEDIUM',
+    status: 'SUBMITTED',
+    citizenName: 'Siddharth Rao',
+    citizenEmail: 'siddharth.rao@techhub.in',
+    citizenPhone: '+91 91234 56789',
+    incidentDate: '08 Jun 2026, 11:32 AM',
+    reportedDate: '08 Jun 2026, 11:32 AM',
+    financialLoss: 0,
+    suspectInfo: {
+      alias: 'Impersonated Executive Profile',
+      website: 'https://t.me/official_bonus_airdrop',
+      phone: '+91 91234 56789'
+    },
+    description: 'Cloned Instagram executive handle soliciting fraudulent cryptocurrency token pre-sales and phishing Telegram links from corporate contacts.',
+    evidenceFiles: [
+      {
+        name: 'profile_screenshot.png',
+        size: '1.4 MB',
+        type: 'image/png',
+        sha256Hash: '3c4daa11234567890abcdef1234567890abcdef1234567890abcdef12345678',
+        verified: true
+      }
+    ],
+    aiTriageScore: 71,
+    assignedUnit: 'Cyber Social Monitoring Unit',
+    assignedOfficer: 'Priya Sharma (Specialist)',
+    timeline: [
+      {
+        timestamp: '08 Jun 2026, 11:32 AM',
+        title: 'Citizen Narrative Logged',
+        description: 'Preservation request dispatched under Section 91 CrPC.',
+        actor: 'Social Monitoring Unit'
+      }
+    ]
+  },
+  {
+    id: 'case-1156',
+    referenceNumber: 'CYBER-2026-1156',
+    title: 'Algorithmic High-Yield Investment Fraud & Ponzi Ring (₹1,20,00,000)',
+    category: 'Financial Fraud',
+    severity: 'CRITICAL',
+    status: 'CLOSED',
+    citizenName: 'Vikramaditya Singhania',
+    citizenEmail: 'v.singhania@apexholding.in',
+    citizenPhone: '+91 98721 65432',
+    incidentDate: '02 Jun 2026, 09:14 AM',
+    reportedDate: '02 Jun 2026, 09:14 AM',
+    financialLoss: 12000000,
+    suspectInfo: {
+      alias: 'Apex Algo Yield Syndicate',
+      website: 'https://apex-algo-yield.trade',
+      walletAddress: '0x38bF91024e8912bc90048EF910c2830fFa829804e89'
+    },
+    description: 'Syndicated Ponzi scheme soliciting fake algorithmic trading deposits. Cumulative losses ₹1.2 Cr recovered via interim judicial bank freezing.',
+    evidenceFiles: [
+      {
+        name: 'certified_ledger.pdf',
+        size: '4.2 MB',
+        type: 'application/pdf',
+        sha256Hash: '6d7eff331234567890abcdef1234567890abcdef1234567890abcdef12345678',
+        verified: true
+      }
+    ],
+    aiTriageScore: 94,
+    assignedUnit: 'Financial Crimes Taskforce',
+    assignedOfficer: 'Rajesh Sharma (Inspector)',
+    timeline: [
+      {
+        timestamp: '02 Jun 2026, 09:14 AM',
+        title: 'Case Registered',
+        description: 'High-value financial syndicate flagged by FinCEN/FIU-IND alert.',
+        actor: 'Financial Crimes Taskforce'
+      },
+      {
+        timestamp: '05 Jun 2026, 05:00 PM',
+        title: 'Case Resolved & Sealed',
+        description: 'Frozen assets returned under Magistrate restitution order.',
+        actor: 'District Court'
+      }
+    ]
   }
 ];
 

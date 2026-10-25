@@ -10,6 +10,9 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { EmptyState } from '../components/ui/EmptyState';
 import { SkeletonCard } from '../components/ui/Skeleton';
 import { FileComplaintWizard } from '../components/citizen/FileComplaintWizard';
+import { SafetyHubView } from '../components/citizen/SafetyHubView';
+import { AwarenessResourcesView } from '../components/citizen/AwarenessResourcesView';
+import { SettingsView } from '../components/citizen/SettingsView';
 import { 
   PlusCircle, 
   FileText, 
@@ -2086,7 +2089,7 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
       )}
 
       {/* 6. CITIZEN AI CYBER SHIELD & ASSISTANT TAB */}
-      {activeTab === 'ai-assistant' && (
+      {(activeTab === 'ai-assistant' || activeTab === 'ai-shield') && (
         <div className="max-w-4xl mx-auto w-full flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Header Banner */}
           <div className="bg-gradient-to-r from-emerald-950/40 via-[#18181b] to-zinc-900 border border-emerald-500/30 p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -2548,6 +2551,24 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 9. SAFETY HUB TAB */}
+      {(activeTab === 'safety-hub' || activeTab === 'safety') && (
+        <SafetyHubView onSelectTab={onSelectTab} />
+      )}
+
+      {/* 10. AWARENESS & RESOURCES TAB */}
+      {(activeTab === 'awareness' || activeTab === 'awareness-resources') && (
+        <AwarenessResourcesView onSelectTab={onSelectTab} />
+      )}
+
+      {/* 11. SETTINGS TAB */}
+      {(activeTab === 'settings' || activeTab === 'citizen-settings') && (
+        <SettingsView 
+          currentUser={currentUser} 
+          onSelectTab={onSelectTab} 
+        />
       )}
     </div>
   );

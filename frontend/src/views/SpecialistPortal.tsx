@@ -4,7 +4,7 @@ import { apiClient } from '../api/client';
 import { formatINR } from '../utils/formatters';
 import { MarkdownMessage } from '../components/MarkdownMessage';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { MOCK_CORRELATION_NODES } from '../data/mockData';
+import { MOCK_CORRELATION_NODES, INITIAL_COMPLAINTS } from '../data/mockData';
 import { CorrelationGraph3D, GraphNode3D, GraphLink3D, getNodeCategory } from '../components/intelligence/CorrelationGraph3D';
 import { ThreatIntelligencePortalView } from '../components/intelligence/ThreatIntelligencePortalView';
 import { SocMonitoringPortalView } from '../components/intelligence/SocMonitoringPortalView';
@@ -73,7 +73,29 @@ export const SpecialistPortal: React.FC<SpecialistPortalProps> = ({
   nodes,
   onSelectCase
 }) => {
-  const [selectedCaseId, setSelectedCaseId] = useState<string>(complaints[0]?.id || '');
+  const effectiveComplaints = useMemo(() => {
+    return complaints && complaints.length > 0 ? complaints : INITIAL_COMPLAINTS;
+  }, [complaints]);
+
+  const [selectedCaseId, setSelectedCaseId] = useState<string>(complaints[0]?.id || INITIAL_COMPLAINTS[0]?.id || '');
+  const [docketFilter, setDocketFilter] = useState<'ALL' | 'CRITICAL' | 'HIGH' | 'MEDIUM'>('ALL');
+  const [docketSearch, setDocketSearch] = useState<string>('');
+
+  const filteredDocket = useMemo(() => {
+    return effectiveComplaints.filter((c) => {
+      if (docketFilter !== 'ALL' && c.severity !== docketFilter) return false;
+      if (docketSearch.trim()) {
+        const q = docketSearch.toLowerCase();
+        return (
+          c.referenceNumber.toLowerCase().includes(q) ||
+          c.title.toLowerCase().includes(q) ||
+          (c.citizenName && c.citizenName.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
+  }, [effectiveComplaints, docketFilter, docketSearch]);
+
   const [selectedNodeId, setSelectedNodeId] = useState<string>('node-case-9842');
   const [isStreaming, setIsStreaming] = useState(true);
   const [specialistSummary, setSpecialistSummary] = useState<any>(null);
@@ -920,7 +942,7 @@ export const SpecialistPortal: React.FC<SpecialistPortalProps> = ({
         <SocMonitoringPortalView
           onSelectTab={onSelectTab}
           onSelectCase={onSelectCase}
-          complaints={complaints}
+          complaints={effectiveComplaints}
         />
       )}
 
@@ -928,48 +950,99 @@ export const SpecialistPortal: React.FC<SpecialistPortalProps> = ({
       {activeTab === 'assigned-cases' && (
         <div className="flex flex-col gap-6">
           <div className="op-card p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/[0.08] mb-4 gap-3">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-primary" />
-                <span className="text-xs font-mono font-bold text-content-primary uppercase">Assigned Forensic Cases ({complaints.length})</span>
+                <span className="text-xs font-mono font-bold text-content-primary uppercase">
+                  Assigned Forensic Cases ({effectiveComplaints.length})
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <button className="btn-secondary px-3 py-1.5 text-xs rounded-xl flex items-center gap-1.5 font-mono">
-                  <Filter className="w-3 h-3" />
-                  FILTER DOCKET
+
+              {/* Filter & Search Bar */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-content-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search docket..."
+                    value={docketSearch}
+                    onChange={(e) => setDocketSearch(e.target.value)}
+                    className="bg-[#06150c] border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-content-muted focus:outline-none focus:border-primary font-mono w-44 sm:w-56"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 font-mono text-[11px]">
+                  {(['ALL', 'CRITICAL', 'HIGH', 'MEDIUM'] as const).map((sev) => (
+                    <button
+                      key={sev}
+                      onClick={() => setDocketFilter(sev)}
+                      className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                        docketFilter === sev
+                          ? 'bg-[#00e676] text-[#020b06] font-bold border-[#00e676]'
+                          : 'bg-[#06150c] text-content-muted border-white/[0.08] hover:text-white'
+                      }`}
+                    >
+                      {sev}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {filteredDocket.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredDocket.map((c) => (
+                  <div 
+                    key={c.id} 
+                    className="p-5 rounded-2xl bg-[#05130a] border border-white/[0.08] hover:border-primary/50 transition-all flex flex-col justify-between gap-4 cursor-pointer shadow-lg hover:shadow-[0_0_15px_rgba(0,230,118,0.15)] group"
+                    onClick={() => { setSelectedCaseId(c.id); onSelectTab('investigation-workspace'); }}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between font-mono text-xs mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-primary font-bold">{c.referenceNumber}</span>
+                          <span className="text-[10px] text-content-muted">• {c.category}</span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          c.severity === 'CRITICAL' ? 'chip-danger' :
+                          c.severity === 'HIGH' ? 'chip-warning' : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                        }`}>
+                          {c.severity}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-bold text-white group-hover:text-primary transition-colors">{c.title}</h3>
+                      <p className="text-xs text-content-muted line-clamp-2 mt-1 leading-relaxed">{c.description}</p>
+                    </div>
+
+                    <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono">
+                      <div className="flex items-center gap-2 text-content-secondary">
+                        <span>Victim: <strong className="text-white">{c.citizenName}</strong></span>
+                        {c.evidenceFiles && c.evidenceFiles.length > 0 && (
+                          <span className="text-[10px] text-content-muted">({c.evidenceFiles.length} files)</span>
+                        )}
+                      </div>
+                      <button className="text-primary font-bold flex items-center gap-1 hover:underline cursor-pointer">
+                        <span>OPEN WORKSPACE</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center flex flex-col items-center justify-center gap-3 bg-[#040e08] rounded-xl border border-white/[0.06]">
+                <FileText className="w-8 h-8 text-content-muted" />
+                <p className="text-xs font-mono text-content-secondary">
+                  No forensic cases match the active filter ({docketFilter}{docketSearch ? `, "${docketSearch}"` : ''}).
+                </p>
+                <button
+                  onClick={() => { setDocketFilter('ALL'); setDocketSearch(''); }}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs transition-colors cursor-pointer"
+                >
+                  Reset Docket Filters
                 </button>
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {complaints.map((c) => (
-                <div 
-                  key={c.id} 
-                  className="p-5 rounded-2xl bg-[#242426] border border-white/[0.08] hover:border-primary/50 transition-all flex flex-col justify-between gap-4 cursor-pointer"
-                  onClick={() => { setSelectedCaseId(c.id); onSelectTab('investigation-workspace'); }}
-                >
-                  <div>
-                    <div className="flex items-center justify-between font-mono text-xs mb-2">
-                      <span className="text-primary font-bold">{c.referenceNumber}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        c.severity === 'CRITICAL' ? 'chip-danger' : 'chip-warning'
-                      }`}>
-                        {c.severity}
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-bold text-content-primary">{c.title}</h3>
-                    <p className="text-xs text-content-muted line-clamp-2 mt-1">{c.description}</p>
-                  </div>
-
-                  <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-content-secondary">Victim: {c.citizenName}</span>
-                    <button className="text-primary font-bold flex items-center gap-1 hover:underline">
-                      OPEN WORKSPACE →
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            )}
           </div>
         </div>
       )}
@@ -979,7 +1052,7 @@ export const SpecialistPortal: React.FC<SpecialistPortalProps> = ({
         <InvestigationWorkspacePortalView
           onSelectTab={onSelectTab}
           onSelectCase={onSelectCase}
-          complaints={complaints}
+          complaints={effectiveComplaints}
           selectedCaseId={selectedCaseId}
         />
       )}

@@ -15,7 +15,7 @@ import { SpecialistPortal } from './views/SpecialistPortal';
 import { AIPortal } from './views/AIPortal';
 import { AdminPortal } from './views/AdminPortal';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { MOCK_CORRELATION_NODES, MOCK_THREAT_FEEDS } from './data/mockData';
+import { MOCK_CORRELATION_NODES, MOCK_THREAT_FEEDS, INITIAL_COMPLAINTS } from './data/mockData';
 import { NotificationCenterModal } from './components/NotificationCenterModal';
 import { UserProfileModal } from './components/UserProfileModal';
 
@@ -25,12 +25,12 @@ export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [currentPortal, setCurrentPortal] = useState<PortalRole>('landing');
   const [activeTab, setActiveTab] = useState<string>('landing-overview');
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>(INITIAL_COMPLAINTS);
   const [threatFeeds, setThreatFeeds] = useState<ThreatFeedItem[]>(MOCK_THREAT_FEEDS);
   const [correlationNodes, setCorrelationNodes] = useState<CorrelatedNode[]>(MOCK_CORRELATION_NODES);
   const [aiModels, setAiModels] = useState<ModelMetric[]>([]);
   const [auditLogs, setAuditLogs] = useState<SystemAuditLog[]>([]);
-  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(INITIAL_COMPLAINTS[0]?.id || null);
   const [isOmniSearchOpen, setIsOmniSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
@@ -50,27 +50,41 @@ export const App: React.FC = () => {
   const [portalKey, setPortalKey] = useState<string>(`${currentPortal}-${Date.now()}`);
 
   const fetchEnclaveData = async () => {
-    try {
-      const liveComplaints = await apiClient.getComplaints();
-      setComplaints(liveComplaints || []);
-      if (liveComplaints && liveComplaints.length > 0) {
-        setSelectedCaseId(prev => (prev && liveComplaints.some(c => c.id === prev)) ? prev : liveComplaints[0].id);
+    const token = apiClient.getToken();
+
+    if (token) {
+      try {
+        const liveComplaints = await apiClient.getComplaints();
+        const validComplaints = liveComplaints && liveComplaints.length > 0 ? liveComplaints : INITIAL_COMPLAINTS;
+        setComplaints(validComplaints);
+        if (validComplaints && validComplaints.length > 0) {
+          setSelectedCaseId(prev => (prev && validComplaints.some(c => c.id === prev)) ? prev : validComplaints[0].id);
+        }
+      } catch (e) {
+        setComplaints(INITIAL_COMPLAINTS);
       }
-    } catch (e) {
-      setComplaints([]);
+    } else {
+      setComplaints(INITIAL_COMPLAINTS);
     }
 
-    try {
-      const liveThreats = await apiClient.getThreatFeeds();
-      setThreatFeeds(liveThreats && liveThreats.length > 0 ? liveThreats : MOCK_THREAT_FEEDS);
-    } catch (e) {
+    const canAccessSpecialist = Boolean(token && (currentPortal === 'specialist' || currentPortal === 'admin' || currentUser?.role === 'specialist' || currentUser?.role === 'admin'));
+
+    if (canAccessSpecialist) {
+      try {
+        const liveThreats = await apiClient.getThreatFeeds();
+        setThreatFeeds(liveThreats && liveThreats.length > 0 ? liveThreats : MOCK_THREAT_FEEDS);
+      } catch (e) {
+        setThreatFeeds(MOCK_THREAT_FEEDS);
+      }
+
+      try {
+        const liveNodes = await apiClient.getCorrelationNodes();
+        setCorrelationNodes(liveNodes && liveNodes.length > 0 ? liveNodes : MOCK_CORRELATION_NODES);
+      } catch (e) {
+        setCorrelationNodes(MOCK_CORRELATION_NODES);
+      }
+    } else {
       setThreatFeeds(MOCK_THREAT_FEEDS);
-    }
-
-    try {
-      const liveNodes = await apiClient.getCorrelationNodes();
-      setCorrelationNodes(liveNodes && liveNodes.length > 0 ? liveNodes : MOCK_CORRELATION_NODES);
-    } catch (e) {
       setCorrelationNodes(MOCK_CORRELATION_NODES);
     }
 
@@ -461,7 +475,7 @@ export const App: React.FC = () => {
           currentPortal={currentPortal}
           onSelectPortal={handleSelectPortal}
           onOpenOmniSearch={() => setIsOmniSearchOpen(true)}
-          notificationCount={unreadCount}
+          notificationCount={unreadCount > 0 ? unreadCount : (currentPortal === 'citizen' ? 2 : 0)}
           onOpenNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
           onOpenProfileModal={() => setIsProfileModalOpen(true)}
           defconLevel={4}
@@ -618,13 +632,13 @@ export const App: React.FC = () => {
 
           {/* Portal content — dynamically adapts when sidebar is toggled */}
           <main 
-            className={`flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto transition-all duration-300 ease-in-out ${
+            className={`flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto transition-all duration-300 ease-in-out ${
               isSidebarOpen ? 'md:ml-64 max-w-[calc(100vw-16rem)]' : 'ml-0 max-w-full'
             }`} 
             key={portalKey}
           >
             <ErrorBoundary fallbackTitle="Module Telemetry Error">
-              <div className="page-enter">
+              <div className="page-enter min-w-0">
                 {currentPortal === 'citizen' && (
                   <CitizenPortal
                     activeTab={activeTab}
