@@ -90,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex flex-col select-none">
       {/* Main Operational Header */}
-      <div className="h-16 w-full bg-[#030706]/95 backdrop-blur-xl border-b border-[#00e676]/15 px-4 md:px-6 flex items-center justify-between gap-4 shadow-[0_4px_28px_rgba(0,0,0,0.5)]">
+      <div className="h-16 w-full bg-[#030706]/95 backdrop-blur-xl border-b border-[#00e676]/15 px-2.5 sm:px-4 md:px-6 flex items-center justify-between gap-1.5 sm:gap-4 shadow-[0_4px_28px_rgba(0,0,0,0.5)]">
         
         {/* Brand Emblem & Sidebar Toggle */}
         <div
@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
               onSelectPortal('citizen');
             }
           }}
-          className="flex items-center gap-3 cursor-pointer group min-w-max select-none"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-max select-none"
           role="button"
           tabIndex={0}
           onKeyDown={e => e.key === 'Enter' && (onToggleSidebar ? onToggleSidebar() : onSelectPortal('citizen'))}
@@ -117,11 +117,11 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-base sm:text-lg font-extrabold tracking-wider text-white group-hover:text-[#00e676] transition-colors duration-fast">
                 CCIP
               </span>
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00e676]/15 text-[#00e676] border border-[#00e676]/30">
+              <span className="hidden sm:inline text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00e676]/15 text-[#00e676] border border-[#00e676]/30">
                 SOVEREIGN
               </span>
             </div>
-            <span className="text-[10px] sm:text-[11px] text-[#6e8d7a] font-normal leading-tight group-hover:text-white/80 transition-colors">
+            <span className="hidden sm:inline text-[10px] sm:text-[11px] text-[#6e8d7a] font-normal leading-tight group-hover:text-white/80 transition-colors">
               Citizen Cybercrime Intelligence Platform
             </span>
           </div>
@@ -131,14 +131,14 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="relative shrink-0">
           <button
             onClick={() => { setPortalDropdownOpen(!portalDropdownOpen); setUserMenuOpen(false); }}
-            className="flex items-center gap-2 bg-[#07170e] px-3.5 py-1.5 rounded-full border border-[#00e676]/25 hover:border-[#00e676]/50 hover:bg-[#0a2215] transition-all duration-fast text-left shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 bg-[#07170e] px-2 sm:px-3.5 py-1.5 rounded-full border border-[#00e676]/25 hover:border-[#00e676]/50 hover:bg-[#0a2215] transition-all duration-fast text-left shadow-sm"
             aria-haspopup="listbox"
             aria-expanded={portalDropdownOpen}
           >
             <span className="text-[11px] text-[#6e8d7a] uppercase tracking-wider hidden lg:inline">Portal:</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="h-2 w-2 rounded-full bg-[#00e676] shadow-[0_0_8px_#00e676]" aria-hidden="true" />
-              <span className="text-xs font-semibold text-white truncate max-w-[130px] md:max-w-[170px]">
+              <span className="text-xs font-semibold text-white truncate max-w-[80px] sm:max-w-[130px] md:max-w-[170px]">
                 {currentPortalMeta.label}
               </span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] font-mono text-[#00e676] hidden sm:inline">
@@ -231,11 +231,11 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Mobile search */}
           <button
             onClick={onOpenOmniSearch}
-            className="p-2 rounded-full bg-[#07170e] border border-[#00e676]/25 hover:border-[#00e676]/50 text-[#c8ddd0] hover:text-[#00e676] transition-all duration-fast md:hidden"
+            className="p-1.5 sm:p-2 rounded-full bg-[#07170e] border border-[#00e676]/25 hover:border-[#00e676]/50 text-[#c8ddd0] hover:text-[#00e676] transition-all duration-fast md:hidden"
             aria-label="Open search"
           >
             <Search className="w-4 h-4" aria-hidden="true" />
@@ -244,7 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Notifications Bell */}
           <button
             onClick={() => { setPortalDropdownOpen(false); setUserMenuOpen(false); onOpenNotifications(); }}
-            className="relative p-2.5 rounded-full bg-[#07170e] border border-[#00e676]/25 hover:border-[#00e676]/50 text-[#c8ddd0] hover:text-[#00e676] transition-all duration-fast"
+            className="relative p-2 sm:p-2.5 rounded-full bg-[#07170e] border border-[#00e676]/25 hover:border-[#00e676]/50 text-[#c8ddd0] hover:text-[#00e676] transition-all duration-fast"
             aria-label={`System alerts${notificationCount > 0 ? ` — ${notificationCount} unread` : ''}`}
           >
             <Bell className="w-4 h-4" aria-hidden="true" />
@@ -262,7 +262,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative shrink-0">
             <button
               onClick={() => { setUserMenuOpen(!userMenuOpen); setPortalDropdownOpen(false); }}
-              className="flex items-center gap-2.5 bg-[#07170e] border border-[#00e676]/25 hover:border-[#00e676]/50 rounded-full px-3 py-1.5 transition-all duration-fast text-left shadow-[0_0_15px_rgba(0,230,118,0.05)]"
+              className="flex items-center gap-1 sm:gap-2.5 bg-[#07170e] border border-[#00e676]/25 hover:border-[#00e676]/50 rounded-full p-1 sm:px-3 sm:py-1.5 transition-all duration-fast text-left shadow-[0_0_15px_rgba(0,230,118,0.05)]"
               aria-haspopup="menu"
               aria-expanded={userMenuOpen}
               aria-label="User profile menu"
@@ -272,7 +272,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <User className="w-4 h-4 text-[#00e676]" />
               </div>
 
-              <div className="flex flex-col">
+              <div className="hidden sm:flex flex-col">
                 <span className="text-xs font-bold text-white leading-tight max-w-[120px] truncate">
                   {currentUser?.full_name || (currentPortal === 'citizen' ? 'Priya Sharma' : 'Naveen')}
                 </span>
@@ -282,7 +282,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               <ChevronDown
-                className={`w-3.5 h-3.5 text-[#6e8d7a] transition-transform duration-fast ${userMenuOpen ? 'rotate-180' : ''}`}
+                className={`hidden sm:inline w-3.5 h-3.5 text-[#6e8d7a] transition-transform duration-fast ${userMenuOpen ? 'rotate-180' : ''}`}
                 aria-hidden="true"
               />
             </button>

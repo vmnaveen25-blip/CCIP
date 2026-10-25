@@ -178,6 +178,16 @@ class APIClient {
     return res;
   }
 
+  async logout() {
+    try {
+      await this.request<any>('/auth/logout', {
+        method: 'POST'
+      });
+    } finally {
+      this.setToken(null);
+    }
+  }
+
   async getGoogleAuthUrl() {
     return await this.request<{
       configured: boolean;

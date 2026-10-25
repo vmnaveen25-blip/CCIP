@@ -1,0 +1,17 @@
+{
+  "target_url": "http://127.0.0.1:8000/api/v1/health",
+  "total_requests": 100,
+  "successful_requests": 100,
+  "error_rate": "0.0%",
+  "total_duration_sec": 2.12,
+  "throughput_rps": 47.16,
+  "latency_ms": {
+    "min": 6.45,
+    "mean": 21.2,
+    "p50": 10.14,
+    "p90": 17.61,
+    "p95": 27.41,
+    "p99": 785.8,
+    "max": 785.8
+  }
+}

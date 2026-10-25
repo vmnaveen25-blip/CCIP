@@ -1,0 +1,913 @@
+# Analysis of 219 Test Cases against Codebase
+
+## A. Baseline, test safety, and repository truth (8 cases)
+- **[BASE-001] (P0) Capture repository identity and revision**
+  - Tool: Terminal/Git
+  - Steps: Run `git rev-parse --show-toplevel`, `git branch --show-current`, `git rev-parse HEAD`, and `git status --short`. Save the outputs before running tests.
+  - Expected: Repository root, branch, commit SHA, and dirty-file list are recorded; no existing work is discarded.
+- **[BASE-002] (P0) Preserve uncommitted implementation changes**
+  - Tool: Terminal/Git
+  - Steps: Review `git status --short` and `git diff --stat`; do not checkout, reset, clean, stash, or overwrite files unless the owner explicitly directs it.
+  - Expected: All pre-existing modifications remain intact; test outputs are placed in a dedicated artifacts folder.
+- **[BASE-003] (P0) Verify claimed report and CI files exist in workspace**
+  - Tool: Terminal/Git
+  - Steps: Check the exact paths `CCIP_FINAL_PRODUCTION_READINESS_REPORT.md` and `.github/workflows/ci.yml`; inspect their contents and timestamps.
+  - Expected: Files exist in the active workspace and content matches the reported implementation; if missing, record discrepancy without fabricating success.
+- **[BASE-004] (P0) Check workspace versus remote snapshot drift**
+  - Tool: Terminal/Git
+  - Steps: Record `git remote -v`; compare current branch/HEAD and relevant changed paths against remote tracking branch, without pulling or switching branches.
+  - Expected: It is clear whether remediation is local/uncommitted, committed locally, or present remotely; no automatic synchronization occurs.
+- **[BASE-005] (P0) Confirm isolated test environment**
+  - Tool: Terminal/config
+  - Steps: Inspect effective environment variable names and test DB/cache/storage endpoints without printing secret values. Confirm the app cannot point at production resources.
+  - Expected: Tests target an isolated test database and test storage; secret values are not written to logs or artifacts.
+- **[BASE-006] (P0) Confirm safe test-data policy**
+  - Tool: Static review
+  - Steps: Search fixture data and test scripts for real citizen PII, real credentials, production endpoints, or genuine evidence files. Replace any accidental real data with synthetic values.
+  - Expected: Only synthetic test identities and files are used; no real cases or user data are changed.
+- **[BASE-007] (P1) Verify deterministic test execution instructions**
+  - Tool: Terminal/static review
+  - Steps: Read `pyproject.toml`/requirements, frontend package scripts, pytest configuration, and README instructions. Resolve exact commands from current repository rather than assuming these docs are current.
+  - Expected: Each planned command is supported by this checkout and its runtime; absent dependencies are reported as blockers.
+- **[BASE-008] (P1) Record test environment/version metadata**
+  - Tool: Terminal
+  - Steps: Capture OS, Python version, Node/npm version, browser versions, database version, Redis/storage state, and model artifact inventory. Redact secrets.
+  - Expected: A reproducible environment manifest is saved with the run.
+
+## B. Authentication, sessions, and identity lifecycle (14 cases)
+- **[AUTH-001] (P0) Valid login succeeds**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Submit valid credentials through the supported login API/UI.
+  - Expected: A session/token is issued with the intended identity and role; no password or secret appears in response/logs.
+- **[AUTH-002] (P0) Invalid password is rejected**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Submit correct identifier with an incorrect password.
+  - Expected: Authentication fails with generic safe error; no token/session is created and no user existence leak is introduced.
+- **[AUTH-003] (P1) Unknown account login is rejected safely**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Attempt login with the nonexistent identifier.
+  - Expected: Authentication fails without exposing account-enumeration details beyond approved policy.
+- **[AUTH-004] (P1) Missing credential fields are rejected**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Send request with missing username/email, missing password, empty strings, and malformed body.
+  - Expected: Validation rejects invalid bodies predictably; no traceback or 500 response.
+- **[AUTH-005] (P0) Inactive or disabled account cannot authenticate**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Attempt login with correct credentials.
+  - Expected: Login is denied and no active session is issued.
+- **[AUTH-006] (P0) Expired access token is rejected**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Call a protected endpoint after expiration.
+  - Expected: Request is denied with the documented authentication status; protected data is not returned.
+- **[AUTH-007] (P0) Tampered token signature is rejected**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Change one token byte/claim without signing and call protected endpoint.
+  - Expected: Request is rejected; no identity or privilege escalation occurs.
+- **[AUTH-008] (P0) Token claim tampering does not elevate role**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Attempt to alter role/user ID claims in a token without the signing key.
+  - Expected: Tampered token is rejected; server-side role is not trusted from unsigned client input.
+- **[AUTH-009] (P1) Logout invalidates session when designed to do so**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Logout; then replay token/session against a protected endpoint.
+  - Expected: Session is invalidated according to the documented strategy; if JWTs are stateless, documented expiry/revocation behavior is verified instead.
+- **[AUTH-010] (P1) Refresh token rotation/reuse behavior**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Refresh once; attempt reuse of prior refresh token; replay the new token.
+  - Expected: Refresh policy is enforced, old-token reuse is rejected if rotation is specified, and token values are never logged.
+- **[AUTH-011] (P1) Password reset or OTP flow boundary checks**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Test wrong OTP, expired OTP, reused OTP, too many attempts, and successful one-time use with test provider.
+  - Expected: Invalid/replayed codes fail, expiry/cooldown is enforced, and success changes only the intended account.
+- **[AUTH-012] (P1) OAuth callback validates state and redirect**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Test valid callback, missing/invalid state, invalid code, and unapproved redirect URI.
+  - Expected: Only valid flow completes; state/redirect validation blocks CSRF/open-redirect paths.
+- **[AUTH-013] (P0) Authentication errors do not leak secrets**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Trigger invalid credentials and malformed auth token; inspect client response and logs.
+  - Expected: No password, full token, OTP, API key, or secret appears in response/logs.
+- **[AUTH-014] (P1) Rate limit or abuse controls on authentication**
+  - Tool: pytest/API; UI where applicable
+  - Steps: Submit a controlled series of failed logins from a test client within the configured window.
+  - Expected: Rate limits/lockout/step-up policy triggers as documented without locking unrelated users.
+
+## C. Role-based access control and object-level authorization (18 cases)
+- **[RBAC-001] (P0) Anonymous caller cannot read protected case**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Call case list and direct case detail APIs with no token.
+  - Expected: Both are denied; no case or linked complaint data is returned.
+- **[RBAC-002] (P0) Citizen cannot read another citizen case**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Login as A; request B case by internal ID and case number.
+  - Expected: Access is denied or resource is consistently hidden per policy; B data is not disclosed.
+- **[RBAC-003] (P0) Citizen cannot use list filters to enumerate others**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: As citizen, vary case IDs, complaint IDs, status, priority, and pagination/filter values.
+  - Expected: Only authorized personal records are returned; total counts do not leak inaccessible records.
+- **[RBAC-004] (P0) Unassigned staff cannot read restricted case**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: As B, request case detail through every alias/identifier and any linked complaint route.
+  - Expected: Object-level case policy is enforced consistently on each endpoint.
+- **[RBAC-005] (P0) Assigned specialist reads permitted case**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Request case detail and approved linked evidence/complaint fields.
+  - Expected: Only the scope approved for that specialist is returned; required operational fields remain usable.
+- **[RBAC-006] (P0) Specialist cannot change assignment or privilege**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Attempt to assign another staff member, alter role, change protected case fields, and call admin-only endpoints.
+  - Expected: Forbidden operations fail; no partial mutation occurs.
+- **[RBAC-007] (P0) Police/investigator access follows assignment policy**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Run identical read/write operations on assigned and unassigned cases under both accounts.
+  - Expected: Only operations allowed by role and assignment policy succeed.
+- **[RBAC-008] (P1) Administrator rights are intentional and audited**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Perform an approved administrative user/role/assignment action.
+  - Expected: Action succeeds only via approved admin path and creates an audit record.
+- **[RBAC-009] (P0) AI/ML System Lead cannot read raw citizen narrative by default**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: As AI/ML System Lead, inspect case list/detail, model endpoints, correlation data, logs, report preview, and exports.
+  - Expected: Narrative is masked or withheld on all restricted paths; no canary/raw content leaks unless an explicit, approved, audited permission grants it.
+- **[RBAC-010] (P0) Narrative masking occurs server-side before model call**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Submit synthetic complaint with fake name/email/phone and canary token; trigger AI triage.
+  - Expected: Model adapter receives masked/minimized text before the network/model boundary, not merely a masked UI rendering.
+- **[RBAC-011] (P0) Report access inherits case permission**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Attempt report metadata, detail, preview, export/download, and report generation referencing case A.
+  - Expected: All paths consistently deny access; report IDs cannot be used to bypass case permission.
+- **[RBAC-012] (P0) Evidence read/download inherits complaint/case permission**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: As unauthorized user, request evidence metadata, processing status, download, and direct object/storage path if exposed.
+  - Expected: All unauthorized paths fail without revealing file bytes, hash, filename, or sensitive metadata beyond approved denial details.
+- **[RBAC-013] (P0) Evidence processing actions require authority**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Invoke processing/reprocess/cancel/verify endpoints where available.
+  - Expected: Unauthorized actions are rejected and processing state remains unchanged.
+- **[RBAC-014] (P0) Role cannot be changed through request payload**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Submit registration/profile update payloads containing role/admin flags or user IDs for another person.
+  - Expected: Protected role/identity fields are ignored or rejected; persisted role remains unchanged.
+- **[RBAC-015] (P1) Role-scoped model operations deny disallowed role**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Call each model inference/management route under citizen, specialist, police, and admin roles.
+  - Expected: Allowed matrix is enforced consistently; no hidden inference route bypasses checks.
+- **[RBAC-016] (P0) Cross-case correlation review requires authorized reviewer**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Attempt to approve, reject, mark duplicate, edit relation, or force refresh candidate.
+  - Expected: Disallowed review/update operations fail without changing decision or case data.
+- **[RBAC-017] (P0) Direct object IDs cannot bypass API scoping**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Replace visible IDs in URLs and JSON bodies with inaccessible IDs across read/write endpoints.
+  - Expected: Every endpoint performs authorization at object access; no IDOR.
+- **[RBAC-018] (P0) Authorization failure has no side effect**
+  - Tool: pytest/API + DB assertions; UI smoke
+  - Steps: Attempt a forbidden write or state transition; compare DB and audit events.
+  - Expected: No unauthorized mutation or misleading success audit is created.
+
+## D. Citizen complaint intake and lifecycle (16 cases)
+- **[COMP-001] (P0) Citizen submits valid complaint**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Submit complaint with valid title, description, category, contact consent, and only required fields.
+  - Expected: Complaint is stored once, receives stable reference/state, and displays truthful confirmation.
+- **[COMP-002] (P0) Guest complaint flow matches documented policy**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Submit without a login; verify required guest verification/consent controls and record ownership strategy.
+  - Expected: Guest submission is either correctly supported with safe anti-abuse/ownership controls or rejected if guest intake is not allowed; no invented citizen identity is silently treated as verified.
+- **[COMP-003] (P1) Required fields are enforced**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Submit with each required field missing, empty, null, whitespace, and invalid type.
+  - Expected: Validation explains correctable errors and writes no incomplete complaint.
+- **[COMP-004] (P1) Length and boundary validation**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Test min/max lengths, one character below/above bounds, Unicode, newline, and large body.
+  - Expected: Inputs inside policy bounds persist accurately; out-of-range inputs fail safely without 500 or truncation surprises.
+- **[COMP-005] (P0) Malicious markup is safely rendered**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Submit escaped HTML/script/event-handler payloads in title and narrative; open all relevant views.
+  - Expected: Payload is rendered as text or safely sanitized; no script executes and no stored/reflected XSS occurs.
+- **[COMP-006] (P1) Duplicate submit does not create accidental duplicate**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Double-click submit and replay the same request using supported idempotency behavior.
+  - Expected: UI prevents accidental double submission; backend behavior is deterministic and dedupe is applied when the contract supports it.
+- **[COMP-007] (P0) Complaint reference is unique under concurrency**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Create a burst of synthetic complaints concurrently and check unique constraint/collision handling.
+  - Expected: No two persisted complaints share a reference; conflicts are retried or returned safely.
+- **[COMP-008] (P0) Status transition follows allowed state graph**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Attempt each allowed transition and representative disallowed jumps through UI/API.
+  - Expected: Only permitted transitions occur; invalid transition is rejected with no partial update.
+- **[COMP-009] (P1) Complaint status persists after reload**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Reload UI and query the backing API after a fresh session/request.
+  - Expected: Persisted status/timestamps match the successful operation.
+- **[COMP-010] (P0) Citizen sees own complaint only**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Login as A and query list/detail/search/timeline for B.
+  - Expected: No B record or metadata leaks.
+- **[COMP-011] (P1) Citizen complaint edits are limited by lifecycle**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Attempt permitted edits before review and prohibited edits after lifecycle lock.
+  - Expected: Edits are limited exactly as policy specifies and audit history records permitted changes.
+- **[COMP-012] (P1) Complaint category/severity values validated**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Submit valid category/severity and unknown, lower/upper-case, forged risk/triage values.
+  - Expected: Only allowed client-supplied fields are accepted; server-calculated fields cannot be spoofed.
+- **[COMP-013] (P1) Triage fallback is truthful**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Submit synthetic complaint while classifier service/assets are unavailable.
+  - Expected: Complaint intake remains available if designed to; triage is identified as fallback/unavailable and does not claim neural inference occurred.
+- **[COMP-014] (P0) Attachment relationship is complaint-bound**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Try attaching evidence via another complaint ID and change request fields between upload and submission.
+  - Expected: Evidence belongs only to authorized intended complaint; mismatched relationship is rejected.
+- **[COMP-015] (P1) Concurrent status updates do not silently overwrite**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Read same state in two sessions and attempt concurrent conflicting transitions.
+  - Expected: Conflict/ordering behavior is deterministic; invalid stale update is reported or versioned safely.
+- **[COMP-016] (P1) Complaint deletion/retention follows policy**
+  - Tool: pytest/API + DB; Playwright for form
+  - Steps: Attempt citizen delete, admin delete, and retention expiry in test data.
+  - Expected: Only authorized policy-supported action occurs; evidence/audit dependencies and legal hold rules are respected.
+
+## E. Complaint tracking and reference protection (8 cases)
+- **[TRACK-001] (P0) Tracking requires appropriate verification**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Request the tracking endpoint with reference only and with valid reference plus token.
+  - Expected: Unauthenticated detail/status exposure follows explicit policy; detailed/trusted data requires valid verification token where designed.
+- **[TRACK-002] (P0) Wrong tracking token is rejected**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Submit wrong token, truncated token, and token for another complaint.
+  - Expected: Verification fails without exposing protected status or confirming a valid token.
+- **[TRACK-003] (P0) Tracking token cannot be guessed from reference**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Inspect token generation and issue low-volume bounded guesses with test rate limit.
+  - Expected: Token is high entropy, not derived from reference; guessing attempts are limited and audited.
+- **[TRACK-004] (P0) Reference enumeration is rate-limited**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Issue controlled sequence of invalid refs from a test client.
+  - Expected: Abuse controls apply; responses do not leak whether refs are valid beyond approved policy.
+- **[TRACK-005] (P0) Public tracking response minimizes data**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Fetch public tracking response with permitted credential; inspect all nested fields.
+  - Expected: No raw narrative, contact details, evidence URLs, internal IDs, assignments, notes, or investigator identities leak unless explicitly approved.
+- **[TRACK-006] (P1) Tracking token storage/use is safe**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Inspect storage/transmission approach and logs; exercise token in query/body/header as designed.
+  - Expected: Token does not appear in logs/analytics/referrer; storage follows declared threat model and token values are not returned casually.
+- **[TRACK-007] (P2) Tracking token rotates or revokes if supported**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Rotate/revoke a test token and replay old token.
+  - Expected: Old token no longer verifies if rotation/revocation is promised.
+- **[TRACK-008] (P1) Tracking UI handles invalid and expired state**
+  - Tool: API + pytest; Playwright for UI
+  - Steps: Enter malformed reference, wrong token, expired token (if applicable), and valid values.
+  - Expected: Accessible, non-enumerating error is shown; no stale data remains on screen after failure.
+
+## F. Case management, assignment, and investigation workflow (15 cases)
+- **[CASE-001] (P0) Authorized staff creates case from complaint**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Invoke create-from-complaint once.
+  - Expected: One case links to the complaint, correct fields are populated, and an audit/timeline record is created.
+- **[CASE-002] (P0) Case creation is idempotent**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Call create-from-complaint repeatedly and concurrently.
+  - Expected: Exactly one official case remains linked to the complaint; retries do not create duplicate cases.
+- **[CASE-003] (P0) Case detail endpoint enforces object scope**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: As B call detail by internal ID, external case number, and alternate accepted identifier.
+  - Expected: All identifiers enforce the same object authorization policy.
+- **[CASE-004] (P0) Case list is scoped by assignment/policy**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Query default case list, all filters, assigned-to-me true/false, and pagination.
+  - Expected: Default query cannot expose unassigned/inaccessible cases; filter toggles cannot bypass scope.
+- **[CASE-005] (P0) Assignment requires authorized role**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Attempt assignment as citizen, unauthorized specialist, assigned staff, and admin as policy allows.
+  - Expected: Only authorized assignment operations succeed.
+- **[CASE-006] (P1) Assignment target must be valid and eligible**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Assign nonexistent, disabled, citizen, or ineligible user.
+  - Expected: Invalid assignments are rejected without corrupting relationship.
+- **[CASE-007] (P1) Assignment change is audited**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Change assignment from Staff A to Staff B.
+  - Expected: Previous and new assignee, actor, time, and case are traceable in audit history.
+- **[CASE-008] (P0) Unauthorized case status transition is rejected**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Attempt status changes as each role, including invalid transitions.
+  - Expected: Only allowed actors/transitions succeed; no partial state or misleading UI success.
+- **[CASE-009] (P0) Priority/risk values cannot be forged**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Submit impossible priority/risk scores and client-supplied risk flags.
+  - Expected: Server validates or recalculates protected fields; unauthorized arbitrary risk changes fail.
+- **[CASE-010] (P1) Case reopen/close requires reason and permission**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Attempt reopen/close with no reason, invalid reason, and valid reason as roles.
+  - Expected: Policy is enforced and reopening creates a visible history/audit record.
+- **[CASE-011] (P1) Case status history is append-only/traceable**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Query status history, compare actor/time/order, attempt alteration where endpoint exists.
+  - Expected: Historical transitions remain ordered and protected against ordinary mutation.
+- **[CASE-012] (P0) Investigation activity creation is scoped**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Create activity/note as A then attempt as unrelated user; try forged actor ID.
+  - Expected: Allowed activity persists with authenticated actor; unauthorized insert is rejected and actor cannot be spoofed.
+- **[CASE-013] (P1) Investigation finding links to source evidence**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Create finding referencing evidence; then attempt foreign case/evidence ID.
+  - Expected: Valid finding preserves traceability; invalid relationship is rejected.
+- **[CASE-014] (P0) Cross-case action cannot silently modify source case**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Review/refresh correlation, then compare source-case status/assignment and audit data.
+  - Expected: Correlation action does not make unapproved changes to cases; all side effects are explicit and audited.
+- **[CASE-015] (P1) Case data persists across process restart**
+  - Tool: pytest/API + DB; UI smoke
+  - Steps: Restart only the test app process; retrieve case and activity again.
+  - Expected: Durable data remains available and consistent.
+
+## G. Evidence upload, quarantine, processing, integrity, and download (18 cases)
+- **[EVID-001] (P0) Unauthenticated upload is denied or tightly scoped**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Attempt upload with no credentials; then test the documented guest-upload credential if such a path exists.
+  - Expected: Anonymous upload is rejected unless a deliberate, narrowly scoped guest capability exists; no anonymous arbitrary complaint attachment is allowed.
+- **[EVID-002] (P0) Authenticated uploader must own or be authorized for complaint**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Upload to own complaint; then use same user/session to upload to another citizen’s complaint.
+  - Expected: Own authorized upload succeeds; cross-citizen upload is denied with no stored evidence row/object.
+- **[EVID-003] (P0) File type allowlist enforced server-side**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Try allowed document/image/archive formats and disallowed executable/script/unknown extensions with spoofed MIME.
+  - Expected: Policy is enforced using server-side content/extension checks; dangerous files are rejected or quarantined.
+- **[EVID-004] (P1) File size boundary enforced**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Upload just below, at, and above max size; also send oversized chunked request if supported.
+  - Expected: Accepted sizes follow configuration; oversize uploads fail before excessive resource use.
+- **[EVID-005] (P0) Filename traversal and special names are neutralized**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Use `../`, absolute paths, Unicode separators, long filenames, reserved device names, and CRLF characters.
+  - Expected: Storage path is generated safely; original display name is escaped/normalized; no filesystem traversal or header injection.
+- **[EVID-006] (P0) SHA-256 matches received bytes**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Upload file; independently compute SHA-256 of original bytes and compare API/DB digest.
+  - Expected: Digest exactly matches the uploaded byte stream and is consistent wherever displayed.
+- **[EVID-007] (P0) Evidence bytes cannot be changed without detection**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: In isolated test storage, mutate stored bytes; download/verify.
+  - Expected: Integrity verification detects mismatch and marks/reports evidence as tampered or invalid; it does not claim verified.
+- **[EVID-008] (P0) Malware-infected file is rejected/quarantined**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Upload the standard EICAR test string/file, not real malware.
+  - Expected: File is blocked or quarantined; content is not processed/downloaded as clean; event is auditable.
+- **[EVID-009] (P0) Scanner unavailable produces explicit NOT_SCANNED state**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Upload harmless synthetic file while scan service is unreachable.
+  - Expected: State is NOT_SCANNED/QUARANTINED per policy; UI never marks scan as passed or verified clean.
+- **[EVID-010] (P0) Unscanned files are not processed as trusted**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Attempt OCR/parser/AI extraction, export, and ordinary download.
+  - Expected: Unscanned evidence is blocked or limited to explicit safe/quarantined handling; no downstream processor runs as if clean.
+- **[EVID-011] (P1) Scanner clean verdict is distinguished from integrity digest**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Upload clean file and inspect verification fields.
+  - Expected: Hash integrity, malware verdict, forensic verification, and human validation remain distinct concepts; no field conflates them.
+- **[EVID-012] (P1) Malformed or empty file is handled safely**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Upload zero-byte file, corrupt PDF, invalid image, malformed archive, and incorrect MIME.
+  - Expected: File is rejected or stored in explicit invalid state; parser exceptions do not cause 500 or leave partial objects.
+- **[EVID-013] (P0) Evidence metadata is owner/role scoped**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Call metadata endpoint as owner, authorized staff, and unrelated citizen.
+  - Expected: Response follows policy; inaccessible metadata is not disclosed.
+- **[EVID-014] (P0) Evidence download rechecks authorization**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Access as owner/authorized staff then replay URL as unrelated user and without token.
+  - Expected: Download endpoint reauthorizes every request; URL alone does not become a bearer secret unless explicitly designed and bounded.
+- **[EVID-015] (P1) Download response prevents content sniffing and unsafe inline execution**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Download HTML/SVG or another active content type; inspect content disposition and security headers.
+  - Expected: Potentially active evidence is served as attachment or safe MIME policy; nosniff and relevant security headers are present.
+- **[EVID-016] (P1) Evidence processing state machine is valid**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Drive each supported transition and retry from failure.
+  - Expected: Only documented transitions occur; invalid transition does not mark a failed/unsafe object clean.
+- **[EVID-017] (P1) Parser resource limits prevent archive bombs**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Test nested archives, excessive entry count, path traversal entries, and expansion size within isolated resource limits.
+  - Expected: Parser enforces limits and blocks traversal/bomb behavior without exhausting host resources.
+- **[EVID-018] (P1) Failed upload cleans partial DB/object state**
+  - Tool: pytest/API + DB/object store; scanner adapter
+  - Steps: Cause failure after object upload but before DB commit, then failure after DB insert if test hooks permit.
+  - Expected: No orphaned object or inconsistent evidence row remains; retry is safe.
+
+## H. AI models, privacy masking, provider routing, and safe degradation (16 cases)
+- **[AI-001] (P0) Model readiness reflects actual required weight files**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: For every registered model compare status API output with required config/tokenizer/weight files and runtime-load probe.
+  - Expected: Availability is not inferred from config/metrics/tokenizer alone; missing weights are reported unavailable or fallback-only.
+- **[AI-002] (P0) Missing neural model weights trigger explicit fallback**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Invoke affected inference endpoint.
+  - Expected: Safe heuristic/rule-based fallback is explicitly labeled; no neural model success is claimed and no avoidable 500 occurs.
+- **[AI-003] (P1) Present weights are loadable, not just present**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Run a cold-load inference test and one repeated inference.
+  - Expected: Model loads from expected path and returns schema-valid output; load errors are surfaced as unavailable rather than masked as success.
+- **[AI-004] (P0) Model output schema is validated**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Feed representative valid, empty, boundary, and malformed inputs.
+  - Expected: Outputs satisfy schema/range constraints; malformed provider output is rejected or safely normalized.
+- **[AI-005] (P0) Low confidence is represented without overclaiming**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Invoke with ambiguous input and inspect response/UI.
+  - Expected: Uncertainty/low confidence is visible; system does not present uncertain inference as fact or automated final determination.
+- **[AI-006] (P0) AI fallback mode is transparent in UI and API**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Use email/SMS/URL/complaint/correlation paths that use the model.
+  - Expected: System reports active engine or degradation state and does not show fabricated neural metrics/results.
+- **[AI-007] (P0) Provider routing matches configured provider**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Run with each supported provider setting; capture outbound adapter target without secrets.
+  - Expected: Configured provider determines actual adapter used; unsupported provider names fail validation or explicitly fall back, never silently route to another provider.
+- **[AI-008] (P0) Gemini/local runtime secrets are not hardcoded or exposed**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Inspect defaults, environment wiring, errors, debug logs, and API responses for provider API key use.
+  - Expected: Production requires externally supplied secrets; placeholder strings are not accepted as usable credentials; keys are redacted.
+- **[AI-009] (P0) Citizen narrative masking covers all model ingress**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Trigger triage, NER, summarization, investigation chat retrieval, correlation, and report drafting as restricted role.
+  - Expected: Restricted models/services receive minimized/masked content; canary scan is clean across every configured path, including retries.
+- **[AI-010] (P0) Prompt injection is treated as untrusted content**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Use benign security test strings requesting system prompt disclosure, tool misuse, or policy override inside complaint/evidence text.
+  - Expected: System instructions and tool permissions remain isolated; content is treated as data and unauthorized tools/actions do not execute.
+- **[AI-011] (P0) AI has no authority to perform final case decisions**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Generate a high-risk suggestion and attempt to use output as direct case close/assignment or guilt determination.
+  - Expected: Recommendations remain advisory; final action requires an authorized human and is audited.
+- **[AI-012] (P1) URL phishing detector handles safe representative cases**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Test benign URLs, obvious suspicious synthetic URLs, malformed URL, internationalized domain, IP-literal URL, and empty input using non-clicked strings.
+  - Expected: Output follows declared schema, handles edge cases, discloses fallback, and does not fetch untrusted URLs unexpectedly.
+- **[AI-013] (P1) Email/SMS threat classifier uses neutral labels and uncertainty**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Test benign, suspicious, unknown, multilingual/Unicode, and long inputs.
+  - Expected: Classification output is structured with confidence/engine and avoids fabricated accuracy claims.
+- **[AI-014] (P0) Metrics have provenance and are not invented at runtime**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Compare model metrics API to persisted evaluation artifacts and baseline provenance docs.
+  - Expected: Metrics match source artifacts, have dataset/split provenance and timestamps, and missing metrics are null/unknown rather than guessed.
+- **[AI-015] (P0) AI errors do not leak raw sensitive input**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Trigger failure with synthetic canary/PII in input and inspect API error/log/telemetry.
+  - Expected: Client sees safe generic error and correlation/request ID; raw sensitive input and secrets are not logged.
+- **[AI-016] (P1) External-provider calls use data minimization and safe timeouts**
+  - Tool: pytest/model stubs + API; static config review
+  - Steps: Simulate slow provider, provider 429/500, and oversized input.
+  - Expected: Timeout/retry/circuit-breaker policy is bounded; only approved/redacted content is sent; caller receives graceful degraded response.
+
+## I. Investigation chat, streaming, context retrieval, and injection resistance (10 cases)
+- **[CHAT-001] (P1) Valid chat request returns schema-valid answer**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Send a valid message with permitted case context.
+  - Expected: Response includes required fields, safe answer, request/correlation ID if designed, and persists the interaction according to policy.
+- **[CHAT-002] (P1) SSE stream emits valid event framing**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Consume a complete streamed response and parse each event.
+  - Expected: Events follow expected SSE format, order, terminator, and content schema; no malformed partial JSON reaches client.
+- **[CHAT-003] (P1) SSE disconnect is cleaned up**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Disconnect client mid-stream; inspect task/session/resource cleanup.
+  - Expected: No leaked task, DB transaction, or unbounded provider request remains.
+- **[CHAT-004] (P0) Context retrieval respects case permissions**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Ask chat to summarize A, then attempt to reference B by ID or guessed title.
+  - Expected: A may be retrieved; B context is excluded and never appears in answer or model prompt.
+- **[CHAT-005] (P0) Chat cannot use unauthorized case IDs to retrieve evidence**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Send chat requests that mention B case/evidence ID and ask for file content.
+  - Expected: No unauthorized evidence fetch/content is returned; denial is logged safely.
+- **[CHAT-006] (P0) Prompt injection in complaint/evidence is isolated**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Query chat using that record as context.
+  - Expected: Model treats embedded instructions as quoted/untrusted data; system prompts/secrets/tools are not disclosed.
+- **[CHAT-007] (P0) Chat tool/function calls are allowlisted**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Attempt requests to perform administrative or destructive action through natural language.
+  - Expected: Only allowlisted actions are callable and each rechecks user permission; unsupported action is refused.
+- **[CHAT-008] (P1) Chat messages persist with correct actor/case**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Send multiple messages under case A; reopen history as same and another user.
+  - Expected: History is associated to correct user/case and another user cannot retrieve it without permission.
+- **[CHAT-009] (P1) Chat provider failure degrades gracefully**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Send message for each controlled provider failure.
+  - Expected: UI/API returns safe failure/degraded notice, no false success, no duplicate persistence, and resources close.
+- **[CHAT-010] (P1) Chat output is escaped in UI**
+  - Tool: pytest + API/SSE client; Playwright for rendering
+  - Steps: Return script/tag payload through model response and render it in chat.
+  - Expected: Output is safely escaped/Markdown-sanitized; script does not execute.
+
+## J. Entity extraction, cross-case correlation, graph review (12 cases)
+- **[CORR-001] (P1) Entity normalization handles equivalent forms**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Create same synthetic URL/domain/email/phone in different casing/format; inspect normalized form.
+  - Expected: Normalization is deterministic and type-aware; original raw value is retained only where policy permits.
+- **[CORR-002] (P0) Entity matching distinguishes types**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Use same textual value across types, e.g. domain-like string in a username field.
+  - Expected: Cross-type collisions do not create false equivalence unless configured relation explicitly supports it.
+- **[CORR-003] (P0) Shared indicator produces candidate, not automatic guilt claim**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Run correlation generation and inspect candidate/output labels.
+  - Expected: Relationship is described as a candidate/potential overlap; no offender identity or guilt is asserted.
+- **[CORR-004] (P0) Correlation records identify engine source**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Run correlation with missing weights and inspect metadata.
+  - Expected: Rule-based fallback is identified as such and not misrepresented as trained neural inference.
+- **[CORR-005] (P1) Correlation confidence is bounded and interpreted correctly**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Test no-overlap, one-indicator overlap, and multiple corroborating indicators.
+  - Expected: Scores stay in documented bounds and are explained as heuristic/model confidence, not probability of guilt unless calibrated and validated.
+- **[CORR-006] (P0) Correlation review state persists across refresh**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Approve/reject/mark unrelated, force refresh/recompute, reload UI.
+  - Expected: Human review decision and reviewer/time persist; refresh does not silently reset decision.
+- **[CORR-007] (P0) Unauthorized user cannot review correlation**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Call review endpoints as citizen, unrelated staff, and unauthorized specialist.
+  - Expected: All unauthorized decisions are rejected; no state mutation occurs.
+- **[CORR-008] (P1) Correlation is bounded for large case counts**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Trigger correlation within configured candidate/timeout limit.
+  - Expected: Comparison is bounded and paginated/batched; no unbounded full-table quadratic scan occurs for normal request path.
+- **[CORR-009] (P1) Duplicate correlation edges are prevented**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Run correlation generation repeatedly and concurrently.
+  - Expected: A single canonical relationship is persisted or duplicate handling is deterministic; evidence of shared types can aggregate without duplicating edges.
+- **[CORR-010] (P2) Graph UI handles empty and dense data**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Render zero nodes, one edge, disconnected clusters, and bounded high-density synthetic data.
+  - Expected: UI shows meaningful empty/loading/error states and remains responsive/readable for supported scale.
+- **[CORR-011] (P0) Case separation is respected in graph filters**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Apply filters/search, inspect detail drawer, click edge and attempt direct case navigation.
+  - Expected: Unauthorized nodes/details are not exposed; filtering does not leak counts or hidden labels.
+- **[CORR-012] (P1) AI/entity extraction handles malformed document output**
+  - Tool: pytest/API + DB; Playwright for graph
+  - Steps: Feed malformed model response via stub.
+  - Expected: Invalid entities are rejected/normalized safely; no malformed case/correlation records are created.
+
+## K. Investigation reports, exports, integrity seal, and truthfulness (14 cases)
+- **[RPT-001] (P0) Report generation uses a real authorized case**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Generate report and compare referenced facts with persisted case/investigation/evidence.
+  - Expected: Report fields derive from authorized persisted records; empty state does not synthesize demo data.
+- **[RPT-002] (P0) Empty reports do not silently seed demo records**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Call report list with no filters and refresh frontend.
+  - Expected: Empty state remains empty; no demo records are inserted or fabricated cards displayed outside explicit demo mode.
+- **[RPT-003] (P0) Failed generation never displays sealed/success state**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Click Generate and trigger 4xx, 5xx, timeout, or network failure.
+  - Expected: UI displays failure/pending retry, not a sealed/verified report; no fake local report is added as if persisted.
+- **[RPT-004] (P0) Report read/download requires case-level authorization**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Fetch by report ID and try all detail/export/download formats.
+  - Expected: All access paths deny consistently; guessing report ID does not bypass case access.
+- **[RPT-005] (P1) Report author and timestamps are server-derived**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Submit forged author, creation time, case identity, and report status.
+  - Expected: Server ignores/rejects protected fields; authoritative actor/time are persisted correctly.
+- **[RPT-006] (P0) Integrity digest covers canonical full report payload**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Generate report; independently canonicalize declared signed/sealed payload and compute digest; mutate each included field in fixture.
+  - Expected: Digest is reproducible and any covered-field change is detected; digest scope is documented.
+- **[RPT-007] (P0) Digital signature claim is backed by real cryptographic verification**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Verify report with public-key operation, then alter payload and verify again.
+  - Expected: A claimed signature verifies with configured public key and fails after mutation. If only a hash exists, UI/docs call it a hash/integrity digest, not RSA-PSS or official certification.
+- **[RPT-008] (P1) Report identifiers are collision-resistant**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Create concurrent reports in same clock tick and verify uniqueness.
+  - Expected: Database-level unique IDs prevent collision; conflicts are handled safely.
+- **[RPT-009] (P0) CSV export escapes formulas and delimiters**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Export CSV and open/parse in safe parser; inspect field escaping.
+  - Expected: CSV structure is valid and spreadsheet formula injection is neutralized per export policy.
+- **[RPT-010] (P0) Export filters and scopes cannot leak other cases**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Use export filters for B IDs, wide date ranges, status values, and pagination.
+  - Expected: Only authorized records are exported and counts reflect visible results only.
+- **[RPT-011] (P1) PDF/DOCX export content is consistent**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Generate same report in each supported format and compare source fields, timestamps, and digest/signature metadata.
+  - Expected: Supported formats contain consistent content; unsupported formats return explicit message rather than pretend success.
+- **[RPT-012] (P0) Report rendering escapes untrusted content**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Generate and display/export report with this content.
+  - Expected: Markup is escaped in preview/HTML; no executable content or template injection occurs.
+- **[RPT-013] (P1) Report history and audit preserve revisions**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Create then revise/replace report; inspect prior version and audit.
+  - Expected: Versioning/immutable audit behavior matches policy; a new report does not silently rewrite authoritative past content.
+- **[RPT-014] (P1) Report unavailable state is explicit**
+  - Tool: pytest/API + DB; Playwright; export parser
+  - Steps: Attempt report generation with empty/partially unavailable source.
+  - Expected: System returns a truthful incomplete/blocked response, clearly identifies missing data, and does not mark report officially verified.
+
+## L. Administration, users, roles, and governance (10 cases)
+- **[ADMIN-001] (P0) Admin-only routes require admin permission**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Enumerate admin routes from API router/OpenAPI; call each as non-admin and anonymous.
+  - Expected: Every route enforces server-side authorization, independent of hidden frontend navigation.
+- **[ADMIN-002] (P1) User creation validates identity and role**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Create valid test user, duplicate email, malformed email, weak password, and protected role payload.
+  - Expected: Validation and uniqueness apply; only roles explicitly grantable by actor can be assigned.
+- **[ADMIN-003] (P0) Admin role changes are audited and protected**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Change a user role; attempt same as a non-admin; inspect audit event.
+  - Expected: Authorized change is atomic and audited; unauthorized attempt does not mutate role.
+- **[ADMIN-004] (P0) Disabled users lose access promptly**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Disable that user and replay existing session against protected paths.
+  - Expected: Access is blocked within documented revocation/expiry window; user cannot continue sensitive work unnoticed.
+- **[ADMIN-005] (P0) MLOps/model actions are role-gated**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Try status, reload, retrain, feedback, evaluation, and configuration actions as each role.
+  - Expected: Only permitted roles can make operational changes; read status access is separately scoped.
+- **[ADMIN-006] (P1) Admin dashboard uses live state outside demo mode**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Launch with demo flag off and empty DB, then populated DB.
+  - Expected: Metrics match live API/DB and do not silently show mock/demo counts.
+- **[ADMIN-007] (P0) Audit log is restricted from ordinary users**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Try list/detail/export audit logs as citizen, specialist, police, and admin.
+  - Expected: Only approved audit viewers access logs; sensitive values are masked.
+- **[ADMIN-008] (P1) Administrative actions are safe to retry**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Replay same request due to simulated timeout/network retry.
+  - Expected: No duplicate users/roles/jobs or inconsistent state; idempotency behavior is documented.
+- **[ADMIN-009] (P1) Account identifiers are not exposed in UI errors**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Submit duplicate user or unknown ID and inspect UI/API errors.
+  - Expected: Errors disclose only information permitted by policy and avoid stack traces.
+- **[ADMIN-010] (P0) Least privilege is maintained for specialist role**
+  - Tool: pytest/API + DB; Playwright
+  - Steps: Inspect navigation, API routes, downloadable reports, model inputs, and backend permission dependencies.
+  - Expected: Specialist can complete designated tasks but cannot administer users, change system settings, or access unrestricted citizen data.
+
+## M. Frontend routes, forms, responsive UI, and accessibility (12 cases)
+- **[UI-001] (P1) Every navigation item opens the correct route**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Click each visible navigation item for each role; record route, title, and primary content.
+  - Expected: No dead links, wrong portal, empty route, or accidental privilege reveal occurs.
+- **[UI-002] (P0) Direct route access applies same authorization as API**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Paste a restricted route into a fresh/unauthorized browser context.
+  - Expected: App redirects/denies appropriately and backend APIs independently deny access.
+- **[UI-003] (P1) Loading, empty, error, and retry states are correct**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Exercise each major portal under those response conditions.
+  - Expected: Loading clears, empty state is distinct from error, error is actionable, retry works, and no fake success data appears.
+- **[UI-004] (P1) Form validation messages are actionable**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Submit invalid and missing fields, then correct input.
+  - Expected: Message identifies problem accessibly; valid correction succeeds without duplicate submission.
+- **[UI-005] (P1) Keyboard-only interaction is possible**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Navigate major flows using Tab/Shift+Tab, Enter, Space, Escape, and arrow keys where applicable.
+  - Expected: Focus is visible and logical; interactive elements are keyboard operable; no keyboard trap.
+- **[UI-006] (P1) Accessible labels and names exist**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Inspect accessibility tree for inputs, buttons, dialog, tabs, status badges, graph controls.
+  - Expected: Controls expose meaningful accessible names/roles/states; errors associate with fields.
+- **[UI-007] (P2) Viewport responsiveness at required sizes**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Run main portals at small mobile, tablet, laptop, and wide desktop viewport.
+  - Expected: No critical overlap, clipped primary action, unreadable text, or inaccessible horizontal controls.
+- **[UI-008] (P0) Session expiry returns user to safe state**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Expire/clear session during a form and during a sensitive detail view.
+  - Expected: Protected data is not left exposed after expiry; user sees clear re-authentication behavior; draft preservation follows policy.
+- **[UI-009] (P1) Network retries do not duplicate mutations**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Throttle/drop response after request is sent and trigger retry for complaint/evidence/case/report operation.
+  - Expected: The UI does not claim false state; idempotency or duplicate warning prevents unintended duplicate writes.
+- **[UI-010] (P0) User-facing status matches persisted backend status**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Compare displayed state to fresh API read after action, refresh, and navigation away/back.
+  - Expected: UI does not use stale or local mock state as authoritative status.
+- **[UI-011] (P0) No sensitive info persists after account switch**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Logout; login as user B in same browser context; inspect tabs, caches, detail drawers, and API calls.
+  - Expected: User A content is cleared or properly partitioned; B cannot see A data through stale UI state.
+- **[UI-012] (P1) Browser console has no critical errors**
+  - Tool: Playwright + accessibility checks + API assertions
+  - Steps: Run smoke journeys and capture console exceptions, failed requests, React warnings, and broken assets.
+  - Expected: No unexplained critical console errors or failed required API requests; known noncritical warnings are documented.
+
+## N. Auditability, logs, privacy, and security headers (8 cases)
+- **[AUDIT-001] (P0) Successful privileged mutations create audit entries**
+  - Tool: API + log scan + DB
+  - Steps: Perform each authorized mutation.
+  - Expected: Audit event identifies actor, action, resource, timestamp, outcome, and request/correlation ID without excess PII.
+- **[AUDIT-002] (P1) Denied privileged operations are recorded safely**
+  - Tool: API + log scan + DB
+  - Steps: Attempt forbidden access and mutation.
+  - Expected: Security event is logged at appropriate level with reason/resource metadata and no secrets or raw narrative.
+- **[AUDIT-003] (P0) Audit history is tamper resistant to ordinary roles**
+  - Tool: API + log scan + DB
+  - Steps: Attempt update/delete through UI/API/ORM-facing route as non-admin and ordinary admin if policy forbids edits.
+  - Expected: History cannot be altered by unauthorized actors; retention and privileged maintenance policy is explicit.
+- **[AUDIT-004] (P1) Request IDs propagate consistently**
+  - Tool: API + log scan + DB
+  - Steps: Send request with custom request ID and one without; cause a controlled error.
+  - Expected: Response/logs share the proper ID; malformed user-provided IDs are bounded/normalized safely.
+- **[AUDIT-005] (P1) Security headers are present on success and error**
+  - Tool: API + log scan + DB
+  - Steps: Request health, login error, 404, 403, validation failure, and file download.
+  - Expected: Required headers such as nosniff/frame policy/referrer policy appear where applicable; error path does not drop them.
+- **[AUDIT-006] (P0) Logs redact PII and credentials**
+  - Tool: API + log scan + DB
+  - Steps: Trigger complaint, auth failure, AI error, upload error and report failure; search logs.
+  - Expected: No passwords, bearer tokens, OTPs, API keys, raw restricted narratives or file contents appear in logs.
+- **[AUDIT-007] (P0) Errors do not expose internal traceback in production mode**
+  - Tool: API + log scan + DB
+  - Steps: Trigger validation, dependency failure, and generic exception.
+  - Expected: Client gets safe structured response with request ID; traceback stays in protected server logs.
+- **[AUDIT-008] (P1) Sensitive values are not leaked through telemetry/referrers**
+  - Tool: API + log scan + DB
+  - Steps: Inspect analytics/network requests, browser history/referrer, and third-party requests after sensitive views.
+  - Expected: Tokens, narrative, evidence paths, or PII are not placed in URLs/third-party telemetry without approved controls.
+
+## O. Resilience, degraded modes, and deployment configuration (12 cases)
+- **[OPS-001] (P0) Application starts with correct required configuration**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Start app with valid config; then omit each required secret in a separate isolated process.
+  - Expected: Valid config starts; missing required production secrets causes clear startup failure, not insecure defaults.
+- **[OPS-002] (P0) Placeholder secrets are rejected in production mode**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Set obvious placeholder/default secret values in production mode and start service.
+  - Expected: Startup is blocked with explicit safe validation error; no hardcoded fallback secret is accepted.
+- **[OPS-003] (P1) Database unavailable produces controlled readiness failure**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Start/probe service and call readiness health endpoint.
+  - Expected: Readiness accurately reports DB unready; no false healthy response for required dependencies.
+- **[OPS-004] (P1) Readiness distinguishes live process from dependency health**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Compare liveness and readiness with DB/cache/storage/model/scanner on and off.
+  - Expected: Liveness remains useful for process supervision; readiness reflects required dependencies and optional degraded components accurately.
+- **[OPS-005] (P1) Redis unavailable behavior is bounded**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Disable Redis in isolated environment and trigger relevant flows.
+  - Expected: System fails/degrades according to documented policy without hanging requests or losing acknowledged durable data.
+- **[OPS-006] (P0) MinIO/storage unavailable does not create false evidence**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Upload/download with storage unavailable.
+  - Expected: Operation fails safely, transaction remains consistent, no broken evidence marked verified, and no local temp file leaks.
+- **[OPS-007] (P0) ClamAV service configuration points to reachable service**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Start isolated Compose stack with ClamAV; inspect backend hostname/port and run EICAR test.
+  - Expected: Backend reaches the scanner container by service DNS; readiness and scan verdict reflect actual result.
+- **[OPS-008] (P0) Missing ClamAV cannot be treated as clean**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Stop scanner container, upload harmless synthetic file, then inspect status and processing permissions.
+  - Expected: Upload becomes explicitly unscanned/quarantined or rejects; it is not marked malware-cleared.
+- **[OPS-009] (P0) Migration upgrade works from prior schema**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Run `alembic upgrade head` using exact workspace configuration.
+  - Expected: Migration completes and new tracking_token column/index exists; pre-existing synthetic rows are preserved.
+- **[OPS-010] (P1) Migration is idempotent and downgrade policy is understood**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Run `alembic upgrade head` again; test downgrade only if project explicitly supports it and using disposable DB.
+  - Expected: Repeat upgrade is clean; downgrade behavior is documented and does not destroy user data unexpectedly.
+- **[OPS-011] (P0) No automatic destructive schema initialization in production**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Inspect startup code and run production-like startup against preexisting schema.
+  - Expected: Production schema changes use controlled migrations; startup does not silently create/alter schema while swallowing arbitrary errors.
+- **[OPS-012] (P0) Container ports and secrets are production-safe**
+  - Tool: pytest/terminal/Compose + static review
+  - Steps: Inspect exposed ports, credentials, image tags, health checks, mounted volumes, and env wiring.
+  - Expected: No default credentials in production; only required ports are public; versions are pinned where policy requires; secrets are not committed.
+
+## P. Performance, concurrency, and resource bounds (8 cases)
+- **[PERF-001] (P2) Baseline API latency is measured**
+  - Tool: pytest + bounded load tool
+  - Steps: Measure p50/p95/p99 for health, case list, case detail, upload metadata, and report listing over documented sample size.
+  - Expected: Results are recorded with environment/seed size and compared to explicit targets; no unsupported SLA is invented.
+- **[PERF-002] (P1) Case list pagination prevents unbounded response**
+  - Tool: pytest + bounded load tool
+  - Steps: Request default list and max page sizes; try invalid or huge limit/offset.
+  - Expected: API enforces bounded pagination and stable ordering; large DB cannot cause unbounded payload by default.
+- **[PERF-003] (P0) Concurrent complaint submission preserves integrity**
+  - Tool: pytest + bounded load tool
+  - Steps: Submit many distinct synthetic complaints concurrently.
+  - Expected: No duplicate references, lost rows, deadlocks, or corrupted lifecycle transitions.
+- **[PERF-004] (P1) Concurrent upload obeys resource limits**
+  - Tool: pytest + bounded load tool
+  - Steps: Upload multiple bounded synthetic files concurrently under configured limit.
+  - Expected: Resource usage stays within expected bounds; each accepted upload has consistent bytes/hash/record; overload is explicit.
+- **[PERF-005] (P1) Correlation job scales within configured limits**
+  - Tool: pytest + bounded load tool
+  - Steps: Run correlation at several safe sizes and capture query count, runtime, peak memory.
+  - Expected: Runtime/resource curve is documented and safeguards/timeouts prevent runaway full-scan behavior.
+- **[PERF-006] (P1) Slow model provider does not exhaust request workers**
+  - Tool: pytest + bounded load tool
+  - Steps: Issue parallel AI/chat requests exceeding normal concurrency but within test budget.
+  - Expected: Timeouts/circuit breakers bound resource use; unrelated endpoints remain responsive.
+- **[PERF-007] (P2) Large report export is streamed/bounded**
+  - Tool: pytest + bounded load tool
+  - Steps: Generate/download supported export and monitor memory/time.
+  - Expected: Export respects configured limits and does not load unbounded data into memory without guardrails.
+- **[PERF-008] (P1) Repeated failed login/upload abuse is bounded**
+  - Tool: pytest + bounded load tool
+  - Steps: Run safe bounded abuse simulation in test environment.
+  - Expected: Rate limits and limits work; no resource exhaustion or leaked temp files.
+
+## Q. CI/CD, static quality, migrations, and reproducibility (10 cases)
+- **[CI-001] (P0) CI workflow exists and triggers on intended events**
+  - Tool: CI + terminal + static review
+  - Steps: Inspect workflow event filters and validate YAML syntax.
+  - Expected: Workflow triggers on intended push/PR branches, avoids unintended deployment, and YAML parses cleanly.
+- **[CI-002] (P0) CI provisions supported Python version and runs backend tests**
+  - Tool: CI + terminal + static review
+  - Steps: Run backend job from a clean checkout.
+  - Expected: Declared Python version/dependencies install reproducibly and pytest fails the job on a test failure.
+- **[CI-003] (P0) CI validates Alembic migration history**
+  - Tool: CI + terminal + static review
+  - Steps: Run upgrade from expected baseline and/or test new migration head.
+  - Expected: Migration check succeeds from clean environment and catches missing/broken migration files.
+- **[CI-004] (P0) CI builds frontend from clean checkout**
+  - Tool: CI + terminal + static review
+  - Steps: Run npm ci and production build.
+  - Expected: Clean build succeeds deterministically; no reliance on ignored local artifacts.
+- **[CI-005] (P0) CI runs security regression tests**
+  - Tool: CI + terminal + static review
+  - Steps: Inspect collected tests; run named security/workflow/RBAC/degraded-mode suites.
+  - Expected: Critical authorization and degraded-mode tests are in required CI path and fail the build on regression.
+- **[CI-006] (P1) CI does not need real external secrets for unit tests**
+  - Tool: CI + terminal + static review
+  - Steps: Run test workflow with no production secret values.
+  - Expected: Tests use mocks/test secrets; production secrets are not stored in repo or printed.
+- **[CI-007] (P1) Model artifact absence is handled in CI**
+  - Tool: CI + terminal + static review
+  - Steps: Run clean CI checkout with large weights absent.
+  - Expected: Non-model tests pass where expected; model-specific tests clearly skip/block or test fallback; no false green claiming neural inference.
+- **[CI-008] (P2) Coverage report records meaningful files/branches**
+  - Tool: CI + terminal + static review
+  - Steps: Run coverage for auth, case authorization, evidence, report, tracking, and AI masking.
+  - Expected: Coverage is reported by critical module; thresholds are used only if configured and justified.
+- **[CI-009] (P0) Secrets and ignored artifact policy is correct**
+  - Tool: CI + terminal + static review
+  - Steps: Scan tracked files for real secret patterns; check `.env.example` is not accidentally excluded while real `.env` remains ignored.
+  - Expected: No real secrets are tracked; safe example templates are committed if required; weight artifact storage policy is documented.
+- **[CI-010] (P1) Clean-clone reproducibility check**
+  - Tool: CI + terminal + static review
+  - Steps: Create clean checkout (do not disturb current workspace); install backend/frontend dependencies and run selected checks.
+  - Expected: Build/tests do not rely on local-only files, stale generated bundles, or uncommitted migrations.
+
+## R. Complete end-to-end journeys across the platform (10 cases)
+- **[E2E-001] (P0) Citizen complaint-to-tracking journey**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Login/register as citizen; submit complaint; record reference/token as designed; upload safe evidence; retrieve allowed tracking view; reload and verify persistence.
+  - Expected: All stages join to one complaint; ownership is correct; evidence is correctly scoped; tracking exposes only allowed fields.
+- **[E2E-002] (P0) Complaint-to-case assignment-to-investigation journey**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Create case; assign investigator; add activity/finding; update status through permitted states; reopen case detail as assigned investigator.
+  - Expected: Single case links to complaint; assignment and history are correct; finding/action preserve actor and evidence traceability.
+- **[E2E-003] (P0) Evidence safe-processing journey with ClamAV online**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Upload clean file; scan; verify hash; process; download as authorized user; deny unauthorized download.
+  - Expected: Clean file progresses according to state graph; hash matches; unauthorized path is denied.
+- **[E2E-004] (P0) Evidence scanner-outage journey**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Attempt upload; inspect quarantine/unscanned state; attempt downstream processing/download; restore scanner and retry per policy.
+  - Expected: Outage never yields false clean/verified state; retry transitions to a valid state and is audited.
+- **[E2E-005] (P0) Cross-case correlation human-review journey**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Run correlation; open graph/candidate; inspect shared indicators; review/decline; refresh; inspect persistence.
+  - Expected: Candidate is advisory, engine source is truthful, reviewer decision persists, and unauthorized user cannot review.
+- **[E2E-006] (P0) AI/ML System Lead workflow with narrative masking**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Open model views; run approved analysis; inspect network/model adapter inputs, outputs, logs, and report views.
+  - Expected: Restricted raw narrative remains masked/minimized across the full path; model status/fallback is honest.
+- **[E2E-007] (P0) Report generation-to-integrity verification journey**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Generate report; reload list; export; independently verify digest/signature; mutate a local copy and verify failure; repeat as unauthorized user.
+  - Expected: Persisted report and exported content agree; real signature claims verify, digest claims are labeled accurately; unauthorized access fails.
+- **[E2E-008] (P0) Admin role change revokes former user's scope**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Admin changes role/disables A; replay old session and direct API; inspect audit.
+  - Expected: Access is removed according to revocation design and role change is auditable.
+- **[E2E-009] (P1) Model outage does not break core citizen submission**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: Submit complaint, attach allowed evidence, view confirmation and status.
+  - Expected: Core intake works per product contract; optional AI failure is visible but does not fabricate results or corrupt complaint data.
+- **[E2E-010] (P0) Full role-isolation regression matrix**
+  - Tool: Playwright + API clients + pytest + DB assertions
+  - Steps: For each role run a curated positive/negative path across complaint, case, evidence, report, correlation, AI, admin, and audit APIs.
+  - Expected: Every allowed action succeeds and every forbidden action fails across UI and direct API; no IDOR or stale-state leak remains.
