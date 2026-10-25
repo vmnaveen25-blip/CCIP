@@ -22,15 +22,16 @@ import { UserProfileModal } from './components/UserProfileModal';
 import { Bell, X, Check, Inbox, ExternalLink } from 'lucide-react';
 
 export const App: React.FC = () => {
+  const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === 'true';
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [currentPortal, setCurrentPortal] = useState<PortalRole>('landing');
   const [activeTab, setActiveTab] = useState<string>('landing-overview');
-  const [complaints, setComplaints] = useState<Complaint[]>(INITIAL_COMPLAINTS);
-  const [threatFeeds, setThreatFeeds] = useState<ThreatFeedItem[]>(MOCK_THREAT_FEEDS);
-  const [correlationNodes, setCorrelationNodes] = useState<CorrelatedNode[]>(MOCK_CORRELATION_NODES);
+  const [complaints, setComplaints] = useState<Complaint[]>(isDemoMode ? INITIAL_COMPLAINTS : []);
+  const [threatFeeds, setThreatFeeds] = useState<ThreatFeedItem[]>(isDemoMode ? MOCK_THREAT_FEEDS : []);
+  const [correlationNodes, setCorrelationNodes] = useState<CorrelatedNode[]>(isDemoMode ? MOCK_CORRELATION_NODES : []);
   const [aiModels, setAiModels] = useState<ModelMetric[]>([]);
   const [auditLogs, setAuditLogs] = useState<SystemAuditLog[]>([]);
-  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(INITIAL_COMPLAINTS[0]?.id || null);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(isDemoMode ? INITIAL_COMPLAINTS[0]?.id || null : null);
   const [isOmniSearchOpen, setIsOmniSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
@@ -55,16 +56,18 @@ export const App: React.FC = () => {
     if (token) {
       try {
         const liveComplaints = await apiClient.getComplaints();
-        const validComplaints = liveComplaints && liveComplaints.length > 0 ? liveComplaints : INITIAL_COMPLAINTS;
+        const validComplaints = (liveComplaints && (liveComplaints.length > 0 || !isDemoMode)) ? liveComplaints : (isDemoMode ? INITIAL_COMPLAINTS : []);
         setComplaints(validComplaints);
         if (validComplaints && validComplaints.length > 0) {
           setSelectedCaseId(prev => (prev && validComplaints.some(c => c.id === prev)) ? prev : validComplaints[0].id);
+        } else {
+          setSelectedCaseId(null);
         }
       } catch (e) {
-        setComplaints(INITIAL_COMPLAINTS);
+        setComplaints(isDemoMode ? INITIAL_COMPLAINTS : []);
       }
     } else {
-      setComplaints(INITIAL_COMPLAINTS);
+      setComplaints(isDemoMode ? INITIAL_COMPLAINTS : []);
     }
 
     const canAccessSpecialist = Boolean(token && (currentPortal === 'specialist' || currentPortal === 'admin' || currentUser?.role === 'specialist' || currentUser?.role === 'admin'));
@@ -72,20 +75,20 @@ export const App: React.FC = () => {
     if (canAccessSpecialist) {
       try {
         const liveThreats = await apiClient.getThreatFeeds();
-        setThreatFeeds(liveThreats && liveThreats.length > 0 ? liveThreats : MOCK_THREAT_FEEDS);
+        setThreatFeeds(liveThreats && (liveThreats.length > 0 || !isDemoMode) ? liveThreats : (isDemoMode ? MOCK_THREAT_FEEDS : []));
       } catch (e) {
-        setThreatFeeds(MOCK_THREAT_FEEDS);
+        setThreatFeeds(isDemoMode ? MOCK_THREAT_FEEDS : []);
       }
 
       try {
         const liveNodes = await apiClient.getCorrelationNodes();
-        setCorrelationNodes(liveNodes && liveNodes.length > 0 ? liveNodes : MOCK_CORRELATION_NODES);
+        setCorrelationNodes(liveNodes && (liveNodes.length > 0 || !isDemoMode) ? liveNodes : (isDemoMode ? MOCK_CORRELATION_NODES : []));
       } catch (e) {
-        setCorrelationNodes(MOCK_CORRELATION_NODES);
+        setCorrelationNodes(isDemoMode ? MOCK_CORRELATION_NODES : []);
       }
     } else {
-      setThreatFeeds(MOCK_THREAT_FEEDS);
-      setCorrelationNodes(MOCK_CORRELATION_NODES);
+      setThreatFeeds(isDemoMode ? MOCK_THREAT_FEEDS : []);
+      setCorrelationNodes(isDemoMode ? MOCK_CORRELATION_NODES : []);
     }
 
     try {
@@ -98,8 +101,8 @@ export const App: React.FC = () => {
             modelName: 'URL Phishing Detector',
             version: m.url_phishing?.version || '2.0.0-xgboost',
             task: 'Zero-Hour Domain, URL Structure & Lexical Threat Scoring',
-            accuracy: Number(m.url_phishing?.accuracy ?? 97.74),
-            f1Score: Number(m.url_phishing?.f1_score ?? 0.9799),
+            accuracy: m.url_phishing?.accuracy != null ? Number(m.url_phishing.accuracy) : 0,
+            f1Score: m.url_phishing?.f1_score != null ? Number(m.url_phishing.f1_score) : 0,
             driftRate: 0.8,
             status: (m.url_phishing?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.url_phishing?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -111,8 +114,8 @@ export const App: React.FC = () => {
             modelName: 'Complaint Classifier',
             version: m.complaint_classifier?.version || '1.1.0',
             task: 'DeBERTa-v3 18-Category Cybercrime Legal Triage & Jurisdiction',
-            accuracy: Number(m.complaint_classifier?.accuracy ?? 96.79),
-            f1Score: Number(m.complaint_classifier?.f1_score ?? 0.9767),
+            accuracy: m.complaint_classifier?.accuracy != null ? Number(m.complaint_classifier.accuracy) : 0,
+            f1Score: m.complaint_classifier?.f1_score != null ? Number(m.complaint_classifier.f1_score) : 0,
             driftRate: 1.1,
             status: (m.complaint_classifier?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.complaint_classifier?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -124,8 +127,8 @@ export const App: React.FC = () => {
             modelName: 'Email Threat Classifier',
             version: m.email_threat?.version || '1.0.0',
             task: 'DistilBERT Binary Sequence Classification (Threat / Safe)',
-            accuracy: Number(m.email_threat?.accuracy ?? 98.36),
-            f1Score: Number(m.email_threat?.f1_score ?? 0.9783),
+            accuracy: m.email_threat?.accuracy != null ? Number(m.email_threat.accuracy) : 0,
+            f1Score: m.email_threat?.f1_score != null ? Number(m.email_threat.f1_score) : 0,
             driftRate: 0.6,
             status: (m.email_threat?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.email_threat?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -137,8 +140,8 @@ export const App: React.FC = () => {
             modelName: 'SMS Spam Classifier',
             version: m.sms_spam?.version || '1.0.0',
             task: 'DistilBERT Binary Smishing & SMS Fraud Detection',
-            accuracy: Number(m.sms_spam?.accuracy ?? 98.84),
-            f1Score: Number(m.sms_spam?.f1_score ?? 0.9514),
+            accuracy: m.sms_spam?.accuracy != null ? Number(m.sms_spam.accuracy) : 0,
+            f1Score: m.sms_spam?.f1_score != null ? Number(m.sms_spam.f1_score) : 0,
             driftRate: 0.4,
             status: (m.sms_spam?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.sms_spam?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -150,8 +153,8 @@ export const App: React.FC = () => {
             modelName: 'Investigation Assistant',
             version: m.investigation_assistant?.version || 'v2.0.0',
             task: 'Astraea Sovereign Forensic Reasoning Engine (Sovereign Enclave)',
-            accuracy: Number(m.investigation_assistant?.accuracy ?? 98.4),
-            f1Score: Number(m.investigation_assistant?.f1_score ?? 0.981),
+            accuracy: m.investigation_assistant?.accuracy != null ? Number(m.investigation_assistant.accuracy) : 0,
+            f1Score: m.investigation_assistant?.f1_score != null ? Number(m.investigation_assistant.f1_score) : 0,
             driftRate: 0.0,
             status: (m.investigation_assistant?.status as any) || 'READY',
             lastEvaluated: 'Operational Enclave Mode',
@@ -163,8 +166,8 @@ export const App: React.FC = () => {
             modelName: 'Cyber NER Transformer',
             version: m.cyber_ner?.version || 'cyber-ner-bootstrap-v4.0.0',
             task: 'DeBERTa-v3 Token Classification (11 Cyber Entity Classes, 23 BIO Labels)',
-            accuracy: Number(m.cyber_ner?.accuracy ?? 95.52),
-            f1Score: Number(m.cyber_ner?.f1_score ?? 0.8723),
+            accuracy: m.cyber_ner?.accuracy != null ? Number(m.cyber_ner.accuracy) : 0,
+            f1Score: m.cyber_ner?.f1_score != null ? Number(m.cyber_ner.f1_score) : 0,
             driftRate: 1.2,
             status: (m.cyber_ner?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.cyber_ner?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -176,8 +179,8 @@ export const App: React.FC = () => {
             modelName: 'Case Similarity Transformer',
             version: m.case_similarity?.version || '1.0.0',
             task: 'all-MiniLM-L6-v2 384-d Dense Semantic Embeddings (Cosine Threshold: 0.55)',
-            accuracy: Number(m.case_similarity?.accuracy ?? 92.5),
-            f1Score: Number(m.case_similarity?.f1_score ?? 0.895),
+            accuracy: m.case_similarity?.accuracy != null ? Number(m.case_similarity.accuracy) : 0,
+            f1Score: m.case_similarity?.f1_score != null ? Number(m.case_similarity.f1_score) : 0,
             driftRate: 0.5,
             status: (m.case_similarity?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.case_similarity?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -189,8 +192,8 @@ export const App: React.FC = () => {
             modelName: 'Incident Urgency Classifier',
             version: m.incident_urgency?.version || '3.0.0',
             task: 'DistilRoBERTa-v3 Narrative Urgency Triage (LOW, MEDIUM, HIGH, CRITICAL)',
-            accuracy: Number(m.incident_urgency?.accuracy ?? 94.1),
-            f1Score: Number(m.incident_urgency?.f1_score ?? 0.912),
+            accuracy: m.incident_urgency?.accuracy != null ? Number(m.incident_urgency.accuracy) : 0,
+            f1Score: m.incident_urgency?.f1_score != null ? Number(m.incident_urgency.f1_score) : 0,
             driftRate: 0.7,
             status: (m.incident_urgency?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.incident_urgency?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -202,8 +205,8 @@ export const App: React.FC = () => {
             modelName: 'Cyber Relation Extraction',
             version: m.relation_extraction?.version || '1.0.0',
             task: 'RoBERTa-base Entity Pair Semantic Relation Classification (9 Classes)',
-            accuracy: Number(m.relation_extraction?.accuracy ?? 91.8),
-            f1Score: Number(m.relation_extraction?.f1_score ?? 0.887),
+            accuracy: m.relation_extraction?.accuracy != null ? Number(m.relation_extraction.accuracy) : 0,
+            f1Score: m.relation_extraction?.f1_score != null ? Number(m.relation_extraction.f1_score) : 0,
             driftRate: 0.8,
             status: (m.relation_extraction?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.relation_extraction?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -215,8 +218,8 @@ export const App: React.FC = () => {
             modelName: 'Cross-Case Correlation',
             version: m.cross_case_correlation?.version || '1.0.0',
             task: 'DistilRoBERTa-v1 Paired Case Narrative & Indicator Overlap Classifier',
-            accuracy: Number(m.cross_case_correlation?.accuracy ?? 90.4),
-            f1Score: Number(m.cross_case_correlation?.f1_score ?? 0.879),
+            accuracy: m.cross_case_correlation?.accuracy != null ? Number(m.cross_case_correlation.accuracy) : 0,
+            f1Score: m.cross_case_correlation?.f1_score != null ? Number(m.cross_case_correlation.f1_score) : 0,
             driftRate: 0.9,
             status: (m.cross_case_correlation?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.cross_case_correlation?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -228,8 +231,8 @@ export const App: React.FC = () => {
             modelName: 'Evidence Graph Link Predictor',
             version: m.evidence_graph_link?.version || '1.0.0',
             task: 'PyTorch 80-dim Graph Node Link Candidate Prediction (MLP)',
-            accuracy: Number(m.evidence_graph_link?.accuracy ?? 93.0),
-            f1Score: Number(m.evidence_graph_link?.f1_score ?? 0.905),
+            accuracy: m.evidence_graph_link?.accuracy != null ? Number(m.evidence_graph_link.accuracy) : 0,
+            f1Score: m.evidence_graph_link?.f1_score != null ? Number(m.evidence_graph_link.f1_score) : 0,
             driftRate: 0.3,
             status: (m.evidence_graph_link?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.evidence_graph_link?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
@@ -241,8 +244,8 @@ export const App: React.FC = () => {
             modelName: 'Feedback Reliability Gate',
             version: m.feedback_gate?.version || '1.0.0',
             task: 'PyTorch 17-dim Continual Learning Gate with Deterministic Hard Overrides',
-            accuracy: Number(m.feedback_gate?.accuracy ?? 96.2),
-            f1Score: Number(m.feedback_gate?.f1_score ?? 0.948),
+            accuracy: m.feedback_gate?.accuracy != null ? Number(m.feedback_gate.accuracy) : 0,
+            f1Score: m.feedback_gate?.f1_score != null ? Number(m.feedback_gate.f1_score) : 0,
             driftRate: 0.1,
             status: (m.feedback_gate?.available ? 'READY' : 'NOT_DEPLOYED') as any,
             lastEvaluated: m.feedback_gate?.loaded ? 'Loaded in RAM (Active)' : 'Ready for Lazy Load',
