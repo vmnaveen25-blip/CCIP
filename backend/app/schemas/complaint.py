@@ -37,8 +37,8 @@ class PublicMilestoneSchema(BaseModel):
 
 
 class ComplaintPublicTrackingResponse(BaseModel):
-    id: str
     referenceNumber: str
+    id: Optional[str] = None
     title: str = "Cybercrime Incident Record"
     status: str
     statusLabel: str
@@ -46,9 +46,9 @@ class ComplaintPublicTrackingResponse(BaseModel):
     reportedDate: str
     incidentDate: Optional[str] = None
     lastUpdated: Optional[str] = None
-    timeline: List[PublicMilestoneSchema] = []
+    timeline: Optional[List[PublicMilestoneSchema]] = None
     trackingVerified: bool = False
-    evidenceCount: int = 0
+    evidenceCount: Optional[int] = None
     verificationMessage: Optional[str] = None
 
 

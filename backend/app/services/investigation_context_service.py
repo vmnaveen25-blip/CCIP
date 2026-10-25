@@ -153,8 +153,9 @@ class InvestigationContextService:
                 # Truncate narrative if excessively large, sanitize delimiters
                 clean_desc = complaint.description.replace("<CASE_EVIDENCE_DATA>", "").replace("</CASE_EVIDENCE_DATA>", "").strip()
                 lines.append(f"Complaint Narrative: {clean_desc[:2000]}")
-            if complaint.suspect_details:
-                lines.append(f"Suspect Info: {str(complaint.suspect_details)[:500]}")
+            suspect_info = getattr(complaint, "suspect_info", None) or getattr(complaint, "suspect_details", None)
+            if suspect_info:
+                lines.append(f"Suspect Info: {str(suspect_info)[:500]}")
 
         # Intent Discrimination / Question-Aware Filtering
         is_payment_query = any(k in q_lower for k in ["upi", "bank", "account", "payment", "vpa", "ifsc", "money", "transfer"])
@@ -195,9 +196,12 @@ class InvestigationContextService:
         if evidence_items:
             lines.append("\nDIGITAL EVIDENCE ARTIFACTS:")
             for ev in evidence_items:
-                h = ev.file_hash[:16] + "..." if ev.file_hash and len(ev.file_hash) > 16 else (ev.file_hash or "PENDING_HASH")
+                ev_hash = getattr(ev, "sha256_hash", None) or getattr(ev, "file_hash", None)
+                h = ev_hash[:16] + "..." if ev_hash and len(ev_hash) > 16 else (ev_hash or "PENDING_HASH")
+                fname = getattr(ev, "original_filename", None) or getattr(ev, "file_name", "artifact")
+                mtype = getattr(ev, "mime_type", None) or getattr(ev, "file_type", "application/octet-stream")
                 lines.append(
-                    f"- [Evidence: {ev.id[:8]}] Filename: `{ev.file_name}` | Hash: `SHA256:{h}` | MIME: {ev.file_type}"
+                    f"- [Evidence: {ev.id[:8]}] Filename: `{fname}` | Hash: `SHA256:{h}` | MIME: {mtype}"
                 )
 
         # Cross-Case Correlations
@@ -215,7 +219,10 @@ class InvestigationContextService:
         if events:
             lines.append("\nCHRONOLOGICAL INCIDENT & LIFECYCLE EVENTS:")
             for ev in events:
-                lines.append(f"- [{ev.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') if ev.created_at else 'Unknown'}] {ev.event_type}: {ev.notes or ''}")
+                ts = getattr(ev, "timestamp", None) or (ev.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') if getattr(ev, "created_at", None) else 'Unknown')
+                title = getattr(ev, "title", None) or getattr(ev, "event_type", "Event")
+                desc = getattr(ev, "description", None) or getattr(ev, "notes", "")
+                lines.append(f"- [{ts}] {title}: {desc}")
 
         lines.append("</CASE_EVIDENCE_DATA>")
 

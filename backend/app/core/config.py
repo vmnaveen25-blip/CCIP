@@ -105,10 +105,13 @@ class Settings(BaseSettings):
             or os.environ.get("GEMINI_API_KEY")
         )
 
+    @property
+    def is_production(self) -> bool:
+        return (self.APP_ENV or "").strip().lower() in ("production", "prod")
+
     @model_validator(mode="after")
     def validate_production_security(self) -> "Settings":
-        is_prod = (self.APP_ENV or "").strip().lower() in ("production", "prod")
-        if is_prod:
+        if self.is_production:
             if self.DEBUG:
                 raise ValueError("Security violation: DEBUG cannot be enabled in production environment.")
 

@@ -149,15 +149,31 @@ async def get_complaint_categories_stats(db: AsyncSession = Depends(get_db)):
 @router.get("/track/{reference_number}", response_model=ComplaintPublicTrackingResponse)
 async def track_complaint(
     reference_number: str,
+    request: Request,
     token: Optional[str] = Query(None, description="Cryptographic tracking verification token"),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Public/Citizen tracking endpoint. Returns strictly minimal milestone data without exposing sensitive complainant, financial, suspect, or evidence details."""
     complaint = await complaint_service.get_for_tracking(db, reference_number)
     verified = False
-    if token and getattr(complaint, "tracking_token", None):
+
+    # 1. Check tracking token in query param or header
+    header_token = request.headers.get("x-tracking-token")
+    active_token = token or header_token
+    if active_token and getattr(complaint, "tracking_token", None):
         import hmac
-        verified = hmac.compare_digest(str(token).strip(), str(complaint.tracking_token).strip())
+        verified = hmac.compare_digest(str(active_token).strip(), str(complaint.tracking_token).strip())
+
+    # 2. Check authenticated citizen owner or staff role
+    if not verified and current_user:
+        user_role = current_user.role.name if current_user.role else ""
+        if user_role in ["CYBERSECURITY_SPECIALIST", "CYBERCRIME_POLICE", "ADMIN"]:
+            verified = True
+        elif complaint.citizen_id and current_user.id == complaint.citizen_id:
+            verified = True
+        elif complaint.citizen_email and current_user.email.lower() == complaint.citizen_email.lower():
+            verified = True
 
     return complaint_service.map_to_public_tracking_schema(complaint, verified=verified)
 

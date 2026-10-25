@@ -192,7 +192,28 @@ class FeedbackGateAdapter:
                 "metrics": self._metrics or {}
             }
 
-        # Hard gates passed, run neural MLP
+        # Hard gates passed, run neural MLP if available or fallback safely
+        if not self.is_available():
+            return {
+                "model_name": self.model_name,
+                "model_version": self.version,
+                "decision": "REQUIRES_REVIEW",
+                "gate_source": "DEGRADED_HEURISTIC_GATE",
+                "reason": "Neural gate weights offline. All hard gates passed; candidate flagged for human specialist review.",
+                "confidence": 0.5,
+                "hard_gate_passed": True,
+                "model_available": False,
+                "fallback_mode": True,
+                "probabilities": {
+                    "REJECT": 0.0,
+                    "REQUIRES_REVIEW": 1.0,
+                    "APPROVE_CANDIDATE": 0.0
+                },
+                "feature_snapshot": feature_dict,
+                "advisory_warning": "Neural gate offline. Eligible for controlled dataset review. No automatic retraining.",
+                "metrics": self._metrics or {}
+            }
+
         self._ensure_loaded()
         vec = []
         for name in self.FEATURE_NAMES:

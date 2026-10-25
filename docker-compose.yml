@@ -38,6 +38,9 @@ services:
       - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
       - MINIO_BUCKET=${MINIO_BUCKET:-ccip-evidence-vault}
       - MINIO_SECURE=${MINIO_SECURE:-false}
+      - MALWARE_SCANNER_TYPE=${MALWARE_SCANNER_TYPE:-clamav}
+      - CLAMAV_HOST=clamav
+      - CLAMAV_PORT=3310
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
     depends_on:
       postgres:
@@ -100,7 +103,22 @@ services:
       timeout: 5s
       retries: 5
 
+  clamav:
+    image: clamav/clamav:1.2_base
+    container_name: ccip_clamav
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3310:3310"
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdscan", "--version"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
 volumes:
   postgres_data:
   redis_data:
   minio_data:
+  clamav_data:

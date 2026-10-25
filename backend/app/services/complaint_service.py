@@ -21,15 +21,17 @@ from app.core.logging import logger
 class ComplaintService:
     @staticmethod
     def generate_reference_number() -> str:
-        """Generate human-readable reference format e.g. CYBER-2026-9842"""
-        rand_num = random.randint(1000, 9999)
-        return f"CYBER-2026-{rand_num}"
+        """Generate enumeration-resistant high-entropy reference format e.g. CYBER-2026-984210-A7F2"""
+        rand_code = secrets.randbelow(900000) + 100000
+        suffix = secrets.token_hex(2).upper()
+        return f"CYBER-2026-{rand_code}-{suffix}"
 
     @staticmethod
     def map_to_public_tracking_schema(complaint: Complaint, verified: bool = False) -> dict:
         """Map Complaint to a strictly minimized public tracking schema.
         ZERO leak of complainant personal PII, financial details, suspect data,
         narrative description, investigator internal notes, or raw evidence files.
+        Unverified requests (no token) receive only high-level status without milestones.
         """
         status_label_map = {
             "DRAFT": "Draft Saved",
@@ -50,7 +52,28 @@ class ComplaintService:
 
         status_label = status_label_map.get(complaint.status, complaint.status.replace("_", " ").title())
 
-        # High-level public milestones without private operational data
+        # Minimal public response when unverified (no valid tracking token provided)
+        if not verified:
+            return {
+                "referenceNumber": complaint.reference_number,
+                "title": f"Incident Record {complaint.reference_number}",
+                "status": complaint.status,
+                "statusLabel": status_label,
+                "category": complaint.category,
+                "reportedDate": complaint.reported_date,
+                "timeline": [
+                    {
+                        "title": "Incident Logged & Sealed",
+                        "stage": "SUBMITTED",
+                        "state": "COMPLETED",
+                        "timestamp": complaint.reported_date
+                    }
+                ],
+                "trackingVerified": False,
+                "verificationMessage": "Public tracking view: Supply your confidential tracking token or sign in to view detailed milestone telemetry and evidence status."
+            }
+
+        # Detailed tracking telemetry provided ONLY when token is verified
         milestones = []
         if complaint.events:
             for ev in complaint.events:
@@ -81,13 +104,9 @@ class ComplaintService:
             "incidentDate": complaint.incident_date,
             "lastUpdated": complaint.updated_at.strftime("%Y-%m-%d %H:%M:%S UTC") if complaint.updated_at else complaint.reported_date,
             "timeline": milestones,
-            "trackingVerified": verified,
+            "trackingVerified": True,
             "evidenceCount": evidence_count,
-            "verificationMessage": (
-                "Verified access: Full complaint telemetry available under authorized session."
-                if verified else
-                "Public tracking view: sensitive complainant personal details, financial loss data, suspect records, and evidence files are restricted."
-            )
+            "verificationMessage": "Verified access: Full complaint telemetry available under authorized session."
         }
 
     @staticmethod

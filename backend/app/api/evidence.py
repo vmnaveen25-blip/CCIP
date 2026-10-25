@@ -79,6 +79,7 @@ async def list_evidence(
 async def upload_evidence_file(
     request: Request,
     complaint_id: str = Form(...),
+    tracking_token: Optional[str] = Form(None),
     file: UploadFile = File(...),
     current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
@@ -86,11 +87,14 @@ async def upload_evidence_file(
     """Upload evidence file, record SHA-256 submission integrity seal into Enclave Vault, and trigger automated document processing."""
     client_ip = request.client.host if request.client else "127.0.0.1"
     user_agent = request.headers.get("user-agent")
+    header_token = request.headers.get("x-tracking-token")
+    effective_token = tracking_token or header_token
 
     evidence = await evidence_service.upload_evidence(
         db=db,
         complaint_id=complaint_id,
         file=file,
+        tracking_token=effective_token,
         current_user=current_user,
         ip_address=client_ip,
         user_agent=user_agent
@@ -199,6 +203,29 @@ async def process_evidence_document(
     current_user: User = Depends(require_staff)
 ):
     """Trigger or re-execute document processing pipeline (PDF/DOCX/OCR/PII Redaction/Entities/Gemini)."""
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI_ML_SYSTEM_LEAD is not authorized to trigger raw evidence document processing."
+        )
+
+    ev_q = select(Evidence).where(Evidence.id == evidence_id)
+    ev_res = await db.execute(ev_q)
+    ev = ev_res.scalars().first()
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evidence item not found")
+
+    if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value and ev.case_id:
+        from app.models.case import Case
+        case_res = await db.execute(select(Case).where((Case.id == ev.case_id) | (Case.case_number == ev.case_id)))
+        c = case_res.scalars().first()
+        if c and c.assigned_specialist_id is not None and c.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Evidence belongs to a case assigned to another specialist."
+            )
+
     result = await document_processor.process_evidence(db=db, evidence_id=evidence_id)
 
     # Fetch associated cyber entities
@@ -253,6 +280,8 @@ async def get_evidence_processing_result(
     db: AsyncSession = Depends(get_db)
 ):
     """Get extraction results, redacted text, Gemini contextual intelligence, and provenance entities for an evidence file."""
+    user_role = current_user.role.name if current_user.role else ""
+
     # Check parent evidence ownership for citizen privacy isolation
     ev_q = select(Evidence).where(Evidence.id == evidence_id)
     ev_res = await db.execute(ev_q)
@@ -260,7 +289,7 @@ async def get_evidence_processing_result(
     if not ev:
         raise HTTPException(status_code=404, detail="Evidence item not found")
 
-    if current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
+    if user_role == RoleEnum.CITIZEN.value:
         is_owner = False
         if ev.uploaded_by_user_id and ev.uploaded_by_user_id == current_user.id:
             is_owner = True
@@ -272,6 +301,16 @@ async def get_evidence_processing_result(
                 is_owner = True
         if not is_owner:
             raise HTTPException(status_code=403, detail="Unauthorized access to evidence processing dossier")
+
+    if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value and ev.case_id:
+        from app.models.case import Case
+        case_res = await db.execute(select(Case).where((Case.id == ev.case_id) | (Case.case_number == ev.case_id)))
+        c = case_res.scalars().first()
+        if c and c.assigned_specialist_id is not None and c.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Evidence belongs to a case assigned to another specialist."
+            )
 
     q = select(DocumentProcessingResult).where(DocumentProcessingResult.evidence_id == evidence_id)
     res = await db.execute(q)
@@ -289,6 +328,11 @@ async def get_evidence_processing_result(
     ent_res = await db.execute(entities_q)
     entities = ent_res.scalars().all()
 
+    # Mask raw citizen narrative text for AI/ML Lead
+    extracted_text_val = result.extracted_text
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        extracted_text_val = "[REDACTED - AI/ML System Lead role restricted from raw citizen narratives. Refer to redacted_text or entity metadata.]"
+
     return DocumentProcessingResultResponse(
         id=result.id,
         evidence_id=result.evidence_id,
@@ -300,7 +344,7 @@ async def get_evidence_processing_result(
         character_count=result.character_count,
         ocr_applied=result.ocr_applied,
         ocr_engine=result.ocr_engine,
-        extracted_text=result.extracted_text,
+        extracted_text=extracted_text_val,
         redacted_text=result.redacted_text,
         gemini_summary=result.gemini_summary,
         gemini_analysis_json=result.gemini_analysis_json or {},

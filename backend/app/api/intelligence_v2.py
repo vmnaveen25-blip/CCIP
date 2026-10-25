@@ -143,8 +143,20 @@ async def get_case_correlations(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_staff)
 ):
-    """Returns cross-case correlation candidate records for a case."""
+    """Returns cross-case correlation candidate records for a case with case-level access enforcement."""
     from sqlalchemy import select, or_
+    from app.models.role import RoleEnum
+
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        case_res = await db.execute(select(Case).where((Case.id == case_id) | (Case.case_number == case_id)))
+        c = case_res.scalars().first()
+        if c and c.assigned_specialist_id is not None and c.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Case is assigned to another specialist."
+            )
+
     stmt = select(CaseCorrelation).where(
         or_(CaseCorrelation.case_a_id == case_id, CaseCorrelation.case_b_id == case_id)
     )
@@ -174,7 +186,15 @@ async def review_case_correlation(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_staff)
 ):
-    """Reviews and confirms/dismisses a candidate correlation."""
+    """Reviews and confirms/dismisses a candidate correlation. Restricted to authorized investigators."""
+    from app.models.role import RoleEnum
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI_ML_SYSTEM_LEAD is not authorized to review operational cross-case correlations."
+        )
+
     corr = await cross_case_correlation_service.review_correlation(
         db=db,
         correlation_id=correlation_id,
@@ -193,7 +213,18 @@ async def get_case_evidence_graph(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_staff)
 ):
-    """Returns full multi-hop evidence graph (nodes and edges) for a case."""
+    """Returns full multi-hop evidence graph (nodes and edges) for a case with case-level access enforcement."""
+    from app.models.role import RoleEnum
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        case_res = await db.execute(select(Case).where((Case.id == case_id) | (Case.case_number == case_id)))
+        c = case_res.scalars().first()
+        if c and c.assigned_specialist_id is not None and c.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Case is assigned to another specialist."
+            )
+
     res = await evidence_graph_service.build_or_refresh_graph_for_case(db, case_id)
     if "error" in res:
         raise HTTPException(status_code=404, detail=res["error"])

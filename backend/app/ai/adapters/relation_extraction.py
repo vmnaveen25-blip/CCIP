@@ -121,7 +121,37 @@ class RelationExtractionAdapter:
     ) -> Dict[str, Any]:
         """
         Formats text with [E1] entity_a [/E1] and [E2] entity_b [/E2] markers and predicts relation.
+        Provides explicit rule-based heuristic fallback if transformer model weights are offline.
         """
+        if not self.is_available():
+            rel_type = "ASSOCIATED_WITH"
+            conf = 0.65
+            if entity_a_type and entity_b_type:
+                ea = entity_a_type.upper()
+                eb = entity_b_type.upper()
+                if ("PHONE" in ea and "PERSON" in eb) or ("PHONE" in eb and "PERSON" in ea):
+                    rel_type = "USED_BY"
+                    conf = 0.75
+                elif ("WALLET" in ea or "CRYPTO" in ea) and ("BANK" in eb or "ACCOUNT" in eb):
+                    rel_type = "TRANSACTED_WITH"
+                    conf = 0.70
+                elif ("DOMAIN" in ea and "IP" in eb) or ("IP" in ea and "DOMAIN" in eb):
+                    rel_type = "RESOLVES_TO"
+                    conf = 0.80
+
+            return {
+                "model_name": "rule-based-entity-cooccurrence-fallback",
+                "model_version": "1.0.0",
+                "relation_type": rel_type,
+                "confidence": conf,
+                "probabilities": {rel_type: conf, "NO_RELATION": 1.0 - conf},
+                "engine_type": "RULE_BASED_HEURISTIC",
+                "model_available": False,
+                "fallback_mode": True,
+                "advisory_warning": "Syntactic entity co-occurrence heuristic (Transformer weights offline) — human verification required.",
+                "metrics": self._metrics or {}
+            }
+
         self._ensure_loaded()
 
         # Contextual marker insertion:

@@ -120,6 +120,23 @@ class EvidenceGraphLinkAdapter:
 
     def predict_link(self, feature_vector: List[float]) -> Dict[str, Any]:
         """Evaluates an 80-dimensional feature vector and predicts CANDIDATE_LINK likelihood."""
+        if not self.is_available():
+            return {
+                "model_name": self.model_name,
+                "model_version": self.version,
+                "prediction": "NO_LINK",
+                "is_candidate_link": False,
+                "confidence": 0.0,
+                "model_available": False,
+                "fallback_mode": True,
+                "probabilities": {
+                    "NO_LINK": 1.0,
+                    "CANDIDATE_LINK": 0.0
+                },
+                "advisory_warning": "Evidence graph neural weights offline. Heuristic fallback; human investigator manual verification required.",
+                "metrics": self._metrics or {}
+            }
+
         self._ensure_loaded()
         if len(feature_vector) != self.FEATURE_DIM:
             # Pad or truncate gracefully

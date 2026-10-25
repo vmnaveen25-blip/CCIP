@@ -19,6 +19,7 @@ from app.models.case import Case, CaseStatusEnum, CasePriorityEnum
 from app.models.case_assignment import CaseAssignment
 from app.models.case_status_history import CaseStatusHistory
 from app.models.user import User
+from app.models.role import RoleEnum
 from app.models.complaint import Complaint, ComplaintStatusEnum
 from app.core.permissions import get_current_user, require_staff, require_admin
 from app.services.complaint_service import complaint_service
@@ -36,7 +37,9 @@ async def list_cases(
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """List operational cases. Requires staff credentials (Police / Specialist / Admin)."""
+    """List operational cases. Scoped by role, assignment, and object-level authorization."""
+    user_role = current_user.role.name if current_user.role else ""
+
     q = select(Case).options(
         selectinload(Case.complaint).selectinload(Complaint.events),
         selectinload(Case.complaint).selectinload(Complaint.evidence_files),
@@ -53,10 +56,17 @@ async def list_cases(
         q = q.where(Case.is_high_risk == is_high_risk)
     if is_escalated is not None:
         q = q.where(Case.is_escalated == is_escalated)
+
     if assigned_to_me:
         q = q.where(
             (Case.assigned_officer_id == current_user.id) |
             (Case.assigned_specialist_id == current_user.id)
+        )
+    elif user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        # Specialists are scoped to their assigned cases or unassigned triage intake
+        q = q.where(
+            (Case.assigned_specialist_id == current_user.id) |
+            (Case.assigned_specialist_id.is_(None))
         )
 
     res = await db.execute(q)
@@ -65,13 +75,27 @@ async def list_cases(
     results = []
     for c in cases:
         complaint_dict = complaint_service.map_to_frontend_schema(c.complaint) if c.complaint else None
+
+        # Mask citizen PII and raw narratives for AI/ML Lead role
+        case_summary = c.summary
+        if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+            case_summary = "[REDACTED - Citizen Narrative Redacted for AI Lead Role]"
+            if complaint_dict:
+                complaint_dict["description"] = "[REDACTED - AI/ML System Lead role restricted from raw citizen narratives]"
+                if "citizenName" in complaint_dict:
+                    complaint_dict["citizenName"] = "[REDACTED]"
+                if "citizenEmail" in complaint_dict:
+                    complaint_dict["citizenEmail"] = "[REDACTED]"
+                if "citizenPhone" in complaint_dict:
+                    complaint_dict["citizenPhone"] = "[REDACTED]"
+
         results.append(
             CaseResponse(
                 id=c.id,
                 case_number=c.case_number,
                 complaint_id=c.complaint_id,
                 title=c.title,
-                summary=c.summary,
+                summary=case_summary,
                 priority=c.priority,
                 status=c.status,
                 risk_score=c.risk_score,
@@ -234,7 +258,8 @@ async def get_case(
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get complete case file with linked complaint and evidence items."""
+    """Get complete case file with linked complaint and evidence items. Enforces object-level access."""
+    user_role = current_user.role.name if current_user.role else ""
     q = select(Case).where((Case.id == case_id) | (Case.case_number == case_id)).options(
         selectinload(Case.complaint).selectinload(Complaint.events),
         selectinload(Case.complaint).selectinload(Complaint.evidence_files),
@@ -247,13 +272,35 @@ async def get_case(
     if not c:
         raise HTTPException(status_code=404, detail="Case not found")
 
+    # Object-level authorization for specialists: cannot access cases assigned to another specialist
+    if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        if c.assigned_specialist_id is not None and c.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Case docket is assigned to another specialist."
+            )
+
     complaint_dict = complaint_service.map_to_frontend_schema(c.complaint) if c.complaint else None
+
+    # Mask citizen PII and raw narratives for AI/ML Lead role
+    case_summary = c.summary
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        case_summary = "[REDACTED - Citizen Narrative Redacted for AI Lead Role]"
+        if complaint_dict:
+            complaint_dict["description"] = "[REDACTED - AI/ML System Lead role restricted from raw citizen narratives]"
+            if "citizenName" in complaint_dict:
+                complaint_dict["citizenName"] = "[REDACTED]"
+            if "citizenEmail" in complaint_dict:
+                complaint_dict["citizenEmail"] = "[REDACTED]"
+            if "citizenPhone" in complaint_dict:
+                complaint_dict["citizenPhone"] = "[REDACTED]"
+
     return CaseResponse(
         id=c.id,
         case_number=c.case_number,
         complaint_id=c.complaint_id,
         title=c.title,
-        summary=c.summary,
+        summary=case_summary,
         priority=c.priority,
         status=c.status,
         risk_score=c.risk_score,
@@ -277,11 +324,25 @@ async def assign_case(
     db: AsyncSession = Depends(get_db)
 ):
     """Assign case to investigating officer, forensic specialist, or department unit."""
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI_ML_SYSTEM_LEAD is not authorized to assign or reassign cases."
+        )
+
     q = select(Case).where((Case.id == case_id) | (Case.case_number == case_id))
     res = await db.execute(q)
     c = res.scalars().first()
     if not c:
         raise HTTPException(status_code=404, detail="Case not found")
+
+    if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        if c.assigned_specialist_id is not None and c.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Specialists cannot reassign cases assigned to other personnel without supervisor authorization."
+            )
 
     if req.officer_id:
         c.assigned_officer_id = req.officer_id
@@ -369,13 +430,21 @@ async def update_case_status(
 ):
     """Transition case status and record in audit timeline."""
     from app.core.state_machine import validate_status_transition
+    user_role = current_user.role.name if current_user.role else ""
+
     q = select(Case).where((Case.id == case_id) | (Case.case_number == case_id))
     res = await db.execute(q)
     c = res.scalars().first()
     if not c:
         raise HTTPException(status_code=404, detail="Case not found")
 
-    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        if c.assigned_specialist_id is not None and c.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Specialists cannot alter the status of a case assigned to another specialist."
+            )
+
     validate_status_transition(c.status, req.status, user_role)
 
     prev = c.status

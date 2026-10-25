@@ -232,3 +232,260 @@ async def test_intelligence_feeds_and_correlations_rbac(client: AsyncClient):
 
     res_corrs = await client.get("/api/v1/intelligence/correlations")
     assert res_corrs.status_code in [401, 403]
+
+
+@pytest.mark.asyncio
+async def test_evidence_upload_authorization_and_guest_tokens(client: AsyncClient):
+    """
+    Asserts evidence upload authorization:
+    1. Anonymous upload without tracking token is rejected (401).
+    2. Anonymous upload with invalid tracking token is rejected (401).
+    3. Anonymous upload with valid high-entropy tracking token succeeds (200).
+    4. Citizen B attempting to upload to Citizen A's complaint is rejected (403).
+    5. AI/ML System Lead attempting to upload operational evidence is rejected (403).
+    """
+    # 1. Citizen A registers and files a complaint
+    reg_a = await client.post("/api/v1/auth/register", json={
+        "name": "Citizen Owner",
+        "email": "owner.citizen@enclave.org",
+        "password": "TestPassword#2026",
+        "consent": True
+    })
+    token_a = reg_a.json()["access_token"]
+    headers_a = {"Authorization": f"Bearer {token_a}"}
+
+    comp_res = await client.post("/api/v1/complaints", json={
+        "title": "Unauthorized Access Report",
+        "category": "Hacking / Unauthorized Access",
+        "severity": "HIGH",
+        "incidentDate": "2026-10-01",
+        "description": "Evidence upload authorization validation."
+    }, headers=headers_a)
+    comp_data = comp_res.json()
+    comp_id = comp_data["id"]
+    tracking_token = comp_data["trackingToken"]
+
+    test_file = ("evidence_test.txt", b"Suspicious network trace logs 10.0.0.1", "text/plain")
+
+    # Clear session cookies to perform genuine unauthenticated anonymous requests
+    client.cookies.clear()
+
+    # 2. Anonymous upload with NO tracking token -> 401
+    anon_fail = await client.post(
+        "/api/v1/evidence/upload",
+        data={"complaint_id": comp_id},
+        files={"file": test_file}
+    )
+    assert anon_fail.status_code == 401
+    assert "tracking token" in str(anon_fail.json()).lower()
+
+    # 3. Anonymous upload with INVALID tracking token -> 401
+    anon_bad_token = await client.post(
+        "/api/v1/evidence/upload",
+        data={"complaint_id": comp_id, "tracking_token": "ccip_trk_fake_invalid_token_123"},
+        files={"file": test_file}
+    )
+    assert anon_bad_token.status_code == 401
+
+    # 4. Anonymous upload with VALID tracking token -> 200
+    anon_success = await client.post(
+        "/api/v1/evidence/upload",
+        data={"complaint_id": comp_id, "tracking_token": tracking_token},
+        files={"file": test_file}
+    )
+    assert anon_success.status_code == 200
+    assert "id" in anon_success.json()
+    assert anon_success.json()["name"] == "evidence_test.txt"
+
+    # 5. Citizen B registers and tries to upload to Citizen A's complaint -> 403
+    client.cookies.clear()
+    reg_b = await client.post("/api/v1/auth/register", json={
+        "name": "Citizen Attacker",
+        "email": "attacker.citizen@enclave.org",
+        "password": "TestPassword#2026",
+        "consent": True
+    })
+    token_b = reg_b.json()["access_token"]
+    headers_b = {"Authorization": f"Bearer {token_b}"}
+
+    cross_upload = await client.post(
+        "/api/v1/evidence/upload",
+        data={"complaint_id": comp_id},
+        files={"file": test_file},
+        headers=headers_b
+    )
+    assert cross_upload.status_code == 403
+
+    # 6. AI/ML Lead login and attempt upload -> 403
+    ai_login = await client.post("/api/v1/auth/login", json={
+        "email": "m.vance@ai-ops.gov",
+        "password": "AstraeaEnclave#42"
+    })
+    ai_token = ai_login.json()["access_token"]
+    ai_headers = {"Authorization": f"Bearer {ai_token}"}
+
+    ai_upload = await client.post(
+        "/api/v1/evidence/upload",
+        data={"complaint_id": comp_id},
+        files={"file": test_file},
+        headers=ai_headers
+    )
+    assert ai_upload.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_case_level_and_specialist_scoping_rbac(client: AsyncClient):
+    """
+    Asserts object-level case authorization:
+    1. Specialist A cannot access a case assigned to Specialist B (403).
+    2. Specialist A cannot modify status or reassign a case assigned to Specialist B (403).
+    3. AI/ML Lead is blocked from assigning cases (403).
+    4. AI/ML Lead querying case details receives redacted citizen narratives and masked PII.
+    """
+    # 1. Setup Specialist A (Dr. Aris Thorne)
+    spec_a_login = await client.post("/api/v1/auth/login", json={
+        "email": "a.thorne@astraea.gov",
+        "password": "AstraeaEnclave#42"
+    })
+    spec_a_token = spec_a_login.json()["access_token"]
+    spec_a_headers = {"Authorization": f"Bearer {spec_a_token}"}
+
+    # Setup Police (S. Chen)
+    pol_login = await client.post("/api/v1/auth/login", json={
+        "email": "s.chen@police.gov",
+        "password": "AstraeaEnclave#42"
+    })
+    pol_token = pol_login.json()["access_token"]
+    pol_headers = {"Authorization": f"Bearer {pol_token}"}
+
+    # Setup AI Lead (M. Vance)
+    ai_login = await client.post("/api/v1/auth/login", json={
+        "email": "m.vance@ai-ops.gov",
+        "password": "AstraeaEnclave#42"
+    })
+    ai_token = ai_login.json()["access_token"]
+    ai_headers = {"Authorization": f"Bearer {ai_token}"}
+
+    # 2. File a complaint and create a case
+    cit_reg = await client.post("/api/v1/auth/register", json={
+        "name": "Victim Confidential Scope",
+        "email": "victim.scope@enclave.org",
+        "password": "TestPassword#2026",
+        "consent": True
+    })
+    cit_token = cit_reg.json()["access_token"]
+    cit_headers = {"Authorization": f"Bearer {cit_token}"}
+
+    c_res = await client.post("/api/v1/complaints", json={
+        "title": "Private Extortion Docket",
+        "category": "Extortion & Blackmail",
+        "severity": "CRITICAL",
+        "incidentDate": "2026-10-02",
+        "description": "Top secret personal compromising video extortion demands."
+    }, headers=cit_headers)
+    comp_id = c_res.json()["id"]
+
+    case_res = await client.post(f"/api/v1/cases/from-complaint/{comp_id}", headers=spec_a_headers)
+    case_id = case_res.json()["id"]
+
+    # 3. Police assigns case to a different specialist (simulate other specialist assignment)
+    # Target specialist ID is dummy/other UUID
+    other_spec_id = "00000000-0000-0000-0000-000000000002"
+    await client.post(f"/api/v1/cases/{case_id}/assign", headers=pol_headers, json={
+        "specialist_id": other_spec_id,
+        "notes": "Assigned to alternate forensic examiner."
+    })
+
+    # 4. Specialist A (not assigned) attempts to fetch case detail -> 403 Forbidden
+    spec_a_fetch = await client.get(f"/api/v1/cases/{case_id}", headers=spec_a_headers)
+    assert spec_a_fetch.status_code == 403
+
+    # 5. Specialist A attempts status change on other specialist's case -> 403 Forbidden
+    spec_a_patch = await client.patch(f"/api/v1/cases/{case_id}/status", headers=spec_a_headers, json={
+        "status": "UNDER_INVESTIGATION",
+        "reason": "Unauthorized specialist intervention."
+    })
+    assert spec_a_patch.status_code == 403
+
+    # 6. AI/ML Lead attempts assignment -> 403 Forbidden
+    ai_assign = await client.post(f"/api/v1/cases/{case_id}/assign", headers=ai_headers, json={
+        "notes": "AI lead cannot assign cases."
+    })
+    assert ai_assign.status_code == 403
+
+    # 7. AI/ML Lead reads case detail -> Citizen narrative is masked and PII redacted
+    ai_fetch = await client.get(f"/api/v1/cases/{case_id}", headers=ai_headers)
+    assert ai_fetch.status_code == 200
+    ai_data = ai_fetch.json()
+    assert "[REDACTED" in ai_data["summary"]
+    if ai_data.get("complaint"):
+        assert "[REDACTED" in ai_data["complaint"]["description"]
+        assert ai_data["complaint"]["citizenName"] == "[REDACTED]"
+        assert ai_data["complaint"]["citizenEmail"] == "[REDACTED]"
+
+
+@pytest.mark.asyncio
+async def test_report_generation_and_export_security(client: AsyncClient):
+    """
+    Asserts report generation security:
+    1. Rejects report creation for non-existent case (404).
+    2. Rejects report creation by AI/ML Lead (403).
+    3. Replaces fake RSA-PSS claim with truthful SHA-256 Sovereign Integrity Digest.
+    4. Sanitizes CSV exports against spreadsheet formula injection (DDE attacks).
+    """
+    # 1. Police credentials
+    pol_login = await client.post("/api/v1/auth/login", json={
+        "email": "s.chen@police.gov",
+        "password": "AstraeaEnclave#42"
+    })
+    pol_headers = {"Authorization": f"Bearer {pol_login.json()['access_token']}"}
+
+    # 2. AI Lead credentials
+    ai_login = await client.post("/api/v1/auth/login", json={
+        "email": "m.vance@ai-ops.gov",
+        "password": "AstraeaEnclave#42"
+    })
+    ai_headers = {"Authorization": f"Bearer {ai_login.json()['access_token']}"}
+
+    # Attempt report creation for non-existent case -> 404
+    bad_case_rep = await client.post("/api/v1/reports", headers=pol_headers, json={
+        "case_id": "non-existent-case-id-12345",
+        "report_type": "FINAL_INVESTIGATION_REPORT",
+        "title": "Ghost Report",
+        "summary": "Should fail because case does not exist."
+    })
+    assert bad_case_rep.status_code == 404
+
+    # AI Lead attempting report creation -> 403
+    ai_rep = await client.post("/api/v1/reports", headers=ai_headers, json={
+        "report_type": "FINAL_INVESTIGATION_REPORT",
+        "title": "AI Report",
+        "summary": "AI Lead attempt."
+    })
+    assert ai_rep.status_code == 403
+
+    # 3. Create genuine report with potentially malicious CSV formula injection in summary
+    formula_injection_summary = "=cmd|' /C calc'!A0; +2+5; @SUM(1,2)"
+    rep_res = await client.post("/api/v1/reports", headers=pol_headers, json={
+        "report_type": "FORENSIC_EVIDENCE_SUMMARY",
+        "title": "=HYPERLINK(\"http://malicious.link\", \"Click Here\")",
+        "summary": formula_injection_summary,
+        "content_json": {"sections_included": ["Executive Summary", "Evidence Integrity"]}
+    })
+    assert rep_res.status_code == 201
+    rep_data = rep_res.json()
+    rep_id = rep_data["id"]
+
+    # Verify truthful digital seal (SHA-256, NOT RSA-PSS)
+    digital_seal = rep_data["content_json"]["digital_seal"]
+    assert digital_seal["algorithm"] == "SHA-256 Sovereign Integrity Digest"
+    assert len(digital_seal["digest"]) == 64  # Valid 64-hex SHA-256 digest
+
+    # 4. Export report as CSV and verify formula sanitization
+    csv_res = await client.get(f"/api/v1/reports/{rep_id}/export?format=csv", headers=pol_headers)
+    assert csv_res.status_code == 200
+    csv_content = csv_res.text
+
+    # Leading =, +, @ must be escaped with prepended single quote (')
+    assert "'=HYPERLINK" in csv_content or "'=" in csv_content
+    assert "'=cmd" in csv_content

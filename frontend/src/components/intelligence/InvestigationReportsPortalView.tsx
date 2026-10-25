@@ -168,7 +168,7 @@ export const InvestigationReportsPortalView: React.FC<InvestigationReportsPortal
 
   // Advanced options state
   const [advancedOptions, setAdvancedOptions] = useState({
-    algorithm: 'SHA-256 / RSA-PSS Sovereign Seal',
+    algorithm: 'SHA-256 Sovereign Integrity Digest',
     classification: 'RESTRICTED',
     watermark: 'CONFIDENTIAL EVIDENCE',
     jurisdiction: 'State Cyber Cell (Sec 66C/66D IT Act)',
@@ -181,13 +181,13 @@ export const InvestigationReportsPortalView: React.FC<InvestigationReportsPortal
       const reps = await apiClient.getReports();
       if (reps && reps.length > 0) {
         setCreatedReports(reps);
-      } else {
-        // Fallback demo reports matching screenshot
+      } else if ((import.meta as any).env?.VITE_DEMO_MODE === 'true') {
+        // Explicit demonstration fixtures only loaded when VITE_DEMO_MODE=true
         setCreatedReports([
           {
-            id: 'REP-2026-2788-0001',
+            id: 'REP-2026-2788-DEMO',
             case_id: 'CYBER-2026-2788',
-            title: 'Judicial Evidence Disposition & Forensic Summary',
+            title: '[DEMO] Judicial Evidence Disposition & Forensic Summary',
             report_type: 'IOC Threat Brief',
             created_at: '2026-06-14T16:32:00Z',
             content_json: {
@@ -196,47 +196,13 @@ export const InvestigationReportsPortalView: React.FC<InvestigationReportsPortal
               sha256_hash: 'e8b2f93c04907a95df6495dbbf79efc6d5b0583b63d63b2ad8708fafe63e4a1c',
               sections_included: ['case_overview', 'evidence_analysis', 'ioc_correlation', 'cross_case', 'timeline', 'forensic_artifacts', 'statutory_references']
             }
-          },
-          {
-            id: 'REP-2026-1156-0003',
-            case_id: 'CYBER-2026-1156',
-            title: 'Final Investigation Report',
-            report_type: 'Comprehensive',
-            created_at: '2026-06-10T11:20:00Z',
-            content_json: {
-              generated_by_name: 'Naveen',
-              status: 'SEALED',
-              sha256_hash: 'a4d913bf89201cba68482b6c7f8a923d182e04f9815a452ef34c98ad23ef1049'
-            }
-          },
-          {
-            id: 'REP-2026-7033-0002',
-            case_id: 'CYBER-2026-7033',
-            title: 'Evidence Analysis Report',
-            report_type: 'Technical',
-            created_at: '2026-06-09T17:18:00Z',
-            content_json: {
-              generated_by_name: 'Naveen',
-              status: 'SEALED',
-              sha256_hash: '62bf194ac27301d9f824982a1ce09bc736a83ef5912d0912bc854739aa24e815'
-            }
-          },
-          {
-            id: 'REP-2026-7102-0001',
-            case_id: 'CYBER-2026-7102',
-            title: 'IOC Correlation Summary',
-            report_type: 'IOC Threat Brief',
-            created_at: '2026-06-08T15:45:00Z',
-            content_json: {
-              generated_by_name: 'Naveen',
-              status: 'SEALED',
-              sha256_hash: '778ac92df91024bc0192ea78923dfbc6547192bc091823759281a02194c50293'
-            }
           }
         ]);
+      } else {
+        setCreatedReports([]);
       }
     } catch {
-      // Offline fallback
+      setCreatedReports([]);
     }
   };
 
@@ -321,26 +287,8 @@ export const InvestigationReportsPortalView: React.FC<InvestigationReportsPortal
       setFeedbackMessage(`REPORT RECORD SEALED: ${newRep.id} cryptographically registered in database.`);
       setIsGenerating(false);
     } catch (err: any) {
-      // Fallback local persistence if network offline
-      const mockSealed = {
-        id: previewReportId,
-        case_id: selectedCaseObj?.ref || 'CYBER-2026-2788',
-        title: reportTitle,
-        report_type: classificationLabels[reportClassification] || 'IOC Threat Brief',
-        created_at: new Date().toISOString(),
-        summary: reportSummary,
-        content_json: {
-          report_code: previewReportId,
-          case_ref: selectedCaseObj?.ref,
-          status: 'SEALED',
-          classification: advancedOptions.classification,
-          generated_by_name: currentUser?.name || 'Naveen',
-          sha256_hash: '9f83ac0281b37c093a12efbc34891024bc0192ea78923dfbc6547192bc091823',
-          sections_included: activeSectionsList
-        }
-      };
-      setCreatedReports(prev => [mockSealed, ...prev]);
-      setFeedbackMessage(`REPORT RECORD SEALED: ${mockSealed.id} stored in sovereign enclave.`);
+      const errMsg = err?.message || 'Report generation failed on server. Please check backend connection.';
+      setFeedbackMessage(`ERROR: ${errMsg}`);
       setIsGenerating(false);
     }
   };

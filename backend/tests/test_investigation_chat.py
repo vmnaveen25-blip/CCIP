@@ -253,13 +253,15 @@ async def test_streaming_chat_success_and_persistence(client: AsyncClient, db_se
         assert "event: complete" in content
         assert "`mule@okhdfcbank`" in content
 
-        # Verify messages persisted in database
-        conv_stmt = select(InvestigationConversation).where(InvestigationConversation.case_id == case_id)
-        conv_res = await db_session.execute(conv_stmt)
-        conv = conv_res.scalars().first()
-        assert conv is not None
+        # Extract the exact conversation_id from the retrieval event
+        import re
+        conv_id_match = re.search(r'"conversation_id":\s*"([^"]+)"', content)
+        assert conv_id_match is not None, f"conversation_id not found in SSE stream: {content}"
+        actual_conv_id = conv_id_match.group(1)
 
-        msg_stmt = select(InvestigationMessage).where(InvestigationMessage.conversation_id == conv.id)
+        # Verify messages persisted in database (refresh transaction snapshot)
+        await db_session.commit()
+        msg_stmt = select(InvestigationMessage).where(InvestigationMessage.conversation_id == actual_conv_id)
         msg_res = await db_session.execute(msg_stmt)
         messages = msg_res.scalars().all()
         assert len(messages) >= 2

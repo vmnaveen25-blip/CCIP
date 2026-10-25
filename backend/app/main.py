@@ -49,10 +49,15 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing CCIP Enclave database tables...")
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        try:
-            await conn.execute(text("ALTER TABLE complaints ADD COLUMN tracking_token VARCHAR(64)"))
-        except Exception:
-            pass  # Column already exists
+        # Controlled column check for backward-compatible development SQLite instances
+        def check_and_add_column(sync_conn):
+            from sqlalchemy import inspect
+            inspector = inspect(sync_conn)
+            if 'complaints' in inspector.get_table_names():
+                cols = [c['name'] for c in inspector.get_columns('complaints')]
+                if 'tracking_token' not in cols:
+                    sync_conn.execute(text("ALTER TABLE complaints ADD COLUMN tracking_token VARCHAR(64)"))
+        await conn.run_sync(check_and_add_column)
     logger.info("CCIP Database tables initialized.")
     yield
     # Shutdown
@@ -65,9 +70,9 @@ app = FastAPI(
     description="Production-Ready Sovereign Backend for the Citizen Cybercrime Intelligence Platform (CCIP)",
     version="1.0.0",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/api/v1/openapi.json"
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/api/v1/openapi.json"
 )
 
 # CORS Middleware

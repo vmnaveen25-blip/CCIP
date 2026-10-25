@@ -13,118 +13,28 @@ from app.core.permissions import require_staff
 router = APIRouter(prefix="/reports", tags=["Reports & Statistics"])
 
 
+import uuid
 import hashlib
 import json
 from datetime import datetime, timezone
 
-DEMO_REPORTS = [
-    {
-        "id": "REP-2026-2788-0001",
-        "case_id": "CYBER-2026-2788",
-        "report_type": "IOC Threat Brief",
-        "title": "Judicial Evidence Disposition & Forensic Summary",
-        "summary": "Formal evidence analysis, IOC correlation ledger, and statutory judicial recommendation.",
-        "created_at": datetime(2026, 6, 14, 16, 32, 0, tzinfo=timezone.utc),
-        "content_json": {
-            "report_code": "REP-2026-2788-0001",
-            "case_ref": "CYBER-2026-2788",
-            "status": "DRAFT",
-            "classification": "RESTRICTED",
-            "generated_by_name": "Naveen",
-            "sha256_hash": "e8b2f93c04907a95df6495dbbf79efc6d5b0583b63d63b2ad8708fafe63e4a1c",
-            "sections_included": [
-                "CASE_OVERVIEW", "EVIDENCE_ANALYSIS", "IOC_CORRELATION",
-                "CROSS_CASE_ANALYSIS", "TIMELINE_EVENTS", "FORENSIC_ARTIFACTS",
-                "STATUTORY_REFERENCES"
-            ],
-            "digital_seal": {
-                "algorithm": "SHA-256 / RSA-PSS Sovereign Seal",
-                "digest": "e8b2f93c04907a95df6495dbbf79efc6d5b0583b63d63b2ad8708fafe63e4a1c",
-                "notary": "CCIP Enclave Sovereign Authority",
-                "verified": True
-            }
-        }
-    },
-    {
-        "id": "REP-2026-1156-0003",
-        "case_id": "CYBER-2026-1156",
-        "report_type": "Comprehensive",
-        "title": "Final Investigation Report",
-        "summary": "Complete dossier covering unauthorized payment, crypto peel-chain clustering, and cross-case syndicates.",
-        "created_at": datetime(2026, 6, 10, 11, 20, 0, tzinfo=timezone.utc),
-        "content_json": {
-            "report_code": "REP-2026-1156-0003",
-            "case_ref": "CYBER-2026-1156",
-            "status": "SEALED",
-            "classification": "RESTRICTED",
-            "generated_by_name": "Naveen",
-            "sha256_hash": "a4d913bf89201cba68482b6c7f8a923d182e04f9815a452ef34c98ad23ef1049",
-            "sections_included": [
-                "CASE_OVERVIEW", "EVIDENCE_ANALYSIS", "IOC_CORRELATION",
-                "CROSS_CASE_ANALYSIS", "TIMELINE_EVENTS", "INVESTIGATOR_NOTES",
-                "FORENSIC_ARTIFACTS", "STATUTORY_REFERENCES", "AI_RECOMMENDATIONS"
-            ],
-            "digital_seal": {
-                "algorithm": "SHA-256 / RSA-PSS Sovereign Seal",
-                "digest": "a4d913bf89201cba68482b6c7f8a923d182e04f9815a452ef34c98ad23ef1049",
-                "notary": "CCIP Enclave Sovereign Authority",
-                "verified": True
-            }
-        }
-    },
-    {
-        "id": "REP-2026-7033-0002",
-        "case_id": "CYBER-2026-7033",
-        "report_type": "Technical",
-        "title": "Evidence Analysis Report",
-        "summary": "Technical examination of malicious payload attachments, SPF/DKIM spoofing headers, and command & control beacons.",
-        "created_at": datetime(2026, 6, 9, 17, 18, 0, tzinfo=timezone.utc),
-        "content_json": {
-            "report_code": "REP-2026-7033-0002",
-            "case_ref": "CYBER-2026-7033",
-            "status": "SEALED",
-            "classification": "RESTRICTED",
-            "generated_by_name": "Naveen",
-            "sha256_hash": "62bf194ac27301d9f824982a1ce09bc736a83ef5912d0912bc854739aa24e815",
-            "sections_included": [
-                "CASE_OVERVIEW", "EVIDENCE_ANALYSIS", "IOC_CORRELATION",
-                "FORENSIC_ARTIFACTS", "STATUTORY_REFERENCES"
-            ],
-            "digital_seal": {
-                "algorithm": "SHA-256 / RSA-PSS Sovereign Seal",
-                "digest": "62bf194ac27301d9f824982a1ce09bc736a83ef5912d0912bc854739aa24e815",
-                "notary": "CCIP Enclave Sovereign Authority",
-                "verified": True
-            }
-        }
-    },
-    {
-        "id": "REP-2026-7102-0001",
-        "case_id": "CYBER-2026-7102",
-        "report_type": "IOC Threat Brief",
-        "title": "IOC Correlation Summary",
-        "summary": "Network infrastructure mapping across fraudulent telegram bot channels and associated mule bank accounts.",
-        "created_at": datetime(2026, 6, 8, 15, 45, 0, tzinfo=timezone.utc),
-        "content_json": {
-            "report_code": "REP-2026-7102-0001",
-            "case_ref": "CYBER-2026-7102",
-            "status": "SEALED",
-            "classification": "RESTRICTED",
-            "generated_by_name": "Naveen",
-            "sha256_hash": "778ac92df91024bc0192ea78923dfbc6547192bc091823759281a02194c50293",
-            "sections_included": [
-                "CASE_OVERVIEW", "IOC_CORRELATION", "CROSS_CASE_ANALYSIS",
-                "FORENSIC_ARTIFACTS"
-            ],
-            "digital_seal": {
-                "algorithm": "SHA-256 / RSA-PSS Sovereign Seal",
-                "digest": "778ac92df91024bc0192ea78923dfbc6547192bc091823759281a02194c50293",
-                "notary": "CCIP Enclave Sovereign Authority",
-                "verified": True
-            }
-        }
-    }
-]
+from app.db.database import get_db
+from app.models.report import Report
+from app.models.case import Case
+from app.models.user import User
+from app.models.role import RoleEnum
+from app.schemas.reports import ReportResponse, ReportCreate
+from app.schemas.auth import MessageResponse
+from app.core.permissions import require_staff
+
+
+def sanitize_csv_cell(value: Optional[str]) -> str:
+    """Sanitize cell contents to prevent CSV formula injection (DDE/CVS injection)."""
+    text = str(value or "")
+    text = text.replace('"', '""')
+    if text and text[0] in ("=", "+", "-", "@", "\t", "\r"):
+        text = "'" + text
+    return f'"{text}"'
 
 
 @router.get("", response_model=List[ReportResponse])
@@ -134,7 +44,7 @@ async def list_reports(
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """List generated forensic reports and official executive statistics."""
+    """List generated forensic reports from database. Returns genuine empty state when no reports exist."""
     q = select(Report).order_by(desc(Report.created_at))
     if case_id:
         q = q.where(Report.case_id == case_id)
@@ -142,28 +52,7 @@ async def list_reports(
         q = q.where(Report.report_type == report_type)
 
     res = await db.execute(q)
-    reports = res.scalars().all()
-
-    # Seed demo reports if table is empty
-    if not reports and not case_id and not report_type:
-        for demo in DEMO_REPORTS:
-            r = Report(
-                id=demo["id"],
-                report_type=demo["report_type"],
-                title=demo["title"],
-                summary=demo["summary"],
-                case_id=demo["case_id"],
-                content_json=demo["content_json"],
-                created_at=demo["created_at"],
-                generated_by_user_id=current_user.id if hasattr(current_user, "id") else None
-            )
-            db.add(r)
-        await db.commit()
-        q2 = select(Report).order_by(desc(Report.created_at))
-        res2 = await db.execute(q2)
-        reports = res2.scalars().all()
-
-    return reports
+    return res.scalars().all()
 
 
 @router.post("", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
@@ -172,44 +61,74 @@ async def create_report(
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """Generate and cryptographically seal an investigation report."""
+    """Generate and cryptographically seal an investigation report from genuine case records."""
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI_ML_SYSTEM_LEAD is not authorized to generate operational case reports."
+        )
+
+    # 1. Validate case exists if case_id is supplied
+    case_obj: Optional[Case] = None
+    if req.case_id:
+        case_q = select(Case).where(
+            (Case.id == req.case_id) |
+            (Case.case_number == req.case_id) |
+            (Case.complaint_id == req.case_id)
+        )
+        case_res = await db.execute(case_q)
+        case_obj = case_res.scalars().first()
+        if not case_obj:
+            raise HTTPException(status_code=404, detail=f"Target case record '{req.case_id}' not found.")
+
+        # Object-level check: specialists can only generate reports for unassigned or their own cases
+        if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+            if case_obj.assigned_specialist_id is not None and case_obj.assigned_specialist_id != current_user.id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Access denied: Cannot generate report for a case assigned to another specialist."
+                )
+
     raw_content = req.content_json or {}
     
-    # Calculate real SHA-256 cryptographic hash of report payload
-    content_str = json.dumps({
-        "case_id": req.case_id,
+    # 2. Generate canonical, collision-safe unique Report ID
+    unique_entropy = uuid.uuid4().hex[:6].upper()
+    digits = "".join(ch for ch in (case_obj.case_number if case_obj else req.case_id or "0000") if ch.isdigit())
+    case_num = digits[-4:] if digits else "0000"
+    report_code = f"REP-2026-{case_num}-{unique_entropy}"
+
+    user_display_name = getattr(current_user, "full_name", None) or getattr(current_user, "email", "Specialist")
+
+    # 3. Calculate SHA-256 cryptographic hash of canonical report payload
+    canonical_payload = {
+        "report_id": report_code,
+        "case_id": case_obj.id if case_obj else req.case_id,
+        "case_number": case_obj.case_number if case_obj else req.case_id,
         "title": req.title,
         "summary": req.summary,
         "report_type": req.report_type,
         "sections": raw_content.get("sections_included", []),
+        "generated_by": user_display_name,
         "timestamp": datetime.now(timezone.utc).isoformat()
-    }, sort_keys=True)
+    }
+    content_str = json.dumps(canonical_payload, sort_keys=True)
     computed_hash = hashlib.sha256(content_str.encode("utf-8")).hexdigest()
-    
-    # Generate canonical Report ID: REP-2026-XXXX-NNNN
-    case_num = "2788"
-    if req.case_id:
-        digits = "".join(ch for ch in req.case_id if ch.isdigit())
-        if digits:
-            case_num = digits[-4:]
-            
-    report_code = f"REP-2026-{case_num}-{int(datetime.now().timestamp()) % 1000:04d}"
-    user_display_name = getattr(current_user, "full_name", None) or getattr(current_user, "username", "Naveen")
-    
+
     content_payload = {
         **raw_content,
-        "report_code": raw_content.get("report_code", report_code),
-        "case_ref": req.case_id or f"CYBER-2026-{case_num}",
+        "report_code": report_code,
+        "case_ref": case_obj.case_number if case_obj else req.case_id,
         "status": "SEALED",
         "classification": raw_content.get("classification", "RESTRICTED"),
         "generated_by_name": user_display_name,
         "sha256_hash": computed_hash,
         "digital_seal": {
-            "algorithm": raw_content.get("algorithm", "SHA-256 / RSA-PSS Sovereign Seal"),
+            "algorithm": "SHA-256 Sovereign Integrity Digest",
             "digest": computed_hash,
             "notary": "CCIP Enclave Sovereign Authority",
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "verified": True
+            "integrity_verified": True
         }
     }
 
@@ -218,7 +137,7 @@ async def create_report(
         report_type=req.report_type,
         title=req.title,
         summary=req.summary,
-        case_id=req.case_id,
+        case_id=case_obj.id if case_obj else req.case_id,
         content_json=content_payload,
         generated_by_user_id=getattr(current_user, "id", None)
     )
@@ -234,12 +153,29 @@ async def get_report(
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """Retrieve a sealed report by ID."""
+    """Retrieve a sealed report by ID with object-level case authorization."""
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI_ML_SYSTEM_LEAD is not authorized to access operational case reports."
+        )
+
     q = select(Report).where(Report.id == report_id)
     res = await db.execute(q)
     report = res.scalars().first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
+
+    if report.case_id and user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        case_res = await db.execute(select(Case).where((Case.id == report.case_id) | (Case.case_number == report.case_id)))
+        case_obj = case_res.scalars().first()
+        if case_obj and case_obj.assigned_specialist_id is not None and case_obj.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Report belongs to a case assigned to another specialist."
+            )
+
     return report
 
 
@@ -250,28 +186,55 @@ async def export_report(
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """Export report content in specified structured format."""
+    """Export report content in specified structured format with CSV formula sanitization and access control."""
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="AI_ML_SYSTEM_LEAD is not authorized to export operational case reports."
+        )
+
     q = select(Report).where(Report.id == report_id)
     res = await db.execute(q)
     report = res.scalars().first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
 
+    if report.case_id and user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+        case_res = await db.execute(select(Case).where((Case.id == report.case_id) | (Case.case_number == report.case_id)))
+        case_obj = case_res.scalars().first()
+        if case_obj and case_obj.assigned_specialist_id is not None and case_obj.assigned_specialist_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Report belongs to a case assigned to another specialist."
+            )
+
     if format == "text":
         content = (
             f"====================================================\n"
             f"OFFICIAL REPORT: {report.title}\n"
+            f"REPORT ID: {report.id}\n"
             f"TYPE: {report.report_type}\n"
             f"TIMESTAMP: {report.created_at.isoformat()}\n"
+            f"INTEGRITY SEAL: {report.content_json.get('sha256_hash', 'N/A') if isinstance(report.content_json, dict) else 'N/A'}\n"
             f"STATUS: SEALED RECORD\n"
             f"====================================================\n\n"
             f"SUMMARY:\n{report.summary}\n\n"
-            f"METADATA / FINDINGS:\n{report.content_json}\n"
+            f"METADATA / FINDINGS:\n{json.dumps(report.content_json, indent=2)}\n"
         )
         return Response(content=content, media_type="text/plain", headers={"Content-Disposition": f'attachment; filename="report_{report.id}.txt"'})
     elif format == "csv":
-        content = f"id,title,report_type,created_at,summary\n\"{report.id}\",\"{report.title}\",\"{report.report_type}\",\"{report.created_at.isoformat()}\",\"{report.summary}\"\n"
-        return Response(content=content, media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="report_{report.id}.csv"'})
+        header = "id,title,report_type,created_at,summary,sha256_hash\n"
+        digest = report.content_json.get("sha256_hash", "") if isinstance(report.content_json, dict) else ""
+        row = (
+            f"{sanitize_csv_cell(report.id)},"
+            f"{sanitize_csv_cell(report.title)},"
+            f"{sanitize_csv_cell(report.report_type)},"
+            f"{sanitize_csv_cell(report.created_at.isoformat())},"
+            f"{sanitize_csv_cell(report.summary)},"
+            f"{sanitize_csv_cell(digest)}\n"
+        )
+        return Response(content=header + row, media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="report_{report.id}.csv"'})
 
     return {
         "status": "REPORT RECORD EXPORTED",

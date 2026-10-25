@@ -410,8 +410,9 @@ async def stream_investigation_chat(
         final_status = "CANCELLED" if is_cancelled else "COMPLETE"
 
         # Persist assistant response in database
+        assistant_msg_id = str(uuid.uuid4())
         assistant_msg = InvestigationMessage(
-            id=str(uuid.uuid4()),
+            id=assistant_msg_id,
             conversation_id=conversation_id,
             role="ASSISTANT",
             content=final_text if final_text else "(Generation cancelled by investigator)",
@@ -428,7 +429,6 @@ async def stream_investigation_chat(
         )
         db.add(assistant_msg)
         
-        # Touch conversation
         touch_stmt = select(InvestigationConversation).where(InvestigationConversation.id == conversation_id)
         c_res = await db.execute(touch_stmt)
         conv_obj = c_res.scalars().first()

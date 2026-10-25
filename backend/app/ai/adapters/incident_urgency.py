@@ -107,6 +107,37 @@ class IncidentUrgencyAdapter:
                 "warning": "Empty input narrative evaluated as default LOW urgency."
             }
 
+        if not self.is_available():
+            txt_lower = text.lower()
+            if any(k in txt_lower for k in ["extort", "suicide", "threat", "life", "kill", "emergency", "hostage", "immediate"]):
+                label = "CRITICAL"
+                conf = 0.85
+            elif any(k in txt_lower for k in ["fraud", "loss", "stolen", "transfer", "upi", "scam", "lakh", "ransom", "breach"]):
+                label = "HIGH"
+                conf = 0.75
+            elif any(k in txt_lower for k in ["harass", "spam", "impersonat", "fake", "phish"]):
+                label = "MEDIUM"
+                conf = 0.65
+            else:
+                label = "LOW"
+                conf = 0.60
+
+            probs = {lbl: (conf if lbl == label else round((1.0 - conf) / 3, 4)) for lbl in self.LABELS}
+            return {
+                "model_name": "rule-based-keyword-urgency-fallback",
+                "model_version": "1.0.0",
+                "urgency_level": label,
+                "confidence": conf,
+                "probabilities": probs,
+                "engine_type": "RULE_BASED_HEURISTIC",
+                "model_available": False,
+                "fallback_mode": True,
+                "advisory_only": True,
+                "human_review_required": True,
+                "advisory_warning": "Keyword heuristic urgency recommendation (Transformer weights offline) — triage advisory only, does not establish legal priority or enforcement action.",
+                "metrics": self._metrics or {}
+            }
+
         self._ensure_loaded()
         inputs = self._tokenizer(
             text.strip(),

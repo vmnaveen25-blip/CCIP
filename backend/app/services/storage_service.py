@@ -24,6 +24,10 @@ class StorageService(ABC):
         """Retrieve file bytes from storage."""
         pass
 
+    async def get_file(self, storage_key: str) -> bytes:
+        """Alias for get_file_bytes."""
+        return await self.get_file_bytes(storage_key)
+
     @abstractmethod
     async def delete_file(self, storage_key: str) -> bool:
         """Delete file from storage."""

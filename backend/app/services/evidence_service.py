@@ -39,6 +39,7 @@ class EvidenceService:
         db: AsyncSession,
         complaint_id: str,
         file: UploadFile,
+        tracking_token: Optional[str] = None,
         parent_evidence_id: Optional[str] = None,
         current_user: Optional[User] = None,
         ip_address: Optional[str] = "127.0.0.1",
@@ -52,10 +53,23 @@ class EvidenceService:
         if not complaint:
             raise NotFoundError(f"Complaint {complaint_id} not found")
 
-        # Citizen privacy check
-        if current_user and current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
-            if complaint.citizen_id and complaint.citizen_id != current_user.id:
-                raise PermissionDeniedError("Cannot upload evidence to another citizen's case")
+        # Strict authorization: Authenticated user with permission OR valid high-entropy complaint tracking token
+        if current_user:
+            role_name = current_user.role.name if current_user.role else ""
+            if role_name == RoleEnum.CITIZEN.value:
+                is_owner = (complaint.citizen_id and complaint.citizen_id == current_user.id) or (
+                    complaint.citizen_email and complaint.citizen_email.lower() == current_user.email.lower()
+                )
+                if not is_owner:
+                    raise PermissionDeniedError("Cannot upload evidence to another citizen's case")
+            elif role_name == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+                raise PermissionDeniedError("AI/ML System Lead role is not authorized to upload operational evidence")
+            elif role_name not in (RoleEnum.CYBERSECURITY_SPECIALIST.value, RoleEnum.CYBERCRIME_POLICE.value, RoleEnum.ADMIN.value):
+                raise PermissionDeniedError("Unauthorized role for evidence upload")
+        else:
+            # Anonymous / guest upload requires valid complaint tracking_token
+            if not tracking_token or not complaint.tracking_token or tracking_token.strip() != complaint.tracking_token.strip():
+                raise AuthenticationError("Authentication or valid complaint tracking token required to attach evidence to this complaint")
 
         raw_filename = file.filename or "evidence_file"
         filename = sanitize_filename(raw_filename)
@@ -73,6 +87,9 @@ class EvidenceService:
         scan_status, scan_details = await malware_scanner.scan_bytes(content, filename)
         if scan_status == "INFECTED":
             raise ValidationError(f"File upload rejected: security engine detected threat signatures ({scan_details})")
+
+        is_verified = (scan_status == "CLEAN")
+        integrity_status = "Submission Integrity Recorded" if is_verified else f"Quarantined: Malware Scan {scan_status}"
 
         # Save to storage
         storage_key, sha256_hash, file_size_bytes, formatted_size = await storage_service.save_file(
@@ -101,8 +118,8 @@ class EvidenceService:
             file_size_formatted=formatted_size,
             storage_key=storage_key,
             sha256_hash=sha256_hash,
-            integrity_status="Submission Integrity Recorded",
-            is_verified=True,
+            integrity_status=integrity_status,
+            is_verified=is_verified,
             version=version,
             parent_evidence_id=parent_evidence_id,
             malware_scan_status=scan_status
@@ -130,21 +147,22 @@ class EvidenceService:
         # Audit log
         await audit_service.log_event(
             db=db,
-            actor=current_user.full_name if current_user else "Citizen Self-Service",
+            actor=current_user.full_name if current_user else "Citizen Self-Service (Token Verified)",
             action="EVIDENCE_UPLOAD",
             resource=f"evidence:{evidence.id} ({filename} v{version})",
             clearance=current_user.clearance_level if current_user else "CITIZEN TIER",
             user_id=current_user.id if current_user else None,
             ip_address=ip_address,
             user_agent=user_agent,
-            metadata={"sha256": sha256_hash, "file_size": formatted_size, "version": version}
+            metadata={"sha256": sha256_hash, "file_size": formatted_size, "version": version, "verified": is_verified}
         )
 
-        # Trigger document processing pipeline (PDF/DOCX/OCR/PII Redaction/Entities/Gemini)
-        try:
-            await document_processor.process_evidence(db=db, evidence_id=evidence.id)
-        except Exception as e:
-            logger.error(f"Automated document processing failed for evidence {evidence.id}: {e}", exc_info=True)
+        # Trigger document processing pipeline ONLY if clean (unscanned or quarantined files are held safely)
+        if is_verified:
+            try:
+                await document_processor.process_evidence(db=db, evidence_id=evidence.id)
+            except Exception as e:
+                logger.error(f"Automated document processing failed for evidence {evidence.id}: {e}", exc_info=True)
 
         return evidence
 
@@ -166,19 +184,23 @@ class EvidenceService:
         if not evidence:
             raise NotFoundError("Evidence record not found")
 
-        # Citizen privacy check
-        if current_user and current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
-            is_owner = False
-            if evidence.uploaded_by_user_id and evidence.uploaded_by_user_id == current_user.id:
-                is_owner = True
-            elif evidence.complaint_id:
-                comp_q = select(Complaint).where(Complaint.id == evidence.complaint_id)
-                comp_res = await db.execute(comp_q)
-                comp = comp_res.scalars().first()
-                if comp and (comp.citizen_id == current_user.id or (comp.citizen_email and comp.citizen_email.lower() == current_user.email.lower())):
+        # Role privacy checks
+        if current_user and current_user.role:
+            role_name = current_user.role.name
+            if role_name == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+                raise PermissionDeniedError("AI/ML System Lead role is not authorized to download raw evidentiary files")
+            elif role_name == RoleEnum.CITIZEN.value:
+                is_owner = False
+                if evidence.uploaded_by_user_id and evidence.uploaded_by_user_id == current_user.id:
                     is_owner = True
-            if not is_owner:
-                raise PermissionDeniedError("Unauthorized access to evidence vault item")
+                elif evidence.complaint_id:
+                    comp_q = select(Complaint).where(Complaint.id == evidence.complaint_id)
+                    comp_res = await db.execute(comp_q)
+                    comp = comp_res.scalars().first()
+                    if comp and (comp.citizen_id == current_user.id or (comp.citizen_email and comp.citizen_email.lower() == current_user.email.lower())):
+                        is_owner = True
+                if not is_owner:
+                    raise PermissionDeniedError("Unauthorized access to evidence vault item")
 
         # Log access
         access_log = EvidenceAccessLog(

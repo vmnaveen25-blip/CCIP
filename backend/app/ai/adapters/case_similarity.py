@@ -98,6 +98,21 @@ class CaseSimilarityAdapter:
         """Encodes text into a normalized 384-dimensional embedding vector."""
         if not text or not text.strip():
             return [0.0] * self.EMBEDDING_DIM
+
+        if not self.is_available():
+            import hashlib
+            vec = [0.0] * self.EMBEDDING_DIM
+            words = text.lower().split()
+            if not words:
+                return vec
+            for w in words:
+                h = int(hashlib.md5(w.encode()).hexdigest(), 16) % self.EMBEDDING_DIM
+                vec[h] += 1.0
+            norm = sum(x * x for x in vec) ** 0.5
+            if norm > 0:
+                vec = [x / norm for x in vec]
+            return vec
+
         self._ensure_loaded()
         inputs = self._tokenizer(
             text.strip(),
@@ -123,6 +138,24 @@ class CaseSimilarityAdapter:
         Computes cosine similarity between two texts.
         Advisory warning: Semantic similarity does not establish a common offender.
         """
+        if not self.is_available():
+            emb_a = self.get_embedding(text_a)
+            emb_b = self.get_embedding(text_b)
+            dot = sum(a * b for a, b in zip(emb_a, emb_b))
+            score = max(0.0, min(1.0, dot))
+            return {
+                "model_name": "deterministic-ngram-similarity-fallback",
+                "model_version": "1.0.0",
+                "similarity_score": round(score, 4),
+                "threshold": round(self._threshold, 4),
+                "is_candidate_match": score >= self._threshold,
+                "engine_type": "DETERMINISTIC_HEURISTIC",
+                "model_available": False,
+                "fallback_mode": True,
+                "advisory_warning": "N-gram indicator overlap similarity (SentenceTransformer weights offline) — advisory only; does not establish common syndicate or offender identity.",
+                "metrics": self._metrics or {}
+            }
+
         self._ensure_loaded()
         emb_a = torch.tensor([self.get_embedding(text_a)], dtype=torch.float32)
         emb_b = torch.tensor([self.get_embedding(text_b)], dtype=torch.float32)

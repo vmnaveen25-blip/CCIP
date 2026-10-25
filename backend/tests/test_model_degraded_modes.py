@@ -64,45 +64,56 @@ def test_feedback_gate_degraded_hard_gates_remain_active():
 
 
 def test_case_similarity_degraded_availability_check():
-    """Validates truthful reporting of missing assets for case similarity."""
+    """Validates graceful degraded fallback when weights are missing for case similarity."""
     with patch.object(CaseSimilarityAdapter, "is_available", return_value=False):
         adapter = CaseSimilarityAdapter()
         assert adapter.is_available() is False
-        with pytest.raises(FileNotFoundError):
-            adapter.score_text_pair("Text A", "Text B")
+        res = adapter.score_text_pair("Text A", "Text B")
+        assert res["model_available"] is False
+        assert res["fallback_mode"] is True
+        assert "advisory_warning" in res
 
 
 def test_incident_urgency_degraded_availability_check():
-    """Validates truthful reporting of missing assets for incident urgency."""
+    """Validates graceful degraded fallback when weights are missing for incident urgency."""
     with patch.object(IncidentUrgencyAdapter, "is_available", return_value=False):
         adapter = IncidentUrgencyAdapter()
         assert adapter.is_available() is False
-        with pytest.raises(FileNotFoundError):
-            adapter.predict_urgency("Urgent text")
+        res = adapter.predict_urgency("Urgent text")
+        assert res["model_available"] is False
+        assert res["fallback_mode"] is True
+        assert "advisory_warning" in res
 
 
 def test_relation_extraction_degraded_availability_check():
-    """Validates truthful reporting of missing assets for relation extraction."""
+    """Validates graceful degraded fallback when weights are missing for relation extraction."""
     with patch.object(RelationExtractionAdapter, "is_available", return_value=False):
         adapter = RelationExtractionAdapter()
         assert adapter.is_available() is False
-        with pytest.raises(FileNotFoundError):
-            adapter.predict_relation("Text", "EntityA", "EntityB")
+        res = adapter.predict_relation("Text", "EntityA", "EntityB")
+        assert res["model_available"] is False
+        assert res["fallback_mode"] is True
+        assert "advisory_warning" in res
 
 
 def test_cross_case_correlation_degraded_availability_check():
-    """Validates truthful reporting of missing assets for cross-case correlation."""
+    """Validates graceful degraded fallback when weights are missing for cross-case correlation."""
     with patch.object(CrossCaseCorrelationAdapter, "is_available", return_value=False):
         adapter = CrossCaseCorrelationAdapter()
         assert adapter.is_available() is False
-        with pytest.raises(FileNotFoundError):
-            adapter.predict_correlation("Text A", "Text B", [])
+        res = adapter.predict_correlation("Text A", "Text B", [])
+        assert res["model_available"] is False
+        assert res["engine_type"] == "RULE_BASED_OVERLAP"
+        assert "advisory_warning" in res
 
 
 def test_evidence_graph_link_degraded_availability_check():
-    """Validates truthful reporting of missing assets for evidence graph link."""
+    """Validates graceful degraded fallback when weights are missing for evidence graph link."""
     with patch.object(EvidenceGraphLinkAdapter, "is_available", return_value=False):
         adapter = EvidenceGraphLinkAdapter()
         assert adapter.is_available() is False
-        with pytest.raises(FileNotFoundError):
-            adapter.predict_link([0.1] * 80)
+        res = adapter.predict_link([0.1] * 80)
+        assert res["model_available"] is False
+        assert res["prediction"] == "NO_LINK"
+        assert res["fallback_mode"] is True
+        assert "advisory_warning" in res
