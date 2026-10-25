@@ -1,7 +1,7 @@
 import os
 from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, AnyHttpUrl, field_validator
+from pydantic import Field, AnyHttpUrl, field_validator, model_validator
 
 
 class Settings(BaseSettings):
@@ -41,6 +41,14 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Demo Seeding Control
+    ALLOW_DEMO_SEEDING: bool = False
+
+    # Malware Scanning Engine
+    MALWARE_SCANNER_TYPE: str = "development"  # "development", "clamav"
+    CLAMAV_HOST: str = "localhost"
+    CLAMAV_PORT: int = 3310
 
     # Frontend URL for OAuth redirects
     FRONTEND_URL: str = "http://localhost:5173"
@@ -96,6 +104,57 @@ class Settings(BaseSettings):
             or os.environ.get("AI_ASSISTANT_API_KEY")
             or os.environ.get("GEMINI_API_KEY")
         )
+
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        is_prod = (self.APP_ENV or "").strip().lower() in ("production", "prod")
+        if is_prod:
+            if self.DEBUG:
+                raise ValueError("Security violation: DEBUG cannot be enabled in production environment.")
+
+            insecure_jwt_defaults = {
+                "dev_insecure_jwt_secret_key_change_in_production_98421048",
+                "prod_sovereign_enclave_jwt_key_98421048_production",
+                "secret",
+                "changeme",
+                "jwt_secret",
+                "password"
+            }
+            insecure_refresh_defaults = {
+                "dev_insecure_jwt_refresh_secret_key_change_in_production_71048492",
+                "prod_sovereign_enclave_refresh_key_71048492_production",
+                "secret",
+                "changeme",
+                "jwt_refresh_secret",
+                "password"
+            }
+            has_insecure_word = any(w in (self.JWT_SECRET_KEY or "").lower() for w in ("insecure", "changeme", "default", "change-in-production", "change_in_production"))
+            if not self.JWT_SECRET_KEY or self.JWT_SECRET_KEY in insecure_jwt_defaults or len(self.JWT_SECRET_KEY) < 32 or has_insecure_word:
+                raise ValueError(
+                    "Production configuration error: JWT_SECRET_KEY cannot use default/insecure value in production and must be at least 32 characters."
+                )
+            has_refresh_insecure_word = any(w in (self.JWT_REFRESH_SECRET_KEY or "").lower() for w in ("insecure", "changeme", "default", "change-in-production", "change_in_production"))
+            if not self.JWT_REFRESH_SECRET_KEY or self.JWT_REFRESH_SECRET_KEY in insecure_refresh_defaults or len(self.JWT_REFRESH_SECRET_KEY) < 32 or has_refresh_insecure_word:
+                raise ValueError(
+                    "Production configuration error: JWT_REFRESH_SECRET_KEY cannot use default/insecure value in production and must be at least 32 characters."
+                )
+            if self.JWT_SECRET_KEY == self.JWT_REFRESH_SECRET_KEY:
+                raise ValueError(
+                    "Production configuration error: JWT_SECRET_KEY and JWT_REFRESH_SECRET_KEY must be distinct and independent secrets."
+                )
+
+            if self.STORAGE_BACKEND == "minio":
+                if self.MINIO_SECRET_KEY in ("minioadmin", "minioadmin_secure_vault", "password", ""):
+                    raise ValueError(
+                        "Production configuration error: MINIO_SECRET_KEY cannot use default or insecure credentials in production."
+                    )
+
+            if "postgres:postgres_enclave_secure@" in self.DATABASE_URL or "postgres:postgres@" in self.DATABASE_URL:
+                raise ValueError(
+                    "Production configuration error: DATABASE_URL cannot contain default database credentials in production."
+                )
+
+        return self
 
 
 settings = Settings()

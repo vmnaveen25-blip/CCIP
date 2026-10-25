@@ -50,9 +50,11 @@ class CrossCaseCorrelationAdapter:
 
     def is_available(self) -> bool:
         weights_file = self._model_dir / "model.safetensors"
+        bin_file = self._model_dir / "pytorch_model.bin"
+        has_weights = weights_file.is_file() or bin_file.is_file()
         config_file = self._model_dir / "config.json"
         tok_file = self._model_dir / "tokenizer.json"
-        return self._model_dir.is_dir() and weights_file.is_file() and config_file.is_file() and tok_file.is_file()
+        return self._model_dir.is_dir() and has_weights and config_file.is_file() and tok_file.is_file()
 
     def _ensure_loaded(self):
         if self._is_loaded:
@@ -102,7 +104,37 @@ class CrossCaseCorrelationAdapter:
         """
         Evaluates narrative pair and shared features.
         Returns correlation label, probabilities, confidence, and strict advisory notice.
+        If transformer model assets are offline, returns explicitly labeled rule-based overlap.
         """
+        if not self.is_available():
+            shared_count = len(shared_features) if shared_features else 0
+            if shared_count >= 2:
+                label = "STRONGLY_RELATED"
+                conf = 0.82
+            elif shared_count == 1:
+                label = "POSSIBLY_RELATED"
+                conf = 0.58
+            else:
+                label = "UNRELATED"
+                conf = 0.20
+
+            return {
+                "model_name": "rule-based-indicator-overlap-fallback",
+                "model_version": "1.0.0",
+                "correlation_label": label,
+                "confidence": conf,
+                "probabilities": {
+                    "STRONGLY_RELATED": conf if label == "STRONGLY_RELATED" else 0.1,
+                    "POSSIBLY_RELATED": conf if label == "POSSIBLY_RELATED" else 0.2,
+                    "UNRELATED": conf if label == "UNRELATED" else 0.1
+                },
+                "shared_features": shared_features or [],
+                "engine_type": "RULE_BASED_OVERLAP",
+                "model_available": False,
+                "advisory_warning": "Deterministic technical indicator overlap heuristic (Transformer weights offline) — does not establish legal guilt or common syndicate.",
+                "metrics": self._metrics or {}
+            }
+
         self._ensure_loaded()
         shared_str = ", ".join(shared_features) if shared_features else "none"
         formatted_input = (

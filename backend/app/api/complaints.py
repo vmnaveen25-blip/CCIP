@@ -11,11 +11,12 @@ from app.schemas.complaint import (
     ComplaintCreateRequest,
     ComplaintUpdateRequest,
     ComplaintFrontendSchema,
+    ComplaintPublicTrackingResponse,
     TimelineEventSchema
 )
 from app.schemas.auth import MessageResponse
 from app.services.complaint_service import complaint_service
-from app.core.permissions import get_current_user, require_citizen
+from app.core.permissions import get_current_user, get_optional_current_user, require_citizen
 from app.models.user import User
 from app.models.complaint import Complaint, ComplaintStatusEnum
 from app.models.complaint_event import ComplaintEvent
@@ -27,7 +28,7 @@ router = APIRouter(prefix="/complaints", tags=["Complaints"])
 async def create_complaint(
     req: ComplaintCreateRequest,
     request: Request,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """File a new cybercrime complaint or save as draft."""
@@ -51,7 +52,7 @@ async def list_complaints(
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """List complaints. Enforces strict citizen ownership isolation."""
@@ -145,23 +146,29 @@ async def get_complaint_categories_stats(db: AsyncSession = Depends(get_db)):
     return {"categories": categories_list}
 
 
-@router.get("/track/{reference_number}", response_model=ComplaintFrontendSchema)
+@router.get("/track/{reference_number}", response_model=ComplaintPublicTrackingResponse)
 async def track_complaint(
     reference_number: str,
+    token: Optional[str] = Query(None, description="Cryptographic tracking verification token"),
     db: AsyncSession = Depends(get_db)
 ):
-    """Public/Citizen tracking endpoint by human-readable reference number."""
-    complaint = await complaint_service.get_by_id(db, reference_number, current_user=None)
-    return complaint_service.map_to_frontend_schema(complaint)
+    """Public/Citizen tracking endpoint. Returns strictly minimal milestone data without exposing sensitive complainant, financial, suspect, or evidence details."""
+    complaint = await complaint_service.get_for_tracking(db, reference_number)
+    verified = False
+    if token and getattr(complaint, "tracking_token", None):
+        import hmac
+        verified = hmac.compare_digest(str(token).strip(), str(complaint.tracking_token).strip())
+
+    return complaint_service.map_to_public_tracking_schema(complaint, verified=verified)
 
 
 @router.get("/{complaint_id}", response_model=ComplaintFrontendSchema)
 async def get_complaint(
     complaint_id: str,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get single complaint by ID or Reference Number."""
+    """Get single complaint by ID or Reference Number. Enforces authentication and citizen ownership isolation."""
     complaint = await complaint_service.get_by_id(db, complaint_id, current_user=current_user)
     return complaint_service.map_to_frontend_schema(complaint)
 
@@ -242,7 +249,7 @@ async def update_complaint(
 @router.get("/{complaint_id}/timeline", response_model=List[TimelineEventSchema])
 async def get_complaint_timeline(
     complaint_id: str,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get chronological status events and integrity seals for a complaint."""

@@ -155,6 +155,8 @@ class CrossCaseCorrelationService:
 
         return correlations
 
+    VALID_REVIEW_STATUSES = {"CONFIRMED_RELEVANT", "DISMISSED", "NEEDS_MORE_EVIDENCE", "UNREVIEWED"}
+
     @staticmethod
     async def review_correlation(
         db: AsyncSession,
@@ -163,16 +165,36 @@ class CrossCaseCorrelationService:
         status: str,
         notes: Optional[str] = None
     ) -> Optional[CaseCorrelation]:
+        if status not in CrossCaseCorrelationService.VALID_REVIEW_STATUSES:
+            raise ValueError(f"Invalid correlation review status '{status}'. Allowed: {sorted(list(CrossCaseCorrelationService.VALID_REVIEW_STATUSES))}")
+
         stmt = select(CaseCorrelation).where(CaseCorrelation.id == correlation_id)
         corr = (await db.execute(stmt)).scalar_one_or_none()
         if not corr:
             return None
 
+        previous_status = corr.status
         corr.status = status
         corr.reviewed_by = reviewer_id
         corr.reviewed_at = datetime.now(timezone.utc)
         if notes:
             corr.review_notes = notes
+
+        # Audit review decision
+        from app.services.audit_service import audit_service
+        await audit_service.log_event(
+            db=db,
+            actor=reviewer_id,
+            action="CASE_CORRELATION_REVIEW",
+            resource=f"case_correlation:{corr.id}",
+            metadata_json={
+                "previous_status": previous_status,
+                "new_status": status,
+                "case_a_id": corr.case_a_id,
+                "case_b_id": corr.case_b_id,
+                "notes": notes
+            }
+        )
 
         await db.commit()
         await db.refresh(corr)

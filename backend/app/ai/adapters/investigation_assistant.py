@@ -121,7 +121,8 @@ class InvestigationAssistant(BaseAIAdapter):
         except GenerativeLLMUnavailableError:
             logger.warning("[AI Assistant] Local LLM runtime is unavailable.")
             return {
-                "status": "AI_ASSISTANT_UNAVAILABLE",
+                "status": "NOT_AVAILABLE",
+                "code": "AI_ASSISTANT_UNAVAILABLE",
                 "connected": False,
                 "model": self._model,
                 "source": "unavailable",
@@ -131,7 +132,8 @@ class InvestigationAssistant(BaseAIAdapter):
         except Exception as exc:
             logger.error(f"[AI Assistant] Unexpected error during response generation: {exc}")
             return {
-                "status": "AI_ASSISTANT_UNAVAILABLE",
+                "status": "NOT_AVAILABLE",
+                "code": "AI_ASSISTANT_UNAVAILABLE",
                 "connected": False,
                 "model": self._model,
                 "source": "unavailable",

@@ -61,6 +61,37 @@ async def get_current_active_user(
     return current_user
 
 
+async def get_optional_current_user(
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_bearer),
+    db: AsyncSession = Depends(get_db)
+) -> Optional[User]:
+    """Safely extracts authenticated user if valid token is provided, otherwise returns None."""
+    token = None
+    if credentials:
+        token = credentials.credentials
+    elif "access_token" in request.cookies:
+        token = request.cookies.get("access_token")
+
+    if not token:
+        return None
+
+    try:
+        payload = decode_token(token, is_refresh=False)
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+        query = select(User).where(User.id == user_id)
+        result = await db.execute(query)
+        user = result.scalars().first()
+        if not user or not user.is_active or user.is_deleted:
+            return None
+        request.state.user = user
+        return user
+    except Exception:
+        return None
+
+
 def require_role(allowed_roles: List[RoleEnum]):
     """Enforce that the authenticated user possesses one of the allowed operational roles."""
     async def role_checker(current_user: User = Depends(get_current_user)) -> User:

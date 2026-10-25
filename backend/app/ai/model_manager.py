@@ -130,11 +130,11 @@ class ModelManager:
                     "architecture": "DistilBertForSequenceClassification",
                     "version": email_meta.get("model_version", "1.0.0"),
                     "threshold": round(float(email_meta.get("decision_threshold", 0.011331753805279732)), 5),
-                    "accuracy": email_metrics["accuracy"] or 98.36,
-                    "f1_score": email_metrics["f1_score"] or 0.9783,
-                    "precision": email_metrics["precision"] or 0.9699,
-                    "recall": email_metrics["recall"] or 0.9867,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": email_metrics.get("accuracy"),
+                    "f1_score": email_metrics.get("f1_score"),
+                    "precision": email_metrics.get("precision"),
+                    "recall": email_metrics.get("recall"),
+                    "metrics_source": "persisted_disk_artifact" if email_metrics.get("accuracy") else "NOT_EVALUATED"
                 },
                 "sms_spam": {
                     "files_available": sms_files,
@@ -145,11 +145,11 @@ class ModelManager:
                     "architecture": "DistilBertForSequenceClassification",
                     "version": sms_meta.get("model_version", "1.0.0"),
                     "threshold": round(float(sms_meta.get("spam_threshold", 0.2685096263885498)), 4),
-                    "accuracy": sms_metrics["accuracy"] or 98.84,
-                    "f1_score": sms_metrics["f1_score"] or 0.9514,
-                    "precision": sms_metrics["precision"] or 0.9888,
-                    "recall": sms_metrics["recall"] or 0.9167,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": sms_metrics.get("accuracy"),
+                    "f1_score": sms_metrics.get("f1_score"),
+                    "precision": sms_metrics.get("precision"),
+                    "recall": sms_metrics.get("recall"),
+                    "metrics_source": "persisted_disk_artifact" if sms_metrics.get("accuracy") else "NOT_EVALUATED"
                 },
                 "url_phishing": {
                     "files_available": url_files,
@@ -160,11 +160,11 @@ class ModelManager:
                     "architecture": "XGBClassifier",
                     "version": "2.0.0-xgboost",
                     "threshold": 0.5,
-                    "accuracy": url_metrics["accuracy"] or 97.74,
-                    "f1_score": url_metrics["f1_score"] or 0.9799,
-                    "precision": url_metrics["precision"] or 0.9720,
-                    "recall": url_metrics["recall"] or 0.9878,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": url_metrics.get("accuracy"),
+                    "f1_score": url_metrics.get("f1_score"),
+                    "precision": url_metrics.get("precision"),
+                    "recall": url_metrics.get("recall"),
+                    "metrics_source": "persisted_disk_artifact" if url_metrics.get("accuracy") else "NOT_EVALUATED"
                 },
                 "complaint_classifier": {
                     "files_available": complaint_files,
@@ -175,11 +175,11 @@ class ModelManager:
                     "architecture": "DebertaV2ForSequenceClassification",
                     "version": complaint_meta.get("dataset_version", "1.1.0"),
                     "threshold": "Per-Label Calibrated (18 classes)",
-                    "accuracy": complaint_metrics["accuracy"] or 96.79,
-                    "f1_score": complaint_metrics["f1_score"] or 0.9767,
-                    "precision": complaint_metrics["precision"] or 0.9778,
-                    "recall": complaint_metrics["recall"] or 0.9771,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": complaint_metrics.get("accuracy"),
+                    "f1_score": complaint_metrics.get("f1_score"),
+                    "precision": complaint_metrics.get("precision"),
+                    "recall": complaint_metrics.get("recall"),
+                    "metrics_source": "persisted_disk_artifact" if complaint_metrics.get("accuracy") else "NOT_EVALUATED"
                 },
                 "investigation_assistant": {
                     "files_available": True,
@@ -190,9 +190,9 @@ class ModelManager:
                     "architecture": "Astraea Sovereign Forensic Reasoning Engine",
                     "version": "v2.0.0",
                     "threshold": "Deterministic Multi-Step Forensic Rules",
-                    "accuracy": 98.4,
-                    "f1_score": 0.981,
-                    "metrics_source": "rule_based_deterministic_benchmarks"
+                    "accuracy": None,
+                    "f1_score": None,
+                    "metrics_source": "rule_based_deterministic_sop_rag"
                 },
                 "cyber_ner": {
                     "files_available": cyber_ner_files,
@@ -203,15 +203,15 @@ class ModelManager:
                     "architecture": "DebertaV2ForTokenClassification",
                     "version": cyber_ner_meta.get("version", "cyber-ner-bootstrap-v4.0.0"),
                     "threshold": settings.CYBER_NER_CONFIDENCE_THRESHOLD,
-                    "accuracy": cyber_ner_metrics.get("accuracy") or 95.52,
-                    "f1_score": cyber_ner_metrics.get("f1_score") or 0.8723,
-                    "precision": cyber_ner_metrics.get("precision") or 0.8341,
-                    "recall": cyber_ner_metrics.get("recall") or 0.9141,
-                    "validation_f1": cyber_ner_metrics.get("validation_f1") or 0.8723,
-                    "heldout_test_f1": cyber_ner_metrics.get("heldout_test_f1") or 0.5841,
-                    "challenge_f1": cyber_ner_metrics.get("challenge_f1") or 0.0323,
+                    "accuracy": cyber_ner_metrics.get("accuracy"),
+                    "f1_score": cyber_ner_metrics.get("f1_score"),
+                    "precision": cyber_ner_metrics.get("precision"),
+                    "recall": cyber_ner_metrics.get("recall"),
+                    "validation_f1": cyber_ner_metrics.get("validation_f1"),
+                    "heldout_test_f1": cyber_ner_metrics.get("heldout_test_f1"),
+                    "challenge_f1": cyber_ner_metrics.get("challenge_f1"),
                     "validation_scope": "BOOTSTRAP / HELD-OUT SYNTHETIC + SMALL MANUAL CHALLENGE SET",
-                    "metrics_source": "persisted_disk_artifact",
+                    "metrics_source": "persisted_disk_artifact" if cyber_ner_metrics.get("accuracy") else "NOT_EVALUATED",
                     "limitations": cyber_ner_meta.get("limitations", [
                         "Bootstrap model trained primarily on controlled synthetic complaint-style text.",
                         "Held-out template families reduce leakage but do not replace real field validation."
@@ -221,74 +221,74 @@ class ModelManager:
                     "files_available": (CASE_SIMILARITY_PATH / "model.safetensors").is_file(),
                     "available": (CASE_SIMILARITY_PATH / "model.safetensors").is_file(),
                     "loaded": False,
-                    "state": "READY",
-                    "status": "READY",
+                    "state": "READY" if (CASE_SIMILARITY_PATH / "model.safetensors").is_file() else "MODEL_NOT_DEPLOYED",
+                    "status": "READY" if (CASE_SIMILARITY_PATH / "model.safetensors").is_file() else "UNAVAILABLE",
                     "architecture": "BertModel (sentence-transformers/all-MiniLM-L6-v2)",
                     "version": (load_model_metadata("case_similarity") or {}).get("version", "1.0.0"),
                     "threshold": (load_model_metadata("case_similarity") or {}).get("threshold", 0.55),
-                    "accuracy": (load_model_metrics("case_similarity") or {}).get("accuracy") or 92.5,
-                    "f1_score": (load_model_metrics("case_similarity") or {}).get("f1_score") or 0.895,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": (load_model_metrics("case_similarity") or {}).get("accuracy"),
+                    "f1_score": (load_model_metrics("case_similarity") or {}).get("f1_score"),
+                    "metrics_source": "persisted_disk_artifact" if (load_model_metrics("case_similarity") or {}).get("accuracy") else "NOT_EVALUATED"
                 },
                 "incident_urgency": {
                     "files_available": (INCIDENT_URGENCY_PATH / "model.safetensors").is_file(),
                     "available": (INCIDENT_URGENCY_PATH / "model.safetensors").is_file(),
                     "loaded": False,
-                    "state": "READY",
-                    "status": "READY",
+                    "state": "READY" if (INCIDENT_URGENCY_PATH / "model.safetensors").is_file() else "MODEL_NOT_DEPLOYED",
+                    "status": "READY" if (INCIDENT_URGENCY_PATH / "model.safetensors").is_file() else "UNAVAILABLE",
                     "architecture": "RobertaForSequenceClassification (distilroberta-base)",
                     "version": (load_model_metadata("incident_urgency") or {}).get("version", "3.0.0"),
-                    "accuracy": (load_model_metrics("incident_urgency") or {}).get("accuracy") or 94.1,
-                    "f1_score": (load_model_metrics("incident_urgency") or {}).get("f1_score") or 0.912,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": (load_model_metrics("incident_urgency") or {}).get("accuracy"),
+                    "f1_score": (load_model_metrics("incident_urgency") or {}).get("f1_score"),
+                    "metrics_source": "persisted_disk_artifact" if (load_model_metrics("incident_urgency") or {}).get("accuracy") else "NOT_EVALUATED"
                 },
                 "relation_extraction": {
                     "files_available": (RELATION_EXTRACTION_PATH / "model.safetensors").is_file(),
                     "available": (RELATION_EXTRACTION_PATH / "model.safetensors").is_file(),
                     "loaded": False,
-                    "state": "READY",
-                    "status": "READY",
+                    "state": "READY" if (RELATION_EXTRACTION_PATH / "model.safetensors").is_file() else "MODEL_NOT_DEPLOYED",
+                    "status": "READY" if (RELATION_EXTRACTION_PATH / "model.safetensors").is_file() else "UNAVAILABLE",
                     "architecture": "RobertaForSequenceClassification (distilroberta-base)",
                     "version": (load_model_metadata("relation_extraction") or {}).get("version", "1.0.0"),
-                    "accuracy": (load_model_metrics("relation_extraction") or {}).get("accuracy") or 91.8,
-                    "f1_score": (load_model_metrics("relation_extraction") or {}).get("f1_score") or 0.887,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": (load_model_metrics("relation_extraction") or {}).get("accuracy"),
+                    "f1_score": (load_model_metrics("relation_extraction") or {}).get("f1_score"),
+                    "metrics_source": "persisted_disk_artifact" if (load_model_metrics("relation_extraction") or {}).get("accuracy") else "NOT_EVALUATED"
                 },
                 "cross_case_correlation": {
                     "files_available": (CROSS_CASE_CORRELATION_PATH / "model.safetensors").is_file(),
                     "available": (CROSS_CASE_CORRELATION_PATH / "model.safetensors").is_file(),
                     "loaded": False,
-                    "state": "READY",
-                    "status": "READY",
+                    "state": "READY" if (CROSS_CASE_CORRELATION_PATH / "model.safetensors").is_file() else "MODEL_NOT_DEPLOYED",
+                    "status": "READY" if (CROSS_CASE_CORRELATION_PATH / "model.safetensors").is_file() else "UNAVAILABLE",
                     "architecture": "RobertaForSequenceClassification (distilroberta-base)",
                     "version": (load_model_metadata("cross_case_correlation") or {}).get("version", "1.0.0"),
-                    "accuracy": (load_model_metrics("cross_case_correlation") or {}).get("accuracy") or 90.4,
-                    "f1_score": (load_model_metrics("cross_case_correlation") or {}).get("f1_score") or 0.879,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": (load_model_metrics("cross_case_correlation") or {}).get("accuracy"),
+                    "f1_score": (load_model_metrics("cross_case_correlation") or {}).get("f1_score"),
+                    "metrics_source": "persisted_disk_artifact" if (load_model_metrics("cross_case_correlation") or {}).get("accuracy") else "NOT_EVALUATED"
                 },
                 "evidence_graph_link": {
                     "files_available": (EVIDENCE_GRAPH_LINK_PATH / "evidence_graph_link_model.pt").is_file(),
                     "available": (EVIDENCE_GRAPH_LINK_PATH / "evidence_graph_link_model.pt").is_file(),
                     "loaded": False,
-                    "state": "READY",
-                    "status": "READY",
+                    "state": "READY" if (EVIDENCE_GRAPH_LINK_PATH / "evidence_graph_link_model.pt").is_file() else "MODEL_NOT_DEPLOYED",
+                    "status": "READY" if (EVIDENCE_GRAPH_LINK_PATH / "evidence_graph_link_model.pt").is_file() else "UNAVAILABLE",
                     "architecture": "EvidenceGraphLinkMLP (PyTorch 80-dim)",
                     "version": (load_model_metadata("evidence_graph_link") or {}).get("version", "1.0.0"),
-                    "accuracy": (load_model_metrics("evidence_graph_link") or {}).get("accuracy") or 93.0,
-                    "f1_score": (load_model_metrics("evidence_graph_link") or {}).get("f1_score") or 0.905,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": (load_model_metrics("evidence_graph_link") or {}).get("accuracy"),
+                    "f1_score": (load_model_metrics("evidence_graph_link") or {}).get("f1_score"),
+                    "metrics_source": "persisted_disk_artifact" if (load_model_metrics("evidence_graph_link") or {}).get("accuracy") else "NOT_EVALUATED"
                 },
                 "feedback_gate": {
                     "files_available": (FEEDBACK_GATE_PATH / "feedback_gate_model.pt").is_file(),
                     "available": (FEEDBACK_GATE_PATH / "feedback_gate_model.pt").is_file(),
                     "loaded": False,
-                    "state": "READY",
-                    "status": "READY",
+                    "state": "READY" if (FEEDBACK_GATE_PATH / "feedback_gate_model.pt").is_file() else "MODEL_NOT_DEPLOYED",
+                    "status": "READY" if (FEEDBACK_GATE_PATH / "feedback_gate_model.pt").is_file() else "UNAVAILABLE",
                     "architecture": "FeedbackGateMLP (PyTorch 17-dim + Deterministic Hard Gates)",
                     "version": (load_model_metadata("feedback_gate") or {}).get("version", "1.0.0"),
-                    "accuracy": (load_model_metrics("feedback_gate") or {}).get("accuracy") or 96.2,
-                    "f1_score": (load_model_metrics("feedback_gate") or {}).get("f1_score") or 0.948,
-                    "metrics_source": "persisted_disk_artifact"
+                    "accuracy": (load_model_metrics("feedback_gate") or {}).get("accuracy"),
+                    "f1_score": (load_model_metrics("feedback_gate") or {}).get("f1_score"),
+                    "metrics_source": "persisted_disk_artifact" if (load_model_metrics("feedback_gate") or {}).get("accuracy") else "NOT_EVALUATED"
                 }
             }
         }

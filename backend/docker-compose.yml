@@ -10,24 +10,24 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - APP_ENV=production
-      - DEBUG=false
+      - APP_ENV=${APP_ENV:-production}
+      - DEBUG=${DEBUG:-false}
       - PORT=8000
       - HOST=0.0.0.0
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres_enclave_secure@postgres:5432/ccip_db
-      - SYNC_DATABASE_URL=postgresql://postgres:postgres_enclave_secure@postgres:5432/ccip_db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ccip_db}
+      - SYNC_DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ccip_db}
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
-      - JWT_SECRET_KEY=prod_sovereign_enclave_jwt_key_98421048_production
-      - JWT_REFRESH_SECRET_KEY=prod_sovereign_enclave_refresh_key_71048492_production
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_REFRESH_SECRET_KEY=${JWT_REFRESH_SECRET_KEY}
       - STORAGE_BACKEND=minio
       - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=minioadmin
-      - MINIO_SECRET_KEY=minioadmin_secure_vault
-      - MINIO_BUCKET=ccip-evidence-vault
-      - MINIO_SECURE=false
-      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET:-ccip-evidence-vault}
+      - MINIO_SECURE=${MINIO_SECURE:-false}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,15 +43,15 @@ services:
     container_name: ccip_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ccip_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_enclave_secure
+      POSTGRES_DB: ${POSTGRES_DB:-ccip_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ccip_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ccip_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -61,7 +61,7 @@ services:
     container_name: ccip_redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -76,11 +76,11 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin_secure_vault
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - minio_data:/data
     healthcheck:

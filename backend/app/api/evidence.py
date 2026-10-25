@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
 from app.db.database import get_db
@@ -14,8 +14,10 @@ from app.schemas.evidence import (
 )
 from app.services.evidence_service import evidence_service
 from app.services.document_processor_service import document_processor
-from app.core.permissions import get_current_user
+from app.core.permissions import get_current_user, get_optional_current_user, require_staff
 from app.models.user import User
+from app.models.role import RoleEnum
+from app.models.complaint import Complaint
 from app.models.evidence import Evidence
 from app.models.cyber_entity import CyberEntity
 from app.models.document_processing import DocumentProcessingResult
@@ -27,15 +29,33 @@ router = APIRouter(prefix="/evidence", tags=["Evidence Vault & Document Processi
 async def list_evidence(
     complaint_id: Optional[str] = None,
     case_id: Optional[str] = None,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """List all stored evidence items with SHA-256 integrity seals and processing statuses."""
+    """List all stored evidence items with SHA-256 integrity seals. Citizens only see their own evidence."""
     q = select(Evidence).options(selectinload(Evidence.document_processing))
     if complaint_id:
         q = q.where(Evidence.complaint_id == complaint_id)
     if case_id:
         q = q.where(Evidence.case_id == case_id)
+
+    # Citizen data privacy isolation
+    if current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
+        user_complaints_q = select(Complaint.id).where(
+            or_(
+                Complaint.citizen_id == current_user.id,
+                Complaint.citizen_email == current_user.email.lower()
+            )
+        )
+        user_comp_res = await db.execute(user_complaints_q)
+        user_comp_ids = set(user_comp_res.scalars().all())
+        q = q.where(
+            or_(
+                Evidence.uploaded_by_user_id == current_user.id,
+                Evidence.complaint_id.in_(user_comp_ids)
+            )
+        )
+
     res = await db.execute(q)
     items = res.scalars().all()
     
@@ -60,7 +80,7 @@ async def upload_evidence_file(
     request: Request,
     complaint_id: str = Form(...),
     file: UploadFile = File(...),
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Upload evidence file, record SHA-256 submission integrity seal into Enclave Vault, and trigger automated document processing."""
@@ -99,6 +119,7 @@ async def upload_evidence_file(
 @router.get("/{evidence_id}", response_model=EvidenceResponse)
 async def get_evidence_metadata(
     evidence_id: str,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get metadata, integrity hash, and processing status of an evidence file."""
@@ -107,6 +128,20 @@ async def get_evidence_metadata(
     ev = res.scalars().first()
     if not ev:
         raise HTTPException(status_code=404, detail="Evidence item not found")
+
+    # Citizen data privacy isolation
+    if current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
+        is_owner = False
+        if ev.uploaded_by_user_id and ev.uploaded_by_user_id == current_user.id:
+            is_owner = True
+        elif ev.complaint_id:
+            comp_q = select(Complaint).where(Complaint.id == ev.complaint_id)
+            comp_res = await db.execute(comp_q)
+            comp = comp_res.scalars().first()
+            if comp and (comp.citizen_id == current_user.id or (comp.citizen_email and comp.citizen_email.lower() == current_user.email.lower())):
+                is_owner = True
+        if not is_owner:
+            raise HTTPException(status_code=403, detail="Unauthorized access to evidence metadata")
 
     status = ev.document_processing.processing_status if ev.document_processing else "COMPLETED"
 
@@ -131,7 +166,7 @@ async def get_evidence_metadata(
 async def download_evidence_file(
     evidence_id: str,
     request: Request,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Securely stream file content with tamper audit log recording."""
@@ -161,7 +196,7 @@ async def download_evidence_file(
 async def process_evidence_document(
     evidence_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: User = Depends(require_staff)
 ):
     """Trigger or re-execute document processing pipeline (PDF/DOCX/OCR/PII Redaction/Entities/Gemini)."""
     result = await document_processor.process_evidence(db=db, evidence_id=evidence_id)
@@ -214,9 +249,30 @@ async def process_evidence_document(
 @router.get("/{evidence_id}/processing-result", response_model=DocumentProcessingResultResponse)
 async def get_evidence_processing_result(
     evidence_id: str,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get extraction results, redacted text, Gemini contextual intelligence, and provenance entities for an evidence file."""
+    # Check parent evidence ownership for citizen privacy isolation
+    ev_q = select(Evidence).where(Evidence.id == evidence_id)
+    ev_res = await db.execute(ev_q)
+    ev = ev_res.scalars().first()
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evidence item not found")
+
+    if current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
+        is_owner = False
+        if ev.uploaded_by_user_id and ev.uploaded_by_user_id == current_user.id:
+            is_owner = True
+        elif ev.complaint_id:
+            comp_q = select(Complaint).where(Complaint.id == ev.complaint_id)
+            comp_res = await db.execute(comp_q)
+            comp = comp_res.scalars().first()
+            if comp and (comp.citizen_id == current_user.id or (comp.citizen_email and comp.citizen_email.lower() == current_user.email.lower())):
+                is_owner = True
+        if not is_owner:
+            raise HTTPException(status_code=403, detail="Unauthorized access to evidence processing dossier")
+
     q = select(DocumentProcessingResult).where(DocumentProcessingResult.evidence_id == evidence_id)
     res = await db.execute(q)
     result = res.scalars().first()

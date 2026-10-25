@@ -192,29 +192,41 @@ def load_model_metrics(model_type: str) -> Dict[str, Any]:
             if metrics_file.is_file():
                 with open(metrics_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    metrics["accuracy"] = round(float(data.get("test_accuracy", 0.9836)) * 100, 2)
-                    metrics["f1_score"] = round(float(data.get("test_f1", 0.9783)), 4)
-                    metrics["precision"] = round(float(data.get("test_suspicious_precision", 0.9699)), 4)
-                    metrics["recall"] = round(float(data.get("test_suspicious_recall", 0.9867)), 4)
+                    acc = data.get("test_accuracy")
+                    metrics["accuracy"] = round(float(acc) * 100, 2) if acc is not None else None
+                    f1 = data.get("test_f1")
+                    metrics["f1_score"] = round(float(f1), 4) if f1 is not None else None
+                    prec = data.get("test_suspicious_precision")
+                    metrics["precision"] = round(float(prec), 4) if prec is not None else None
+                    rec = data.get("test_suspicious_recall")
+                    metrics["recall"] = round(float(rec), 4) if rec is not None else None
         elif model_type == "sms_spam":
             metrics_file = SMS_MODEL_PATH / "metrics.json"
             if metrics_file.is_file():
                 with open(metrics_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    metrics["accuracy"] = round(float(data.get("eval_accuracy", 0.9884)) * 100, 2)
-                    metrics["f1_score"] = round(float(data.get("eval_f1", 0.9514)), 4)
-                    metrics["precision"] = round(float(data.get("eval_spam_precision", 0.9888)), 4)
-                    metrics["recall"] = round(float(data.get("eval_spam_recall", 0.9167)), 4)
+                    acc = data.get("eval_accuracy")
+                    metrics["accuracy"] = round(float(acc) * 100, 2) if acc is not None else None
+                    f1 = data.get("eval_f1")
+                    metrics["f1_score"] = round(float(f1), 4) if f1 is not None else None
+                    prec = data.get("eval_spam_precision")
+                    metrics["precision"] = round(float(prec), 4) if prec is not None else None
+                    rec = data.get("eval_spam_recall")
+                    metrics["recall"] = round(float(rec), 4) if rec is not None else None
         elif model_type == "complaint_classifier":
             metrics_file = COMPLAINT_MODEL_PATH / "metrics.json"
             if metrics_file.is_file():
                 with open(metrics_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     test_data = data.get("test", {})
-                    metrics["accuracy"] = round(float(test_data.get("subset_accuracy", 0.9679)) * 100, 2)
-                    metrics["f1_score"] = round(float(test_data.get("macro_f1", 0.9767)), 4)
-                    metrics["precision"] = round(float(test_data.get("macro_precision", 0.9778)), 4)
-                    metrics["recall"] = round(float(test_data.get("macro_recall", 0.9771)), 4)
+                    acc = test_data.get("subset_accuracy")
+                    metrics["accuracy"] = round(float(acc) * 100, 2) if acc is not None else None
+                    f1 = test_data.get("macro_f1")
+                    metrics["f1_score"] = round(float(f1), 4) if f1 is not None else None
+                    prec = test_data.get("macro_precision")
+                    metrics["precision"] = round(float(prec), 4) if prec is not None else None
+                    rec = test_data.get("macro_recall")
+                    metrics["recall"] = round(float(rec), 4) if rec is not None else None
         elif model_type == "url_phishing":
             version_file = URL_MODEL_PATH / "version.txt"
             if version_file.is_file():
@@ -245,13 +257,17 @@ def load_model_metrics(model_type: str) -> Dict[str, Any]:
                     val_data = data.get("validation", {})
                     heldout_data = data.get("heldout_test", {})
                     challenge_data = data.get("challenge", {})
-                    metrics["accuracy"] = round(float(val_data.get("token_accuracy", 0.9552)) * 100, 2)
-                    metrics["f1_score"] = round(float(val_data.get("entity_f1", 0.8723)), 4)
-                    metrics["precision"] = round(float(val_data.get("entity_precision", 0.8341)), 4)
-                    metrics["recall"] = round(float(val_data.get("entity_recall", 0.9141)), 4)
-                    metrics["validation_f1"] = round(float(val_data.get("entity_f1", 0.8723)), 4)
-                    metrics["heldout_test_f1"] = round(float(heldout_data.get("entity_f1", 0.5841)), 4)
-                    metrics["challenge_f1"] = round(float(challenge_data.get("f1", 0.0323)), 4)
+                    acc = val_data.get("token_accuracy")
+                    metrics["accuracy"] = round(float(acc) * 100, 2) if acc is not None else None
+                    f1 = val_data.get("entity_f1")
+                    metrics["f1_score"] = round(float(f1), 4) if f1 is not None else None
+                    prec = val_data.get("entity_precision")
+                    metrics["precision"] = round(float(prec), 4) if prec is not None else None
+                    rec = val_data.get("entity_recall")
+                    metrics["recall"] = round(float(rec), 4) if rec is not None else None
+                    metrics["validation_f1"] = round(float(val_data["entity_f1"]), 4) if "entity_f1" in val_data else None
+                    metrics["heldout_test_f1"] = round(float(heldout_data["entity_f1"]), 4) if "entity_f1" in heldout_data else None
+                    metrics["challenge_f1"] = round(float(challenge_data["f1"]), 4) if "f1" in challenge_data else None
         elif model_type in ["case_similarity", "incident_urgency", "relation_extraction", "cross_case_correlation", "evidence_graph_link", "feedback_gate"]:
             target_dir = ML_MODELS_DIR / model_type
             metrics_file = target_dir / "metrics.json"

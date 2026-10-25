@@ -13,7 +13,7 @@ from app.models.evidence import Evidence
 from app.models.user import User
 from app.models.role import RoleEnum
 from app.schemas.complaint import ComplaintCreateRequest, ComplaintUpdateRequest, ComplaintFrontendSchema
-from app.core.exceptions import NotFoundError, PermissionDeniedError, ValidationError
+from app.core.exceptions import NotFoundError, PermissionDeniedError, ValidationError, AuthenticationError
 from app.services.audit_service import audit_service
 from app.core.logging import logger
 
@@ -24,6 +24,71 @@ class ComplaintService:
         """Generate human-readable reference format e.g. CYBER-2026-9842"""
         rand_num = random.randint(1000, 9999)
         return f"CYBER-2026-{rand_num}"
+
+    @staticmethod
+    def map_to_public_tracking_schema(complaint: Complaint, verified: bool = False) -> dict:
+        """Map Complaint to a strictly minimized public tracking schema.
+        ZERO leak of complainant personal PII, financial details, suspect data,
+        narrative description, investigator internal notes, or raw evidence files.
+        """
+        status_label_map = {
+            "DRAFT": "Draft Saved",
+            "SUBMITTED": "Complaint Received & Sealed",
+            "OPEN": "Complaint Received",
+            "UNDER_REVIEW": "Initial Review in Progress",
+            "TRIAGED": "Intelligence Triaged",
+            "VALIDATED": "Analysis Validated",
+            "CASE_CREATED": "Investigation Case Created",
+            "ASSIGNED": "Assigned to Investigation Unit",
+            "UNDER_INVESTIGATION": "Investigation in Progress",
+            "EVIDENCE_VERIFIED": "Evidence Integrity Verified",
+            "LAW_ENFORCEMENT_DISPATCHED": "Appropriate Action Initiated",
+            "RESOLVED": "Investigation Resolved",
+            "CLOSED": "Case Formally Closed",
+            "CANCELLED": "Complaint Cancelled"
+        }
+
+        status_label = status_label_map.get(complaint.status, complaint.status.replace("_", " ").title())
+
+        # High-level public milestones without private operational data
+        milestones = []
+        if complaint.events:
+            for ev in complaint.events:
+                milestones.append({
+                    "title": ev.title,
+                    "stage": "LIFECYCLE_STAGE",
+                    "state": "COMPLETED",
+                    "timestamp": ev.timestamp
+                })
+        else:
+            milestones.append({
+                "title": "Incident Registered & Cryptographic Seal Applied",
+                "stage": "SUBMITTED",
+                "state": "COMPLETED",
+                "timestamp": complaint.reported_date
+            })
+
+        evidence_count = len(complaint.evidence_files) if complaint.evidence_files else 0
+
+        return {
+            "id": complaint.id,
+            "referenceNumber": complaint.reference_number,
+            "title": f"Incident Record {complaint.reference_number}",
+            "status": complaint.status,
+            "statusLabel": status_label,
+            "category": complaint.category,
+            "reportedDate": complaint.reported_date,
+            "incidentDate": complaint.incident_date,
+            "lastUpdated": complaint.updated_at.strftime("%Y-%m-%d %H:%M:%S UTC") if complaint.updated_at else complaint.reported_date,
+            "timeline": milestones,
+            "trackingVerified": verified,
+            "evidenceCount": evidence_count,
+            "verificationMessage": (
+                "Verified access: Full complaint telemetry available under authorized session."
+                if verified else
+                "Public tracking view: sensitive complainant personal details, financial loss data, suspect records, and evidence files are restricted."
+            )
+        }
 
     @staticmethod
     def map_to_frontend_schema(complaint: Complaint) -> dict:
@@ -54,6 +119,7 @@ class ComplaintService:
         return {
             "id": complaint.id,
             "referenceNumber": complaint.reference_number,
+            "trackingToken": getattr(complaint, "tracking_token", None),
             "title": complaint.title,
             "category": complaint.category,
             "severity": complaint.severity,
@@ -84,10 +150,11 @@ class ComplaintService:
     ) -> Complaint:
         """Create a new citizen complaint and corresponding case."""
         ref_num = ComplaintService.generate_reference_number()
+        tracking_token = f"ccip_trk_{secrets.token_urlsafe(24)}"
         now = datetime.datetime.now(datetime.timezone.utc)
         now_str = now.strftime("%Y-%m-%d %H:%M:%S UTC")
 
-        citizen_name = data.citizenName or (current_user.full_name if current_user else "Elena Rostova")
+        citizen_name = data.citizenName or (current_user.full_name if current_user else "Citizen User")
         citizen_email = data.citizenEmail or (current_user.email if current_user else "citizen@example.com")
         citizen_phone = data.citizenPhone or (current_user.phone_number if current_user else "")
 
@@ -96,6 +163,7 @@ class ComplaintService:
 
         complaint = Complaint(
             reference_number=ref_num,
+            tracking_token=tracking_token,
             citizen_id=current_user.id if current_user else None,
             title=data.title or f"{data.category} Incident Report",
             category=data.category,
@@ -175,7 +243,10 @@ class ComplaintService:
 
     @staticmethod
     async def get_by_id(db: AsyncSession, complaint_id: str, current_user: Optional[User] = None) -> Complaint:
-        """Fetch complaint by ID with RBAC check."""
+        """Fetch full complaint by ID with RBAC check. Requires authenticated user."""
+        if not current_user:
+            raise AuthenticationError("Authentication required to access full complaint dossier")
+
         q = select(Complaint).where(
             or_(Complaint.id == complaint_id, Complaint.reference_number == complaint_id)
         ).options(
@@ -187,11 +258,32 @@ class ComplaintService:
         if not complaint:
             raise NotFoundError(f"Complaint {complaint_id} not found")
 
-        # Citizen data privacy check
-        if current_user and current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
-            if complaint.citizen_id and complaint.citizen_id != current_user.id and complaint.citizen_email.lower() != current_user.email.lower():
+        # Citizen data privacy check: citizens can only view their own complaint
+        if current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
+            is_owner = False
+            if complaint.citizen_id and complaint.citizen_id == current_user.id:
+                is_owner = True
+            elif complaint.citizen_email and complaint.citizen_email.strip().lower() == current_user.email.strip().lower():
+                is_owner = True
+
+            if not is_owner:
                 raise PermissionDeniedError("Access to another citizen's complaint is prohibited")
 
+        return complaint
+
+    @staticmethod
+    async def get_for_tracking(db: AsyncSession, reference_number: str) -> Complaint:
+        """Fetch complaint for public status tracking only. Returns Complaint model to be mapped to minimal public schema."""
+        q = select(Complaint).where(
+            or_(Complaint.reference_number == reference_number, Complaint.id == reference_number)
+        ).options(
+            selectinload(Complaint.events),
+            selectinload(Complaint.evidence_files)
+        )
+        res = await db.execute(q)
+        complaint = res.scalars().first()
+        if not complaint:
+            raise NotFoundError(f"Complaint reference '{reference_number}' not found")
         return complaint
 
     @staticmethod
@@ -205,13 +297,16 @@ class ComplaintService:
         limit: int = 50
     ) -> List[Complaint]:
         """Fetch list of complaints filtered by user role and query parameters."""
+        if not current_user:
+            raise AuthenticationError("Authentication required to list complaints")
+
         q = select(Complaint).options(
             selectinload(Complaint.events),
             selectinload(Complaint.evidence_files)
         ).order_by(desc(Complaint.created_at))
 
         # Enforce Citizen Ownership: Citizens only see their own complaints
-        if current_user and current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
+        if current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
             q = q.where(
                 or_(
                     Complaint.citizen_id == current_user.id,

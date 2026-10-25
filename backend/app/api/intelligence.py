@@ -20,9 +20,10 @@ router = APIRouter(prefix="/intelligence", tags=["Threat Intelligence"])
 
 @router.get("/feeds", response_model=List[ThreatFeedResponse])
 async def get_threat_feeds(
+    current_user: User = Depends(require_specialist),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get active IOC indicators and threat feeds."""
+    """Get active IOC indicators and threat feeds. Restricted to authorized specialists and admins."""
     q = select(ThreatFeed).order_by(desc(ThreatFeed.created_at))
     res = await db.execute(q)
     feeds = res.scalars().all()
@@ -69,6 +70,7 @@ async def create_threat_feed(
 
 @router.get("/correlations", response_model=List[CorrelatedNodeResponse])
 async def get_correlations(
+    current_user: User = Depends(require_specialist),
     db: AsyncSession = Depends(get_db)
 ):
     """Get graph nodes and cross-case connection topology."""

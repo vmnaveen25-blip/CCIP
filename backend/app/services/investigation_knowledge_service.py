@@ -78,5 +78,16 @@ class InvestigationKnowledgeService:
         blocks = [s["content"] for s in matched]
         return "\n\n".join(blocks)
 
+    def get_status(self) -> Dict[str, any]:
+        """Return truthful knowledge base and generative copilot status."""
+        from app.core.config import settings
+        has_gemini = bool(getattr(settings, "GEMINI_API_KEY", None))
+        return {
+            "is_available": has_gemini,
+            "provider": "Google Gemini" if has_gemini else "Sovereign Knowledge/SOP RAG",
+            "model": getattr(settings, "GEMINI_MODEL", "gemini-1.5-pro") if has_gemini else "Deterministic SOP RAG",
+            "sops_loaded": len(APPROVED_SOPS)
+        }
+
 
 investigation_knowledge_service = InvestigationKnowledgeService()

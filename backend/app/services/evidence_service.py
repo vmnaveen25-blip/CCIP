@@ -18,7 +18,7 @@ from app.models.role import RoleEnum
 from app.services.storage_service import storage_service
 from app.services.audit_service import audit_service
 from app.services.malware_service import malware_scanner
-from app.core.exceptions import NotFoundError, PermissionDeniedError, ValidationError
+from app.core.exceptions import NotFoundError, PermissionDeniedError, ValidationError, AuthenticationError
 from app.core.logging import logger
 from app.services.document_processor_service import document_processor
 
@@ -157,6 +157,9 @@ class EvidenceService:
         user_agent: Optional[str] = None
     ) -> Tuple[Evidence, bytes]:
         """Fetch evidence record and its raw binary bytes, logging access in audit trail."""
+        if not current_user:
+            raise AuthenticationError("Authentication required to access evidence files")
+
         q = select(Evidence).where(Evidence.id == evidence_id)
         res = await db.execute(q)
         evidence = res.scalars().first()
@@ -165,7 +168,16 @@ class EvidenceService:
 
         # Citizen privacy check
         if current_user and current_user.role and current_user.role.name == RoleEnum.CITIZEN.value:
-            if evidence.uploaded_by_user_id and evidence.uploaded_by_user_id != current_user.id:
+            is_owner = False
+            if evidence.uploaded_by_user_id and evidence.uploaded_by_user_id == current_user.id:
+                is_owner = True
+            elif evidence.complaint_id:
+                comp_q = select(Complaint).where(Complaint.id == evidence.complaint_id)
+                comp_res = await db.execute(comp_q)
+                comp = comp_res.scalars().first()
+                if comp and (comp.citizen_id == current_user.id or (comp.citizen_email and comp.citizen_email.lower() == current_user.email.lower())):
+                    is_owner = True
+            if not is_owner:
                 raise PermissionDeniedError("Unauthorized access to evidence vault item")
 
         # Log access
@@ -180,6 +192,31 @@ class EvidenceService:
         await db.commit()
 
         file_bytes = await storage_service.get_file_bytes(evidence.storage_key)
+
+        # Recalculate SHA-256 integrity verification
+        import hashlib
+        calculated_sha = hashlib.sha256(file_bytes).hexdigest()
+        if calculated_sha.lower() != evidence.sha256_hash.lower():
+            logger.critical(
+                f"INTEGRITY MISMATCH DETECTED for evidence {evidence.id}! "
+                f"Expected: {evidence.sha256_hash}, Found: {calculated_sha}"
+            )
+            evidence.integrity_status = "INTEGRITY_MISMATCH"
+            evidence.is_verified = False
+            await db.commit()
+            await audit_service.log_event(
+                db=db,
+                actor="SYSTEM_INTEGRITY_MONITOR",
+                action="EVIDENCE_TAMPERING_DETECTED",
+                resource=f"evidence:{evidence.id}",
+                clearance="SYSTEM",
+                user_id=current_user.id if current_user else None,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata={"expected_sha": evidence.sha256_hash, "calculated_sha": calculated_sha}
+            )
+            raise ValidationError("Evidentiary integrity check failed: stored binary checksum mismatch.")
+
         return evidence, file_bytes
 
 

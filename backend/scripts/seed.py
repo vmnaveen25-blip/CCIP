@@ -27,13 +27,28 @@ from app.models.model_registry import ModelRegistry
 from app.models.audit_log import AuditLog
 from app.models.notification import Notification
 from app.core.security import hash_password
+from app.core.config import settings
 from app.core.logging import logger
 
 
 async def seed_database():
+    app_env = os.environ.get("APP_ENV", settings.APP_ENV).lower()
+    allow_demo = (os.environ.get("ALLOW_DEMO_SEEDING", "").lower() in ("true", "1")) or settings.ALLOW_DEMO_SEEDING
+    if app_env in ("production", "prod") and not allow_demo:
+        logger.error(
+            "CRITICAL SECURITY ABORT: Seeding demo accounts is strictly prohibited in production! "
+            "To override for isolated staging tests, explicitly set ALLOW_DEMO_SEEDING=true."
+        )
+        raise RuntimeError("Demo account seeding is prohibited in production environment.")
+
     logger.info("Initializing CCIP Sovereign Enclave Database schema...")
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE complaints ADD COLUMN tracking_token VARCHAR(64)"))
+        except Exception:
+            pass
 
     async with AsyncSessionLocal() as db:
         # 1. ROLES & PERMISSIONS

@@ -52,6 +52,7 @@ class Complaint(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     reference_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
+    tracking_token: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
     citizen_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     
     title: Mapped[str] = mapped_column(String(255), nullable=False)

@@ -29,9 +29,33 @@ class TimelineEventSchema(BaseModel):
     verifiedHash: Optional[str] = None
 
 
+class PublicMilestoneSchema(BaseModel):
+    title: str
+    stage: str
+    state: str  # "COMPLETED", "CURRENT", "PENDING"
+    timestamp: Optional[str] = None
+
+
+class ComplaintPublicTrackingResponse(BaseModel):
+    id: str
+    referenceNumber: str
+    title: str = "Cybercrime Incident Record"
+    status: str
+    statusLabel: str
+    category: str
+    reportedDate: str
+    incidentDate: Optional[str] = None
+    lastUpdated: Optional[str] = None
+    timeline: List[PublicMilestoneSchema] = []
+    trackingVerified: bool = False
+    evidenceCount: int = 0
+    verificationMessage: Optional[str] = None
+
+
 class ComplaintFrontendSchema(BaseModel):
     id: str
     referenceNumber: str
+    trackingToken: Optional[str] = None
     title: str
     category: str
     severity: str

@@ -97,20 +97,25 @@ CCIP/
 
 ---
 
-## 🔑 Demo Role Accounts
+## 🔑 Development & Local Testing Accounts
 
-To seed initial demo accounts with operational telemetry:
+For isolated local testing, initial development roles can be initialized using the backend seed utility:
 ```bash
+# In local development mode:
+npm run setup
+# Or directly via Python venv:
 python backend/scripts/seed.py
 ```
 
-| Operational Role | Email | Password | Clearance Level |
+> **Security Notice:** Demo-account seeding is strictly prohibited in production environments. Passwords for local development accounts are defined via local environment variables or generated during setup. In production, administrative and specialist accounts must be provisioned through secure role-based enrollment with multi-factor authentication (MFA).
+
+| Operational Role | Local Dev Identifier | Clearance Level | Purpose |
 | :--- | :--- | :--- | :--- |
-| **System Admin** | `root@astraea.internal` | `AstraeaEnclave#42` | ROOT ENCLAVE |
-| **Verified Citizen** | `elena.rostova@cyberdefense.org` | `SentinelSafe#2026` | CITIZEN TIER |
-| **Cybercrime Police** | `s.chen@police.gov` | `AstraeaEnclave#42` | LEO TIER 2 |
-| **SOC Specialist** | `a.thorne@astraea.gov` | `AstraeaEnclave#42` | TIER-3 FORENSICS |
-| **AI/ML System Lead** | `m.vance@ai-ops.gov` | `AstraeaEnclave#42` | ML-OPS LEVEL 4 |
+| **System Admin** | `root@astraea.internal` | ROOT ENCLAVE | System governance & access control |
+| **Verified Citizen** | `elena.rostova@cyberdefense.org` | CITIZEN TIER | Citizen complaint intake & status tracking |
+| **Cybercrime Police** | `s.chen@police.gov` | LEO TIER 2 | Law enforcement dispatch (Future module) |
+| **SOC Specialist** | `a.thorne@astraea.gov` | TIER-3 FORENSICS | Forensic analysis & cross-case correlation |
+| **AI/ML System Lead** | `m.vance@ai-ops.gov` | ML-OPS LEVEL 4 | Model registry & continual learning governance |
 
 ---
 
