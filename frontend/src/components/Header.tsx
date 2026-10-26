@@ -71,14 +71,20 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const portals: { id: PortalRole; label: string; sub: string; icon: React.ReactNode; color: string; badge: string }[] = [
-    { id: 'landing',   label: 'Public Portal & Landing', sub: 'Citizen Intake & Radar',         icon: <Globe className="w-4 h-4" />,      color: 'text-primary',   badge: 'PUBLIC' },
     { id: 'citizen',   label: 'Citizen Service Portal',  sub: 'File & Track Incidents',          icon: <UserCheck className="w-4 h-4" />,  color: 'text-soft-green', badge: 'CITIZEN' },
     { id: 'specialist',label: 'Specialist Operations',   sub: 'SOC Telemetry & Workbench',       icon: <Radio className="w-4 h-4" />,      color: 'text-primary',   badge: 'SPEC-OPS' },
     { id: 'aiml',      label: 'AI/ML Maintenance',       sub: 'Model Drift & Continuous Learning',icon: <Cpu className="w-4 h-4" />,       color: 'text-soft-pink', badge: 'DATA-OPS' },
     { id: 'admin',     label: 'Admin & System Health',   sub: 'RBAC Matrices & Enclave Config',  icon: <Lock className="w-4 h-4" />,       color: 'text-soft-lime', badge: 'ROOT' },
   ];
 
-  const currentPortalMeta = portals.find(p => p.id === currentPortal) || portals[0];
+  const currentPortalMeta = portals.find(p => p.id === currentPortal) || (currentPortal === 'landing' ? {
+    id: 'landing' as PortalRole,
+    label: 'Citizen Service Portal',
+    sub: 'Citizen Intake & Radar',
+    icon: <UserCheck className="w-4 h-4" />,
+    color: 'text-soft-green',
+    badge: 'CITIZEN'
+  } : portals[0]);
 
   const getUserInitials = () => {
     const name = currentUser?.full_name || (currentPortal === 'citizen' ? 'Citizen User' : 'Operator');
@@ -168,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
                     Switch Operational Enclave
                   </span>
                   <span className="text-[10px] font-mono text-[#00e676] bg-[#00e676]/10 border border-[#00e676]/25 px-1.5 py-0.5 rounded">
-                    6 ENVIRONMENTS
+                    {portals.length} ENVIRONMENTS
                   </span>
                 </div>
                 <div className="flex flex-col gap-0.5" role="group">

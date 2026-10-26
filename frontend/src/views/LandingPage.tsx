@@ -223,7 +223,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Report cybercrime securely. Support evidence-driven investigation. Enable faster, explainable response.
               </p>
               <p className="text-[#96908C] text-xs sm:text-sm leading-relaxed max-w-xl">
-                An integrated platform for citizens, cybercrime police, cybersecurity specialists and authorized AI/ML operations.
+                An integrated platform for citizens, cybersecurity specialists, and authorized AI/ML operations.
               </p>
             </div>
 

@@ -1,0 +1,18 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\CCIP-main\CCIP-main\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\CCIP-main\CCIP-main\backend
+plugins: anyio-4.14.2, asyncio-1.4.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 7 items
+
+tests/test_investigation_chat.py::test_investigation_conversation_crud PASSED [ 14%]
+tests/test_investigation_chat.py::test_investigation_chat_rbac_citizen_denied PASSED [ 28%]
+tests/test_investigation_chat.py::test_question_aware_context_retrieval PASSED [ 42%]
+tests/test_investigation_chat.py::test_dynamic_suggestions_are_case_grounded PASSED [ 57%]
+tests/test_investigation_chat.py::test_prompt_injection_defense_in_evidence_context PASSED [ 71%]
+tests/test_investigation_chat.py::test_truthful_offline_behavior_no_fake_answers PASSED [ 85%]
+tests/test_investigation_chat.py::test_streaming_chat_success_and_persistence PASSED [100%]
+
+- generated xml file: C:\CCIP-main\CCIP-main\test-results\pytest_chat_suite.xml -
+============================== 7 passed in 3.77s ==============================

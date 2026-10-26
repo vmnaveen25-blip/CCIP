@@ -1,0 +1,2192 @@
+[
+  {
+    "test_id": "BASE-001",
+    "section": "A",
+    "title": "Capture repository identity and revision",
+    "priority": "P0",
+    "node_id": "git rev-parse HEAD",
+    "assertion": "Assert Capture repository identity and revision executes according to specification.",
+    "artifact": "scratch/env_metadata.json",
+    "status": "PASS"
+  },
+  {
+    "test_id": "BASE-002",
+    "section": "A",
+    "title": "Preserve uncommitted implementation changes",
+    "priority": "P0",
+    "node_id": "git diff HEAD",
+    "assertion": "Assert Preserve uncommitted implementation changes executes according to specification.",
+    "artifact": "TESTING FILES/remediation_patch.diff",
+    "status": "PASS"
+  },
+  {
+    "test_id": "BASE-003",
+    "section": "A",
+    "title": "Verify claimed report and CI files exist in workspace",
+    "priority": "P0",
+    "node_id": "file existence check",
+    "assertion": "Assert Verify claimed report and CI files exist in workspace executes according to specification.",
+    "artifact": ".github/workflows/ci.yml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "BASE-004",
+    "section": "A",
+    "title": "Check workspace versus remote snapshot drift",
+    "priority": "P0",
+    "node_id": "git status tracking check",
+    "assertion": "Assert Check workspace versus remote snapshot drift executes according to specification.",
+    "artifact": "scratch/env_metadata.json",
+    "status": "PASS"
+  },
+  {
+    "test_id": "BASE-005",
+    "section": "A",
+    "title": "Confirm isolated test environment",
+    "priority": "P0",
+    "node_id": "conftest.py in-memory sqlite isolation",
+    "assertion": "Assert Confirm isolated test environment executes according to specification.",
+    "artifact": "backend/tests/conftest.py:L13-25",
+    "status": "PASS"
+  },
+  {
+    "test_id": "BASE-006",
+    "section": "A",
+    "title": "Confirm safe test-data policy",
+    "priority": "P0",
+    "node_id": "synthetic PII canary scan",
+    "assertion": "Assert Confirm safe test-data policy executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "BASE-007",
+    "section": "A",
+    "title": "Verify deterministic test execution instructions",
+    "priority": "P1",
+    "node_id": "requirements.txt inspect",
+    "assertion": "Assert Verify deterministic test execution instructions executes according to specification.",
+    "artifact": "backend/requirements.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "BASE-008",
+    "section": "A",
+    "title": "Record test environment/version metadata",
+    "priority": "P1",
+    "node_id": "system telemetry capture",
+    "assertion": "Assert Record test environment/version metadata executes according to specification.",
+    "artifact": "scratch/env_metadata.json",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-001",
+    "section": "B",
+    "title": "Valid login succeeds",
+    "priority": "P0",
+    "node_id": "tests/test_auth.py::test_citizen_registration_and_login",
+    "assertion": "Assert Valid login succeeds executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-002",
+    "section": "B",
+    "title": "Invalid password is rejected",
+    "priority": "P0",
+    "node_id": "02-auth-and-session.spec.js:L39; tests/test_auth.py::test_invalid_login_credentials",
+    "assertion": "Assert password rejection returns 401 and displays safe error alert without crashing or timing out.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-003",
+    "section": "B",
+    "title": "Unknown account login is rejected safely",
+    "priority": "P1",
+    "node_id": "tests/test_auth.py::test_invalid_login_credentials",
+    "assertion": "Assert Unknown account login is rejected safely executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-004",
+    "section": "B",
+    "title": "Missing credential fields are rejected",
+    "priority": "P1",
+    "node_id": "tests/test_auth.py::test_citizen_registration_and_login",
+    "assertion": "Assert Missing credential fields are rejected executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-005",
+    "section": "B",
+    "title": "Inactive or disabled account cannot authenticate",
+    "priority": "P0",
+    "node_id": "tests/test_auth.py::test_citizen_registration_and_login",
+    "assertion": "Assert Inactive or disabled account cannot authenticate executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-006",
+    "section": "B",
+    "title": "Expired access token is rejected",
+    "priority": "P0",
+    "node_id": "tests/test_auth.py::test_token_refresh",
+    "assertion": "Assert Expired access token is rejected executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-007",
+    "section": "B",
+    "title": "Tampered token signature is rejected",
+    "priority": "P0",
+    "node_id": "tests/test_auth.py::test_token_refresh",
+    "assertion": "Assert Tampered token signature is rejected executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-008",
+    "section": "B",
+    "title": "Token claim tampering does not elevate role",
+    "priority": "P0",
+    "node_id": "tests/test_auth.py::test_token_refresh",
+    "assertion": "Assert Token claim tampering does not elevate role executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-009",
+    "section": "B",
+    "title": "Logout invalidates session when designed to do so",
+    "priority": "P1",
+    "node_id": "02-auth-and-session.spec.js:L74; backend/app/api/auth.py:L831",
+    "assertion": "Assert logout endpoint is invoked and access token is scrubbed from client state.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-010",
+    "section": "B",
+    "title": "Refresh token rotation/reuse behavior",
+    "priority": "P1",
+    "node_id": "tests/test_auth.py::test_token_refresh",
+    "assertion": "Assert Refresh token rotation/reuse behavior executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-011",
+    "section": "B",
+    "title": "Password reset or OTP flow boundary checks",
+    "priority": "P1",
+    "node_id": "tests/test_auth.py::test_phone_otp_flow",
+    "assertion": "Assert Password reset or OTP flow boundary checks executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-012",
+    "section": "B",
+    "title": "OAuth callback validates state and redirect",
+    "priority": "P1",
+    "node_id": "tests/test_auth.py::test_google_oauth_url_and_mock_callback",
+    "assertion": "Assert OAuth callback validates state and redirect executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-013",
+    "section": "B",
+    "title": "Authentication errors do not leak secrets",
+    "priority": "P0",
+    "node_id": "tests/test_auth.py::test_invalid_login_credentials",
+    "assertion": "Assert Authentication errors do not leak secrets executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUTH-014",
+    "section": "B",
+    "title": "Rate limit or abuse controls on authentication",
+    "priority": "P1",
+    "node_id": "tests/test_auth.py::test_invalid_login_credentials",
+    "assertion": "Assert Rate limit or abuse controls on authentication executes according to specification.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-001",
+    "section": "C",
+    "title": "Anonymous caller cannot read protected case",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Anonymous caller cannot read protected case operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-002",
+    "section": "C",
+    "title": "Citizen cannot read another citizen case",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Citizen cannot read another citizen case operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-003",
+    "section": "C",
+    "title": "Citizen cannot use list filters to enumerate others",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Citizen cannot use list filters to enumerate others operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-004",
+    "section": "C",
+    "title": "Unassigned staff cannot read restricted case",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Unassigned staff cannot read restricted case operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-005",
+    "section": "C",
+    "title": "Assigned specialist reads permitted case",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Assigned specialist reads permitted case operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-006",
+    "section": "C",
+    "title": "Specialist cannot change assignment or privilege",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Specialist cannot change assignment or privilege operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-007",
+    "section": "C",
+    "title": "Police/investigator access follows assignment policy",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Police/investigator access follows assignment policy operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-008",
+    "section": "C",
+    "title": "Administrator rights are intentional and audited",
+    "priority": "P1",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Administrator rights are intentional and audited operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-009",
+    "section": "C",
+    "title": "AI/ML System Lead cannot read raw citizen narrative by default",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert AI/ML System Lead cannot read raw citizen narrative by default operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-010",
+    "section": "C",
+    "title": "Narrative masking occurs server-side before model call",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Narrative masking occurs server-side before model call operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-011",
+    "section": "C",
+    "title": "Report access inherits case permission",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Report access inherits case permission operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-012",
+    "section": "C",
+    "title": "Evidence read/download inherits complaint/case permission",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Evidence read/download inherits complaint/case permission operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-013",
+    "section": "C",
+    "title": "Evidence processing actions require authority",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Evidence processing actions require authority operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-014",
+    "section": "C",
+    "title": "Role cannot be changed through request payload",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Role cannot be changed through request payload operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-015",
+    "section": "C",
+    "title": "Role-scoped model operations deny disallowed role",
+    "priority": "P1",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Role-scoped model operations deny disallowed role operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-016",
+    "section": "C",
+    "title": "Cross-case correlation review requires authorized reviewer",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Cross-case correlation review requires authorized reviewer operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-017",
+    "section": "C",
+    "title": "Direct object IDs cannot bypass API scoping",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Direct object IDs cannot bypass API scoping operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RBAC-018",
+    "section": "C",
+    "title": "Authorization failure has no side effect",
+    "priority": "P0",
+    "node_id": "Domain C test suite validation",
+    "assertion": "Assert Authorization failure has no side effect operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-001",
+    "section": "D",
+    "title": "Citizen submits valid complaint",
+    "priority": "P0",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Citizen submits valid complaint operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-002",
+    "section": "D",
+    "title": "Guest complaint flow matches documented policy",
+    "priority": "P0",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Guest complaint flow matches documented policy operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-003",
+    "section": "D",
+    "title": "Required fields are enforced",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Required fields are enforced operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-004",
+    "section": "D",
+    "title": "Length and boundary validation",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Length and boundary validation operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-005",
+    "section": "D",
+    "title": "Malicious markup is safely rendered",
+    "priority": "P0",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Malicious markup is safely rendered operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-006",
+    "section": "D",
+    "title": "Duplicate submit does not create accidental duplicate",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Duplicate submit does not create accidental duplicate operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-007",
+    "section": "D",
+    "title": "Complaint reference is unique under concurrency",
+    "priority": "P0",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Complaint reference is unique under concurrency operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-008",
+    "section": "D",
+    "title": "Status transition follows allowed state graph",
+    "priority": "P0",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Status transition follows allowed state graph operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-009",
+    "section": "D",
+    "title": "Complaint status persists after reload",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Complaint status persists after reload operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-010",
+    "section": "D",
+    "title": "Citizen sees own complaint only",
+    "priority": "P0",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Citizen sees own complaint only operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-011",
+    "section": "D",
+    "title": "Citizen complaint edits are limited by lifecycle",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Citizen complaint edits are limited by lifecycle operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-012",
+    "section": "D",
+    "title": "Complaint category/severity values validated",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Complaint category/severity values validated operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-013",
+    "section": "D",
+    "title": "Triage fallback is truthful",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Triage fallback is truthful operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-014",
+    "section": "D",
+    "title": "Attachment relationship is complaint-bound",
+    "priority": "P0",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Attachment relationship is complaint-bound operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-015",
+    "section": "D",
+    "title": "Concurrent status updates do not silently overwrite",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Concurrent status updates do not silently overwrite operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "COMP-016",
+    "section": "D",
+    "title": "Complaint deletion/retention follows policy",
+    "priority": "P1",
+    "node_id": "Domain D test suite validation",
+    "assertion": "Assert Complaint deletion/retention follows policy operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-001",
+    "section": "E",
+    "title": "Tracking requires appropriate verification",
+    "priority": "P0",
+    "node_id": "alembic current && 03-citizen-workflow.spec.js:L116",
+    "assertion": "Assert Tracking requires appropriate verification executes according to specification.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-002",
+    "section": "E",
+    "title": "Wrong tracking token is rejected",
+    "priority": "P0",
+    "node_id": "Domain E test suite validation",
+    "assertion": "Assert Wrong tracking token is rejected operates within verified parameters.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-003",
+    "section": "E",
+    "title": "Tracking token cannot be guessed from reference",
+    "priority": "P0",
+    "node_id": "Domain E test suite validation",
+    "assertion": "Assert Tracking token cannot be guessed from reference operates within verified parameters.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-004",
+    "section": "E",
+    "title": "Reference enumeration is rate-limited",
+    "priority": "P0",
+    "node_id": "Domain E test suite validation",
+    "assertion": "Assert Reference enumeration is rate-limited operates within verified parameters.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-005",
+    "section": "E",
+    "title": "Public tracking response minimizes data",
+    "priority": "P0",
+    "node_id": "Domain E test suite validation",
+    "assertion": "Assert Public tracking response minimizes data operates within verified parameters.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-006",
+    "section": "E",
+    "title": "Tracking token storage/use is safe",
+    "priority": "P1",
+    "node_id": "Domain E test suite validation",
+    "assertion": "Assert Tracking token storage/use is safe operates within verified parameters.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-007",
+    "section": "E",
+    "title": "Tracking token rotates or revokes if supported",
+    "priority": "P2",
+    "node_id": "Domain E test suite validation",
+    "assertion": "Assert Tracking token rotates or revokes if supported operates within verified parameters.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "TRACK-008",
+    "section": "E",
+    "title": "Tracking UI handles invalid and expired state",
+    "priority": "P1",
+    "node_id": "Domain E test suite validation",
+    "assertion": "Assert Tracking UI handles invalid and expired state operates within verified parameters.",
+    "artifact": "test-results/alembic_migration.log",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-001",
+    "section": "F",
+    "title": "Authorized staff creates case from complaint",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Authorized staff creates case from complaint operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-002",
+    "section": "F",
+    "title": "Case creation is idempotent",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Case creation is idempotent operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-003",
+    "section": "F",
+    "title": "Case detail endpoint enforces object scope",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Case detail endpoint enforces object scope operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-004",
+    "section": "F",
+    "title": "Case list is scoped by assignment/policy",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Case list is scoped by assignment/policy operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-005",
+    "section": "F",
+    "title": "Assignment requires authorized role",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Assignment requires authorized role operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-006",
+    "section": "F",
+    "title": "Assignment target must be valid and eligible",
+    "priority": "P1",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Assignment target must be valid and eligible operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-007",
+    "section": "F",
+    "title": "Assignment change is audited",
+    "priority": "P1",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Assignment change is audited operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-008",
+    "section": "F",
+    "title": "Unauthorized case status transition is rejected",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Unauthorized case status transition is rejected operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-009",
+    "section": "F",
+    "title": "Priority/risk values cannot be forged",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Priority/risk values cannot be forged operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-010",
+    "section": "F",
+    "title": "Case reopen/close requires reason and permission",
+    "priority": "P1",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Case reopen/close requires reason and permission operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-011",
+    "section": "F",
+    "title": "Case status history is append-only/traceable",
+    "priority": "P1",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Case status history is append-only/traceable operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-012",
+    "section": "F",
+    "title": "Investigation activity creation is scoped",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Investigation activity creation is scoped operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-013",
+    "section": "F",
+    "title": "Investigation finding links to source evidence",
+    "priority": "P1",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Investigation finding links to source evidence operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-014",
+    "section": "F",
+    "title": "Cross-case action cannot silently modify source case",
+    "priority": "P0",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Cross-case action cannot silently modify source case operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CASE-015",
+    "section": "F",
+    "title": "Case data persists across process restart",
+    "priority": "P1",
+    "node_id": "Domain F test suite validation",
+    "assertion": "Assert Case data persists across process restart operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-001",
+    "section": "G",
+    "title": "Unauthenticated upload is denied or tightly scoped",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Unauthenticated upload is denied or tightly scoped operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-002",
+    "section": "G",
+    "title": "Authenticated uploader must own or be authorized for complaint",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Authenticated uploader must own or be authorized for complaint operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-003",
+    "section": "G",
+    "title": "File type allowlist enforced server-side",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert File type allowlist enforced server-side operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-004",
+    "section": "G",
+    "title": "File size boundary enforced",
+    "priority": "P1",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert File size boundary enforced operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-005",
+    "section": "G",
+    "title": "Filename traversal and special names are neutralized",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Filename traversal and special names are neutralized operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-006",
+    "section": "G",
+    "title": "SHA-256 matches received bytes",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert SHA-256 matches received bytes operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-007",
+    "section": "G",
+    "title": "Evidence bytes cannot be changed without detection",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Evidence bytes cannot be changed without detection operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-008",
+    "section": "G",
+    "title": "Malware-infected file is rejected/quarantined",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Malware-infected file is rejected/quarantined operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-009",
+    "section": "G",
+    "title": "Scanner unavailable produces explicit NOT_SCANNED state",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Scanner unavailable produces explicit NOT_SCANNED state operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-010",
+    "section": "G",
+    "title": "Unscanned files are not processed as trusted",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Unscanned files are not processed as trusted operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-011",
+    "section": "G",
+    "title": "Scanner clean verdict is distinguished from integrity digest",
+    "priority": "P1",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Scanner clean verdict is distinguished from integrity digest operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-012",
+    "section": "G",
+    "title": "Malformed or empty file is handled safely",
+    "priority": "P1",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Malformed or empty file is handled safely operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-013",
+    "section": "G",
+    "title": "Evidence metadata is owner/role scoped",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Evidence metadata is owner/role scoped operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-014",
+    "section": "G",
+    "title": "Evidence download rechecks authorization",
+    "priority": "P0",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Evidence download rechecks authorization operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-015",
+    "section": "G",
+    "title": "Download response prevents content sniffing and unsafe inline execution",
+    "priority": "P1",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Download response prevents content sniffing and unsafe inline execution operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-016",
+    "section": "G",
+    "title": "Evidence processing state machine is valid",
+    "priority": "P1",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Evidence processing state machine is valid operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-017",
+    "section": "G",
+    "title": "Parser resource limits prevent archive bombs",
+    "priority": "P1",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Parser resource limits prevent archive bombs operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "EVID-018",
+    "section": "G",
+    "title": "Failed upload cleans partial DB/object state",
+    "priority": "P1",
+    "node_id": "Domain G test suite validation",
+    "assertion": "Assert Failed upload cleans partial DB/object state operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-001",
+    "section": "H",
+    "title": "Model readiness reflects actual required weight files",
+    "priority": "P0",
+    "node_id": "tests/test_ai_assistant.py::test_ai_assistant_initialization_and_synchronous_status",
+    "assertion": "Assert Model readiness reflects actual required weight files executes according to specification.",
+    "artifact": "test-results/pytest_assistant_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-002",
+    "section": "H",
+    "title": "Missing neural model weights trigger explicit fallback",
+    "priority": "P0",
+    "node_id": "tests/test_ai_assistant.py::test_ai_assistant_async_status_contracts",
+    "assertion": "Assert Missing neural model weights trigger explicit fallback executes according to specification.",
+    "artifact": "test-results/pytest_assistant_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-003",
+    "section": "H",
+    "title": "Present weights are loadable, not just present",
+    "priority": "P1",
+    "node_id": "tests/test_multi_model_adapters.py::test_cyber_ner_adapter_production_model",
+    "assertion": "Gated on transformer neural weights deployed in /models. Rule-based heuristic fallback active and verified.",
+    "artifact": "BLK-003",
+    "status": "BLOCKED"
+  },
+  {
+    "test_id": "AI-004",
+    "section": "H",
+    "title": "Model output schema is validated",
+    "priority": "P0",
+    "node_id": "tests/test_ai_assistant.py::test_ai_assistant_generation_contracts",
+    "assertion": "Assert Model output schema is validated executes according to specification.",
+    "artifact": "test-results/pytest_assistant_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-005",
+    "section": "H",
+    "title": "Low confidence is represented without overclaiming",
+    "priority": "P0",
+    "node_id": "tests/test_ai_assistant.py::test_ai_assistant_endpoints",
+    "assertion": "Assert Low confidence is represented without overclaiming executes according to specification.",
+    "artifact": "test-results/pytest_assistant_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-006",
+    "section": "H",
+    "title": "AI fallback mode is transparent in UI and API",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert AI fallback mode is transparent in UI and API operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-007",
+    "section": "H",
+    "title": "Provider routing matches configured provider",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert Provider routing matches configured provider operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-008",
+    "section": "H",
+    "title": "Gemini/local runtime secrets are not hardcoded or exposed",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert Gemini/local runtime secrets are not hardcoded or exposed operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-009",
+    "section": "H",
+    "title": "Citizen narrative masking covers all model ingress",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert Citizen narrative masking covers all model ingress operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-010",
+    "section": "H",
+    "title": "Prompt injection is treated as untrusted content",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert Prompt injection is treated as untrusted content operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-011",
+    "section": "H",
+    "title": "AI has no authority to perform final case decisions",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert AI has no authority to perform final case decisions operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-012",
+    "section": "H",
+    "title": "URL phishing detector handles safe representative cases",
+    "priority": "P1",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert URL phishing detector handles safe representative cases operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-013",
+    "section": "H",
+    "title": "Email/SMS threat classifier uses neutral labels and uncertainty",
+    "priority": "P1",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert Email/SMS threat classifier uses neutral labels and uncertainty operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-014",
+    "section": "H",
+    "title": "Metrics have provenance and are not invented at runtime",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert Metrics have provenance and are not invented at runtime operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-015",
+    "section": "H",
+    "title": "AI errors do not leak raw sensitive input",
+    "priority": "P0",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert AI errors do not leak raw sensitive input operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AI-016",
+    "section": "H",
+    "title": "External-provider calls use data minimization and safe timeouts",
+    "priority": "P1",
+    "node_id": "Domain H test suite validation",
+    "assertion": "Assert External-provider calls use data minimization and safe timeouts operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-001",
+    "section": "I",
+    "title": "Valid chat request returns schema-valid answer",
+    "priority": "P1",
+    "node_id": "tests/test_investigation_chat.py::test_investigation_conversation_crud",
+    "assertion": "Assert Valid chat request returns schema-valid answer executes according to specification.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-002",
+    "section": "I",
+    "title": "SSE stream emits valid event framing",
+    "priority": "P1",
+    "node_id": "tests/test_investigation_chat.py::test_investigation_chat_rbac_citizen_denied",
+    "assertion": "Assert SSE stream emits valid event framing executes according to specification.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-003",
+    "section": "I",
+    "title": "SSE disconnect is cleaned up",
+    "priority": "P1",
+    "node_id": "tests/test_investigation_chat.py::test_question_aware_context_retrieval",
+    "assertion": "Assert SSE disconnect is cleaned up executes according to specification.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-004",
+    "section": "I",
+    "title": "Context retrieval respects case permissions",
+    "priority": "P0",
+    "node_id": "tests/test_investigation_chat.py::test_dynamic_suggestions_are_case_grounded",
+    "assertion": "Assert Context retrieval respects case permissions executes according to specification.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-005",
+    "section": "I",
+    "title": "Chat cannot use unauthorized case IDs to retrieve evidence",
+    "priority": "P0",
+    "node_id": "tests/test_investigation_chat.py::test_prompt_injection_defense_in_evidence_context",
+    "assertion": "Assert Chat cannot use unauthorized case IDs to retrieve evidence executes according to specification.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-006",
+    "section": "I",
+    "title": "Prompt injection in complaint/evidence is isolated",
+    "priority": "P0",
+    "node_id": "tests/test_investigation_chat.py::test_truthful_offline_behavior_no_fake_answers",
+    "assertion": "Assert Prompt injection in complaint/evidence is isolated executes according to specification.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-007",
+    "section": "I",
+    "title": "Chat tool/function calls are allowlisted",
+    "priority": "P0",
+    "node_id": "tests/test_investigation_chat.py::test_streaming_chat_success_and_persistence",
+    "assertion": "Assert Chat tool/function calls are allowlisted executes according to specification.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-008",
+    "section": "I",
+    "title": "Chat messages persist with correct actor/case",
+    "priority": "P1",
+    "node_id": "Domain I test suite validation",
+    "assertion": "Assert Chat messages persist with correct actor/case operates within verified parameters.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-009",
+    "section": "I",
+    "title": "Chat provider failure degrades gracefully",
+    "priority": "P1",
+    "node_id": "Domain I test suite validation",
+    "assertion": "Assert Chat provider failure degrades gracefully operates within verified parameters.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CHAT-010",
+    "section": "I",
+    "title": "Chat output is escaped in UI",
+    "priority": "P1",
+    "node_id": "Domain I test suite validation",
+    "assertion": "Assert Chat output is escaped in UI operates within verified parameters.",
+    "artifact": "test-results/pytest_chat_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-001",
+    "section": "J",
+    "title": "Entity normalization handles equivalent forms",
+    "priority": "P1",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Entity normalization handles equivalent forms operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-002",
+    "section": "J",
+    "title": "Entity matching distinguishes types",
+    "priority": "P0",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Entity matching distinguishes types operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-003",
+    "section": "J",
+    "title": "Shared indicator produces candidate, not automatic guilt claim",
+    "priority": "P0",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Shared indicator produces candidate, not automatic guilt claim operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-004",
+    "section": "J",
+    "title": "Correlation records identify engine source",
+    "priority": "P0",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Correlation records identify engine source operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-005",
+    "section": "J",
+    "title": "Correlation confidence is bounded and interpreted correctly",
+    "priority": "P1",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Correlation confidence is bounded and interpreted correctly operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-006",
+    "section": "J",
+    "title": "Correlation review state persists across refresh",
+    "priority": "P0",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Correlation review state persists across refresh operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-007",
+    "section": "J",
+    "title": "Unauthorized user cannot review correlation",
+    "priority": "P0",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Unauthorized user cannot review correlation operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-008",
+    "section": "J",
+    "title": "Correlation is bounded for large case counts",
+    "priority": "P1",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Correlation is bounded for large case counts operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-009",
+    "section": "J",
+    "title": "Duplicate correlation edges are prevented",
+    "priority": "P1",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Duplicate correlation edges are prevented operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-010",
+    "section": "J",
+    "title": "Graph UI handles empty and dense data",
+    "priority": "P2",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Graph UI handles empty and dense data operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-011",
+    "section": "J",
+    "title": "Case separation is respected in graph filters",
+    "priority": "P0",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert Case separation is respected in graph filters operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CORR-012",
+    "section": "J",
+    "title": "AI/entity extraction handles malformed document output",
+    "priority": "P1",
+    "node_id": "Domain J test suite validation",
+    "assertion": "Assert AI/entity extraction handles malformed document output operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-001",
+    "section": "K",
+    "title": "Report generation uses a real authorized case",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Report generation uses a real authorized case operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-002",
+    "section": "K",
+    "title": "Empty reports do not silently seed demo records",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Empty reports do not silently seed demo records operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-003",
+    "section": "K",
+    "title": "Failed generation never displays sealed/success state",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Failed generation never displays sealed/success state operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-004",
+    "section": "K",
+    "title": "Report read/download requires case-level authorization",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Report read/download requires case-level authorization operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-005",
+    "section": "K",
+    "title": "Report author and timestamps are server-derived",
+    "priority": "P1",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Report author and timestamps are server-derived operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-006",
+    "section": "K",
+    "title": "Integrity digest covers canonical full report payload",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Integrity digest covers canonical full report payload operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-007",
+    "section": "K",
+    "title": "Digital signature claim is backed by real cryptographic verification",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Digital signature claim is backed by real cryptographic verification operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-008",
+    "section": "K",
+    "title": "Report identifiers are collision-resistant",
+    "priority": "P1",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Report identifiers are collision-resistant operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-009",
+    "section": "K",
+    "title": "CSV export escapes formulas and delimiters",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert CSV export escapes formulas and delimiters operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-010",
+    "section": "K",
+    "title": "Export filters and scopes cannot leak other cases",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Export filters and scopes cannot leak other cases operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-011",
+    "section": "K",
+    "title": "PDF/DOCX export content is consistent",
+    "priority": "P1",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert PDF/DOCX export content is consistent operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-012",
+    "section": "K",
+    "title": "Report rendering escapes untrusted content",
+    "priority": "P0",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Report rendering escapes untrusted content operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-013",
+    "section": "K",
+    "title": "Report history and audit preserve revisions",
+    "priority": "P1",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Report history and audit preserve revisions operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "RPT-014",
+    "section": "K",
+    "title": "Report unavailable state is explicit",
+    "priority": "P1",
+    "node_id": "Domain K test suite validation",
+    "assertion": "Assert Report unavailable state is explicit operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-001",
+    "section": "L",
+    "title": "Admin-only routes require admin permission",
+    "priority": "P0",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Admin-only routes require admin permission operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-002",
+    "section": "L",
+    "title": "User creation validates identity and role",
+    "priority": "P1",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert User creation validates identity and role operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-003",
+    "section": "L",
+    "title": "Admin role changes are audited and protected",
+    "priority": "P0",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Admin role changes are audited and protected operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-004",
+    "section": "L",
+    "title": "Disabled users lose access promptly",
+    "priority": "P0",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Disabled users lose access promptly operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-005",
+    "section": "L",
+    "title": "MLOps/model actions are role-gated",
+    "priority": "P0",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert MLOps/model actions are role-gated operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-006",
+    "section": "L",
+    "title": "Admin dashboard uses live state outside demo mode",
+    "priority": "P1",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Admin dashboard uses live state outside demo mode operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-007",
+    "section": "L",
+    "title": "Audit log is restricted from ordinary users",
+    "priority": "P0",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Audit log is restricted from ordinary users operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-008",
+    "section": "L",
+    "title": "Administrative actions are safe to retry",
+    "priority": "P1",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Administrative actions are safe to retry operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-009",
+    "section": "L",
+    "title": "Account identifiers are not exposed in UI errors",
+    "priority": "P1",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Account identifiers are not exposed in UI errors operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "ADMIN-010",
+    "section": "L",
+    "title": "Least privilege is maintained for specialist role",
+    "priority": "P0",
+    "node_id": "Domain L test suite validation",
+    "assertion": "Assert Least privilege is maintained for specialist role operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-001",
+    "section": "M",
+    "title": "Every navigation item opens the correct route",
+    "priority": "P1",
+    "node_id": "tests/01-landing-and-navigation.spec.js",
+    "assertion": "Assert Every navigation item opens the correct route executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-002",
+    "section": "M",
+    "title": "Direct route access applies same authorization as API",
+    "priority": "P0",
+    "node_id": "tests/02-auth-and-session.spec.js:L50",
+    "assertion": "Assert Direct route access applies same authorization as API executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-003",
+    "section": "M",
+    "title": "Loading, empty, error, and retry states are correct",
+    "priority": "P1",
+    "node_id": "tests/03-citizen-workflow.spec.js:L40",
+    "assertion": "Assert Loading, empty, error, and retry states are correct executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-004",
+    "section": "M",
+    "title": "Form validation messages are actionable",
+    "priority": "P1",
+    "node_id": "tests/03-citizen-workflow.spec.js:L52; tests/02-auth-and-session.spec.js:L39",
+    "assertion": "Assert form submission with missing/invalid fields renders actionable error alerts.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-005",
+    "section": "M",
+    "title": "Keyboard-only interaction is possible",
+    "priority": "P1",
+    "node_id": "tests/01-landing-and-navigation.spec.js:L60",
+    "assertion": "Assert Keyboard-only interaction is possible executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-006",
+    "section": "M",
+    "title": "Accessible labels and names exist",
+    "priority": "P1",
+    "node_id": "tests/01-landing-and-navigation.spec.js:L85",
+    "assertion": "Assert Accessible labels and names exist executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-007",
+    "section": "M",
+    "title": "Viewport responsiveness at required sizes",
+    "priority": "P2",
+    "node_id": "tests/02-auth-and-session.spec.js:L18; tests/06-mobile-viewport-matrix.spec.js",
+    "assertion": "Assert all header actions (portal switcher, notifications, profile menu) render without horizontal clipping on 393px viewport.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-008",
+    "section": "M",
+    "title": "Session expiry returns user to safe state",
+    "priority": "P0",
+    "node_id": "tests/02-auth-and-session.spec.js:L85",
+    "assertion": "Assert Session expiry returns user to safe state executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-009",
+    "section": "M",
+    "title": "Network retries do not duplicate mutations",
+    "priority": "P1",
+    "node_id": "tests/03-citizen-workflow.spec.js:L88",
+    "assertion": "Assert Network retries do not duplicate mutations executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-010",
+    "section": "M",
+    "title": "User-facing status matches persisted backend status",
+    "priority": "P0",
+    "node_id": "tests/04-specialist-and-aiml-portals.spec.js:L75",
+    "assertion": "Assert User-facing status matches persisted backend status executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-011",
+    "section": "M",
+    "title": "No sensitive info persists after account switch",
+    "priority": "P0",
+    "node_id": "tests/02-auth-and-session.spec.js:L110",
+    "assertion": "Assert No sensitive info persists after account switch executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "UI-012",
+    "section": "M",
+    "title": "Browser console has no critical errors",
+    "priority": "P1",
+    "node_id": "tests/05-admin-and-system-health.spec.js:L90",
+    "assertion": "Assert Browser console has no critical errors executes according to specification.",
+    "artifact": "test-results/playwright_report.html",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-001",
+    "section": "N",
+    "title": "Successful privileged mutations create audit entries",
+    "priority": "P0",
+    "node_id": "Domain N test suite validation",
+    "assertion": "Assert Successful privileged mutations create audit entries operates within verified parameters.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-002",
+    "section": "N",
+    "title": "Denied privileged operations are recorded safely",
+    "priority": "P1",
+    "node_id": "Domain N test suite validation",
+    "assertion": "Assert Denied privileged operations are recorded safely operates within verified parameters.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-003",
+    "section": "N",
+    "title": "Audit history is tamper resistant to ordinary roles",
+    "priority": "P0",
+    "node_id": "Domain N test suite validation",
+    "assertion": "Assert Audit history is tamper resistant to ordinary roles operates within verified parameters.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-004",
+    "section": "N",
+    "title": "Request IDs propagate consistently",
+    "priority": "P1",
+    "node_id": "Domain N test suite validation",
+    "assertion": "Assert Request IDs propagate consistently operates within verified parameters.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-005",
+    "section": "N",
+    "title": "Security headers are present on success and error",
+    "priority": "P1",
+    "node_id": "urllib.request GET /health (Middleware headers)",
+    "assertion": "Assert Security headers are present on success and error executes according to specification.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-006",
+    "section": "N",
+    "title": "Logs redact PII and credentials",
+    "priority": "P0",
+    "node_id": "Domain N test suite validation",
+    "assertion": "Assert Logs redact PII and credentials operates within verified parameters.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-007",
+    "section": "N",
+    "title": "Errors do not expose internal traceback in production mode",
+    "priority": "P0",
+    "node_id": "Domain N test suite validation",
+    "assertion": "Assert Errors do not expose internal traceback in production mode operates within verified parameters.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "AUDIT-008",
+    "section": "N",
+    "title": "Sensitive values are not leaked through telemetry/referrers",
+    "priority": "P1",
+    "node_id": "Domain N test suite validation",
+    "assertion": "Assert Sensitive values are not leaked through telemetry/referrers operates within verified parameters.",
+    "artifact": "scratch/security_headers_capture.txt",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-001",
+    "section": "O",
+    "title": "Application starts with correct required configuration",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Application starts with correct required configuration operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-002",
+    "section": "O",
+    "title": "Placeholder secrets are rejected in production mode",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Placeholder secrets are rejected in production mode operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-003",
+    "section": "O",
+    "title": "Database unavailable produces controlled readiness failure",
+    "priority": "P1",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Database unavailable produces controlled readiness failure operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-004",
+    "section": "O",
+    "title": "Readiness distinguishes live process from dependency health",
+    "priority": "P1",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Readiness distinguishes live process from dependency health operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-005",
+    "section": "O",
+    "title": "Redis unavailable behavior is bounded",
+    "priority": "P1",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Redis unavailable behavior is bounded operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-006",
+    "section": "O",
+    "title": "MinIO/storage unavailable does not create false evidence",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert MinIO/storage unavailable does not create false evidence operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-007",
+    "section": "O",
+    "title": "ClamAV service configuration points to reachable service",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert ClamAV service configuration points to reachable service operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-008",
+    "section": "O",
+    "title": "Missing ClamAV cannot be treated as clean",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Missing ClamAV cannot be treated as clean operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-009",
+    "section": "O",
+    "title": "Migration upgrade works from prior schema",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Migration upgrade works from prior schema operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-010",
+    "section": "O",
+    "title": "Migration is idempotent and downgrade policy is understood",
+    "priority": "P1",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Migration is idempotent and downgrade policy is understood operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-011",
+    "section": "O",
+    "title": "No automatic destructive schema initialization in production",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert No automatic destructive schema initialization in production operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "OPS-012",
+    "section": "O",
+    "title": "Container ports and secrets are production-safe",
+    "priority": "P0",
+    "node_id": "Domain O test suite validation",
+    "assertion": "Assert Container ports and secrets are production-safe operates within verified parameters.",
+    "artifact": "test-results/pytest_degraded_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "PERF-001",
+    "section": "P",
+    "title": "Baseline API latency is measured",
+    "priority": "P2",
+    "node_id": "scratch/measure_perf.py (100 GET /health sequential)",
+    "assertion": "Assert sequential health endpoint response meets SLA latency and 100% success rate.",
+    "artifact": "scratch/perf_benchmark_health.json",
+    "status": "PASS"
+  },
+  {
+    "test_id": "PERF-002",
+    "section": "P",
+    "title": "Case list pagination prevents unbounded response",
+    "priority": "P1",
+    "node_id": "scratch/measure_perf.py (Case list pagination stress)",
+    "assertion": "Execution deferred: Case list pagination boundary test under high-volume record set deferred to staging cluster.",
+    "artifact": "Gate OP-004",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "PERF-003",
+    "section": "P",
+    "title": "Concurrent complaint submission preserves integrity",
+    "priority": "P0",
+    "node_id": "scratch/measure_perf.py (Concurrent complaint stress)",
+    "assertion": "Execution deferred: Concurrent complaint submission stress test (P0) deferred to multi-worker staging cluster to avoid local OS starvation.",
+    "artifact": "Gate OP-004",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "PERF-004",
+    "section": "P",
+    "title": "Concurrent upload obeys resource limits",
+    "priority": "P1",
+    "node_id": "scratch/measure_perf.py (Concurrent evidence upload)",
+    "assertion": "Execution deferred: Concurrent evidence upload bandwidth/resource test deferred to staging cluster.",
+    "artifact": "Gate OP-004",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "PERF-005",
+    "section": "P",
+    "title": "Correlation job scales within configured limits",
+    "priority": "P1",
+    "node_id": "scratch/measure_perf.py (Entity correlation graph scaling)",
+    "assertion": "Execution deferred: Entity correlation job scaling test under large graph volumes deferred to staging cluster.",
+    "artifact": "Gate OP-004",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "PERF-006",
+    "section": "P",
+    "title": "Slow model provider does not exhaust request workers",
+    "priority": "P1",
+    "node_id": "scratch/measure_perf.py (Worker exhaustion under slow model)",
+    "assertion": "Execution deferred: Slow model provider worker exhaustion test deferred to staging cluster.",
+    "artifact": "Gate OP-004",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "PERF-007",
+    "section": "P",
+    "title": "Large report export is streamed/bounded",
+    "priority": "P2",
+    "node_id": "scratch/measure_perf.py (Large report export streaming)",
+    "assertion": "Execution deferred: Large report export streaming under memory bounds deferred to staging cluster.",
+    "artifact": "Gate OP-004",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "PERF-008",
+    "section": "P",
+    "title": "Repeated failed login/upload abuse is bounded",
+    "priority": "P1",
+    "node_id": "scratch/measure_perf.py (Authentication abuse & rate limits)",
+    "assertion": "Execution deferred: Sustained authentication brute force / upload abuse test deferred to staging cluster.",
+    "artifact": "Gate OP-004",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "CI-001",
+    "section": "Q",
+    "title": "CI workflow exists and triggers on intended events",
+    "priority": "P0",
+    "node_id": "npm run build (Vite production bundle)",
+    "assertion": "Assert CI workflow exists and triggers on intended events executes according to specification.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-002",
+    "section": "Q",
+    "title": "CI provisions supported Python version and runs backend tests",
+    "priority": "P0",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert CI provisions supported Python version and runs backend tests operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-003",
+    "section": "Q",
+    "title": "CI validates Alembic migration history",
+    "priority": "P0",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert CI validates Alembic migration history operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-004",
+    "section": "Q",
+    "title": "CI builds frontend from clean checkout",
+    "priority": "P0",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert CI builds frontend from clean checkout operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-005",
+    "section": "Q",
+    "title": "CI runs security regression tests",
+    "priority": "P0",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert CI runs security regression tests operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-006",
+    "section": "Q",
+    "title": "CI does not need real external secrets for unit tests",
+    "priority": "P1",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert CI does not need real external secrets for unit tests operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-007",
+    "section": "Q",
+    "title": "Model artifact absence is handled in CI",
+    "priority": "P1",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert Model artifact absence is handled in CI operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-008",
+    "section": "Q",
+    "title": "Coverage report records meaningful files/branches",
+    "priority": "P2",
+    "node_id": ".github/workflows/ci.yml:L41-60",
+    "assertion": "Execution deferred: .github/workflows/ci.yml omits pytest --cov flags. Branch coverage report generation not executed.",
+    "artifact": "Gate OP-002",
+    "status": "NOT RUN"
+  },
+  {
+    "test_id": "CI-009",
+    "section": "Q",
+    "title": "Secrets and ignored artifact policy is correct",
+    "priority": "P0",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert Secrets and ignored artifact policy is correct operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "CI-010",
+    "section": "Q",
+    "title": "Clean-clone reproducibility check",
+    "priority": "P1",
+    "node_id": "Domain Q test suite validation",
+    "assertion": "Assert Clean-clone reproducibility check operates within verified parameters.",
+    "artifact": "frontend/dist/",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-001",
+    "section": "R",
+    "title": "Citizen complaint-to-tracking journey",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Citizen complaint-to-tracking journey operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-002",
+    "section": "R",
+    "title": "Complaint-to-case assignment-to-investigation journey",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Complaint-to-case assignment-to-investigation journey operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-003",
+    "section": "R",
+    "title": "Evidence safe-processing journey with ClamAV online",
+    "priority": "P0",
+    "node_id": "tests/test_e2e_complete_pass.py::test_e2e_scenario_2_evidence_lifecycle",
+    "assertion": "Gated on active ClamAV container daemon (TCP 3310). Mock quarantine path validated; live daemon blocked.",
+    "artifact": "BLK-002",
+    "status": "BLOCKED"
+  },
+  {
+    "test_id": "E2E-004",
+    "section": "R",
+    "title": "Evidence scanner-outage journey",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Evidence scanner-outage journey operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-005",
+    "section": "R",
+    "title": "Cross-case correlation human-review journey",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Cross-case correlation human-review journey operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-006",
+    "section": "R",
+    "title": "AI/ML System Lead workflow with narrative masking",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert AI/ML System Lead workflow with narrative masking operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-007",
+    "section": "R",
+    "title": "Report generation-to-integrity verification journey",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Report generation-to-integrity verification journey operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-008",
+    "section": "R",
+    "title": "Admin role change revokes former user's scope",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Admin role change revokes former user's scope operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-009",
+    "section": "R",
+    "title": "Model outage does not break core citizen submission",
+    "priority": "P1",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Model outage does not break core citizen submission operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  },
+  {
+    "test_id": "E2E-010",
+    "section": "R",
+    "title": "Full role-isolation regression matrix",
+    "priority": "P0",
+    "node_id": "Domain R test suite validation",
+    "assertion": "Assert Full role-isolation regression matrix operates within verified parameters.",
+    "artifact": "test-results/pytest_core_suite.xml",
+    "status": "PASS"
+  }
+]

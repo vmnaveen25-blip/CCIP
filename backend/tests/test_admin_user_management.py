@@ -201,7 +201,7 @@ async def test_admin_update_user_and_role_change_audit(client: AsyncClient):
         "email": "temp.analyst@cyberdefense.org",
         "full_name": "Temporary Analyst",
         "password": "SecurePassword123#",
-        "role": "CITIZEN",
+        "role": "AI_ML_SYSTEM_LEAD",
         "phone_number": "+91 91122 33445"
     }
     create_res = await client.post(
@@ -246,7 +246,7 @@ async def test_admin_suspend_and_activate_user(client: AsyncClient):
         "email": "suspendable@cyberdefense.org",
         "full_name": "Suspendable User",
         "password": "SecurePassword123#",
-        "role": "CITIZEN",
+        "role": "CYBERSECURITY_SPECIALIST",
         "phone_number": "+91 97766 55443"
     }
     create_res = await client.post(
@@ -299,7 +299,7 @@ async def test_disabled_user_behavior(client: AsyncClient):
         "email": "disableable@cyberdefense.org",
         "full_name": "Disableable User",
         "password": "SecurePassword123#",
-        "role": "CITIZEN",
+        "role": "CYBERSECURITY_SPECIALIST",
         "phone_number": "+91 96655 44332"
     }
     create_res = await client.post(
@@ -336,7 +336,7 @@ async def test_admin_get_user_audit_history(client: AsyncClient):
         "email": "audit.target@cyberdefense.org",
         "full_name": "Audit Target User",
         "password": "SecurePassword123#",
-        "role": "CITIZEN",
+        "role": "CYBERSECURITY_SPECIALIST",
         "phone_number": "+91 95544 33221"
     }
     create_res = await client.post(
@@ -377,3 +377,45 @@ async def test_no_sensitive_data_returned(client: AsyncClient):
     forbidden_tokens = ["password_hash", "$argon2", "jwt_secret", "refresh_token", "otp_secret"]
     for tok in forbidden_tokens:
         assert tok not in raw_text
+
+
+@pytest.mark.asyncio
+async def test_admin_cannot_provision_citizen(client: AsyncClient):
+    """Verify that administrators cannot provision Citizen accounts (citizens self-register via public portal)."""
+    token = await get_token(client, "root@astraea.internal")
+    payload = {
+        "email": "public.citizen@example.com",
+        "full_name": "Public Citizen",
+        "password": "SecurePassword123#",
+        "role": "CITIZEN",
+        "phone_number": "+91 91234 56789"
+    }
+    res = await client.post(
+        "/api/v1/admin/users",
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert res.status_code == 400
+    assert "Citizen accounts" in res.json()["detail"] or "citizen" in res.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_admin_cannot_provision_police(client: AsyncClient):
+    """Verify that administrators cannot provision Police accounts."""
+    token = await get_token(client, "root@astraea.internal")
+    payload = {
+        "email": "officer@police.gov",
+        "full_name": "Police Officer",
+        "password": "SecurePassword123#",
+        "role": "CYBERCRIME_POLICE",
+        "phone_number": "+91 91234 56780"
+    }
+    res = await client.post(
+        "/api/v1/admin/users",
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert res.status_code == 400
+    assert "Police accounts" in res.json()["detail"] or "police" in res.json()["detail"].lower()
+
+

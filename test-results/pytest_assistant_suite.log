@@ -1,0 +1,21 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\CCIP-main\CCIP-main\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\CCIP-main\CCIP-main\backend
+plugins: anyio-4.14.2, asyncio-1.4.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 4 items
+
+tests/test_ai_assistant.py::test_ai_assistant_initialization_and_synchronous_status PASSED [ 25%]
+tests/test_ai_assistant.py::test_ai_assistant_async_status_contracts PASSED [ 50%]
+tests/test_ai_assistant.py::test_ai_assistant_generation_contracts PASSED [ 75%]
+tests/test_ai_assistant.py::test_ai_assistant_endpoints PASSED           [100%]
+
+============================== warnings summary ===============================
+tests/test_ai_assistant.py::test_ai_assistant_endpoints
+  C:\Users\Admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\routing.py:352: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return await dependant.call(**values)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\CCIP-main\CCIP-main\test-results\pytest_assistant_suite.xml -
+======================== 4 passed, 1 warning in 2.10s =========================

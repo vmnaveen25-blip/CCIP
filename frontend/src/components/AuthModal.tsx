@@ -311,7 +311,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       Authorized Staff
                     </div>
                     <div className="text-xs text-[#8fa396] truncate mt-0.5">
-                      Police dispatch, SOC analysts &amp; admins
+                      Cybersecurity specialists, SOC analysts &amp; admins
                     </div>
                   </div>
                 </div>

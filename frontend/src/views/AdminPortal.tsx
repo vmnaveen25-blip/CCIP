@@ -3199,7 +3199,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           department_id: undefined,
                           clearance_level: addForm.clearance_level === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
                           badge_number: undefined,
-                          is_staff: addForm.role !== 'CITIZEN'
+                          is_staff: true
                         });
                         setShowAddUserModal(false);
                         fetchUsers();
@@ -3215,7 +3215,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <div className="p-3 rounded-xl bg-[#002619] border border-[#00e676]/30 text-[11px] text-[#8fa396] flex items-start gap-2.5">
                       <ShieldCheck className="w-4 h-4 text-[#00e676] shrink-0 mt-0.5" />
                       <span>
-                        Account permissions are directly governed by the selected CCIP role. An immutable audit entry will be recorded in Audit Logs upon creation.
+                        Provisioning is restricted to official CCIP staff accounts (Specialist, AI/ML, Admin). Citizen accounts register publicly via the citizen portal and cannot be created by administrators. An immutable audit entry will be recorded in Audit Logs upon creation.
                       </span>
                     </div>
 
@@ -3267,16 +3267,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             setAddForm({ 
                               ...addForm, 
                               role: r, 
-                              is_staff: r !== 'CITIZEN'
+                              is_staff: true
                             });
                           }}
                           className="w-full bg-[#06140d] border border-white/[0.1] hover:border-[#00e676]/40 focus:border-[#00e676] rounded-xl px-3 py-2 text-xs text-white focus:outline-none cursor-pointer"
                         >
-                          <option value="CITIZEN">Citizen</option>
                           <option value="CYBERSECURITY_SPECIALIST">Cybersecurity Specialist</option>
                           <option value="AI_ML_SYSTEM_LEAD">AI/ML Engineer</option>
                           <option value="ADMIN">Admin</option>
                         </select>
+                        <p className="text-[10px] text-[#6e8d7a] font-mono mt-1">
+                          Citizen accounts register independently through the public portal.
+                        </p>
                       </div>
 
                       <div>
@@ -4454,7 +4456,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 className="bg-[#141414] border border-white/[0.08] rounded-xl px-3 py-2 text-content-primary font-mono focus:outline-none focus:border-primary"
               >
                 <option value="SPECIALIST_UNIT">Specialist Unit</option>
-                <option value="POLICE_PRECINCT">Police Precinct</option>
+                <option value="FORENSIC_LAB">Forensics & Cyber Lab</option>
                 <option value="GOVERNANCE_CELL">Governance Cell</option>
               </select>
               <button type="submit" className="btn-primary px-4 py-2 rounded-xl font-mono text-xs shrink-0 flex items-center gap-1">

@@ -1,6 +1,6 @@
 # CCIP / Astraea Enclave — Consolidated Release Gate Register
 
-**Document Version:** 2.0.0 (Post-Second-Pass Audit Reconciliation)  
+**Document Version:** 3.0.0 (Post-Third-Pass Audit Reconciliation)  
 **Current Release Status:** `CONDITIONAL GO — NOT CLEARED FOR LIVE DEPLOYMENT`  
 **Purpose:** Consolidated release gate register encompassing all primary deployment blockers and secondary operational readiness gates, responsible owners, risks, and exact closure criteria required prior to live production deployment (addressing finding `REV-013`).
 

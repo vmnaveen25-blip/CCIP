@@ -5,10 +5,16 @@
   "playwright_version": "1.57.0",
   "vite_version": "5.4.19",
   "aiosqlite_version": "0.20.0",
-  "git_head_commit": "883950c8c24b4fd6e54d76691bcc44f658004f62",
+  "git_base_commit": "883950c8c24b4fd6e54d76691bcc44f658004f62",
   "git_branch": "main",
   "remediation_patch": "TESTING FILES/remediation_patch.diff",
-  "patch_sha256_lf": "aa8c4b507d510e7ed4ba38119a083fb1e60050213dadbb411b51c73fbe9f0b90",
-  "patch_sha256_crlf": "ed2bc5131443c44fc7c6b45309ee20ea870450c15b815ebb78910f3b55c65973",
-  "captured_at": "2026-10-25T17:40:00Z"
+  "patch_files": [
+    "backend/tests/conftest.py",
+    "backend/tests/test_ai_assistant.py",
+    "frontend/src/api/client.ts",
+    "frontend/src/components/Header.tsx"
+  ],
+  "patch_sha256_lf": "eb381c53c855cc75f2c38ffd3b7305528454f1861a61da038b0d276ed99a5d51",
+  "patch_sha256_crlf": "2261f2a4149600d29a34eedaba022725d208b5ca24233c7e845a55698bbfe884",
+  "reconciled_at": "2026-10-26T01:30:00Z"
 }

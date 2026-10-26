@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\CCIP-main\CCIP-main\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\CCIP-main\CCIP-main\backend
+plugins: anyio-4.14.2, asyncio-1.4.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 15 items
+
+tests/test_model_degraded_modes.py::test_cyber_ner_rules_only_degraded_mode PASSED [  6%]
+tests/test_model_degraded_modes.py::test_feedback_gate_degraded_hard_gates_remain_active PASSED [ 13%]
+tests/test_model_degraded_modes.py::test_case_similarity_degraded_availability_check PASSED [ 20%]
+tests/test_model_degraded_modes.py::test_incident_urgency_degraded_availability_check PASSED [ 26%]
+tests/test_model_degraded_modes.py::test_relation_extraction_degraded_availability_check PASSED [ 33%]
+tests/test_model_degraded_modes.py::test_cross_case_correlation_degraded_availability_check PASSED [ 40%]
+tests/test_model_degraded_modes.py::test_evidence_graph_link_degraded_availability_check PASSED [ 46%]
+tests/test_multi_model_adapters.py::test_case_similarity_adapter PASSED  [ 53%]
+tests/test_multi_model_adapters.py::test_incident_urgency_adapter PASSED [ 60%]
+tests/test_multi_model_adapters.py::test_relation_extraction_adapter PASSED [ 66%]
+tests/test_multi_model_adapters.py::test_cross_case_correlation_adapter PASSED [ 73%]
+tests/test_multi_model_adapters.py::test_evidence_graph_link_adapter PASSED [ 80%]
+tests/test_multi_model_adapters.py::test_feedback_gate_five_deterministic_hard_gates PASSED [ 86%]
+tests/test_admin_rbac.py::test_ai_adapters_safe_not_available PASSED     [ 93%]
+tests/test_admin_rbac.py::test_citizen_forbidden_from_admin_and_police_apis PASSED [100%]
+
+- generated xml file: C:\CCIP-main\CCIP-main\test-results\pytest_degraded_suite.xml -
+============================= 15 passed in 11.76s =============================

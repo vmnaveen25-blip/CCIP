@@ -275,14 +275,6 @@ class APIClient {
     return await this.request<any>('/auth/me');
   }
 
-  async logout() {
-    try {
-      await this.request<any>('/auth/logout', { method: 'POST' });
-    } finally {
-      this.setToken(null);
-    }
-  }
-
   // COMPLAINT APIS
   async getComplaints(params?: { category?: string; status?: string; search?: string }): Promise<Complaint[]> {
     const query = new URLSearchParams();

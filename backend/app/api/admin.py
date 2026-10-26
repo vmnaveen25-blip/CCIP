@@ -118,7 +118,18 @@ async def create_staff_user(
     current_user: User = Depends(require_admin),
     db: AsyncSession = Depends(get_db)
 ):
-    """Provision user and staff accounts (Specialist, Police, AI Lead, Admin, Citizen)."""
+    """Provision staff accounts (Specialist, AI Lead, Admin). Citizens register publicly and cannot be provisioned by admin."""
+    if req.role and req.role.upper() == RoleEnum.CITIZEN.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Administrators cannot provision Citizen accounts. Citizens register independently via the public citizen portal."
+        )
+    if req.role and req.role.upper() == RoleEnum.CYBERCRIME_POLICE.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Police accounts cannot be provisioned via this portal. Provisioning is restricted to Specialist, AI/ML, and Admin staff."
+        )
+
     existing = await user_service.get_by_email(db, req.email.lower())
     if existing:
         raise HTTPException(status_code=400, detail="User with this email already exists")

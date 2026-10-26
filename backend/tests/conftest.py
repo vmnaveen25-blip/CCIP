@@ -11,6 +11,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
+# Enforce in-memory SQLite isolation before any app module imports
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+os.environ["SYNC_DATABASE_URL"] = "sqlite:///:memory:"
+
 from app.main import app
 from app.db.base import Base
 from app.db.database import get_db

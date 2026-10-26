@@ -67,14 +67,14 @@ All three defects identified during the validation campaign have been remediated
 
 ## 4. Test Suite Counts & Deduplication
 
-In response to finding `AUD-005`, test suite counts are mathematically reconciled by unique AST node IDs:
+In response to findings `AUD-005` and `TPA-002`, test suite counts are mathematically reconciled by unique AST test node IDs and machine-readable JUnit XML outputs:
 
-- **Backend Pytest Inventory (61 unique test nodes across 11 files):**
-  - Investigation Chat Suite: **7 unique tests** in `tests/test_investigation_chat.py` (7 passed in 6.25s).
-  - Core Security & Workflow Suite: **39 unique tests** across 7 files (or 46 tests when the 7 chat tests are included).
-  - Degraded Modes & Adapters Suite: **15 unique tests** across 3 files (15 passed in 8.61s).
-  - Combined unique test nodes: `7 + 39 + 15 = 61 unique test nodes`.
-  - Total raw executions: `46 + 7 + 15 = 68 test executions`.
+- **Backend Pytest Inventory (65 unique test nodes across 12 files):**
+  - Investigation Chat Suite: **7 unique tests** in `tests/test_investigation_chat.py` (7 passed in 3.77s; JUnit XML `pytest_chat_suite.xml`).
+  - Investigation Assistant Suite: **4 unique tests** in `tests/test_ai_assistant.py` (4 passed in 2.10s; JUnit XML `pytest_assistant_suite.xml`, strictly resolving `TPA-001`).
+  - Degraded Modes & Adapters Suite: **15 unique tests** across 3 files (15 passed in 11.76s; JUnit XML `pytest_degraded_suite.xml`).
+  - Core Hardening & Security Suite: **39 unique tests** across 7 files (39 passed in 35.28s; JUnit XML `pytest_core_suite.xml`).
+  - Total deduplicated AST nodes: `7 + 4 + 15 + 39 = 65 unique test nodes` (0 failures, 100% passed).
 - **Frontend Playwright E2E Inventory (35 unique scenarios across 6 files):**
   - Landing & Navigation (Suite 01): 5 scenarios.
   - Auth & Session Management (Suite 02): 4 scenarios (8 executions across Desktop & Mobile).
@@ -82,7 +82,7 @@ In response to finding `AUD-005`, test suite counts are mathematically reconcile
   - Specialist & AI/ML Portals (Suite 04): 3 scenarios.
   - Admin & System Health (Suite 05): 7 scenarios.
   - Backend API Integration (Suite 06): 8 scenarios.
-  - Full suite run: **35/35 PASSED** (4.5 minutes) on Chromium.
+  - Full suite run: **35/35 PASSED** (4.5 minutes on Chromium; 8/8 passed on Mobile Chrome Pixel 5 without layout clipping, resolving `BUG-003`). Real HTML report: [`test-results/playwright_report.html`](file:///c:/CCIP-main/CCIP-main/test-results/playwright_report.html).
 
 ---
 

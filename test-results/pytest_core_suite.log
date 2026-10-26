@@ -1,0 +1,56 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\CCIP-main\CCIP-main\backend\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\CCIP-main\CCIP-main\backend
+plugins: anyio-4.14.2, asyncio-1.4.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 39 items
+
+tests/test_auth.py::test_health_endpoints PASSED                         [  2%]
+tests/test_auth.py::test_citizen_registration_and_login PASSED           [  5%]
+tests/test_auth.py::test_invalid_login_credentials PASSED                [  7%]
+tests/test_auth.py::test_phone_otp_flow PASSED                           [ 10%]
+tests/test_auth.py::test_user_profile_binding_elango PASSED              [ 12%]
+tests/test_auth.py::test_user_profile_binding_second_user PASSED         [ 15%]
+tests/test_auth.py::test_identity_isolation_between_accounts PASSED      [ 17%]
+tests/test_auth.py::test_logout_clears_authenticated_session PASSED      [ 20%]
+tests/test_auth.py::test_duplicate_email_validation PASSED               [ 23%]
+tests/test_auth.py::test_duplicate_phone_validation PASSED               [ 25%]
+tests/test_complaints.py::test_complaint_filing_and_tracking PASSED      [ 28%]
+tests/test_complaints.py::test_evidence_upload_and_sha256 PASSED         [ 30%]
+tests/test_workflow_lifecycle.py::test_full_canonical_case_workflow_lifecycle PASSED [ 33%]
+tests/test_workflow_lifecycle.py::test_invalid_status_transitions_protection PASSED [ 35%]
+tests/test_workflow_lifecycle.py::test_exact_transition_graph_and_reopen_policy PASSED [ 38%]
+tests/test_security_audit_remediation.py::test_public_tracking_data_minimization PASSED [ 41%]
+tests/test_security_audit_remediation.py::test_evidence_cross_citizen_isolation_and_unauth_rejection PASSED [ 43%]
+tests/test_security_audit_remediation.py::test_production_config_rejects_default_secrets PASSED [ 46%]
+tests/test_security_audit_remediation.py::test_seed_script_aborts_in_production PASSED [ 48%]
+tests/test_security_audit_remediation.py::test_url_analyzer_adapter_execution PASSED [ 51%]
+tests/test_security_audit_remediation.py::test_cross_case_correlation_rule_based_fallback_and_review PASSED [ 53%]
+tests/test_security_audit_remediation.py::test_intelligence_feeds_and_correlations_rbac PASSED [ 56%]
+tests/test_security_audit_remediation.py::test_evidence_upload_authorization_and_guest_tokens PASSED [ 58%]
+tests/test_security_audit_remediation.py::test_case_level_and_specialist_scoping_rbac PASSED [ 61%]
+tests/test_security_audit_remediation.py::test_report_generation_and_export_security PASSED [ 64%]
+tests/test_e2e_complete_pass.py::test_e2e_scenario_1_citizen_lifecycle PASSED [ 66%]
+tests/test_e2e_complete_pass.py::test_e2e_scenario_2_police_lifecycle PASSED [ 69%]
+tests/test_e2e_complete_pass.py::test_e2e_scenario_3_specialist_lifecycle PASSED [ 71%]
+tests/test_e2e_complete_pass.py::test_e2e_scenario_4_admin_lifecycle PASSED [ 74%]
+tests/test_e2e_complete_pass.py::test_e2e_scenario_5_aiml_lead_lifecycle PASSED [ 76%]
+tests/test_phase_k_e2e.py::test_complete_phase_k_five_role_e2e_pipeline PASSED [ 79%]
+tests/test_production_hardening.py::test_password_complexity_enforcement PASSED [ 82%]
+tests/test_production_hardening.py::test_brute_force_lockout_policy PASSED [ 84%]
+tests/test_production_hardening.py::test_controlled_state_machine_transitions PASSED [ 87%]
+tests/test_production_hardening.py::test_evidence_file_security_and_versioning PASSED [ 89%]
+tests/test_production_hardening.py::test_notifications_lifecycle PASSED  [ 92%]
+tests/test_production_hardening.py::test_reports_lifecycle_and_exports PASSED [ 94%]
+tests/test_production_hardening.py::test_background_task_lifecycle PASSED [ 97%]
+tests/test_production_hardening.py::test_liveness_and_readiness_probes PASSED [100%]
+
+============================== warnings summary ===============================
+tests/test_production_hardening.py::test_password_complexity_enforcement
+  C:\Users\Admin\AppData\Local\Programs\Python\Python312\Lib\site-packages\starlette\_exception_handler.py:59: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    response = await handler(conn, exc)  # type: ignore[arg-type]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\CCIP-main\CCIP-main\test-results\pytest_core_suite.xml -
+======================= 39 passed, 1 warning in 35.28s ========================

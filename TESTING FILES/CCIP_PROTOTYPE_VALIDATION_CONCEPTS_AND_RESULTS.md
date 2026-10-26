@@ -144,7 +144,7 @@ flowchart LR
 
 ### 3.1 Multi-Layered Validation Strategy
 The validation campaign was conducted across three distinct technical tiers:
-1. **Backend Service & Security Layer:** Evaluated using Pytest 9.1.1 on Python 3.12.7 against an isolated SQLite in-memory database (`sqlite+aiosqlite:///:memory:`). Reconciled test inventory comprises **61 unique test nodes** across 11 test files.
+1. **Backend Service & Security Layer:** Evaluated using Pytest 9.1.1 on Python 3.12.7 against an isolated SQLite in-memory database (`sqlite+aiosqlite:///:memory:`). Reconciled test inventory comprises **65 unique test nodes** across 12 test files.
 2. **Persistence & Build Layer:** Evaluated using Alembic migration head verification (`b4c19d28e7f1`), TypeScript compiler checks (`tsc`), and Vite 5.4.19 production asset bundling (`frontend/dist/` deterministic manifest SHA-256: `7e02f0fc...`).
 3. **Frontend Application & User Journey Layer:** Evaluated using Playwright 1.57.0 driving headless Chromium (1920x1080) and simulated Mobile Chrome (Pixel 5, 393x851 viewport) against active local servers (Vite port 5173, FastAPI port 8000), covering **35 unique test scenarios**.
 
@@ -242,7 +242,7 @@ graph TD
 - **Retest & Regression Evidence:** Verified that calling logout sends the POST request, revokes the session on the backend, removes the access token from local storage, and redirects the citizen/specialist cleanly to the unauthenticated landing view.
 
 ### 5.3 Defect BUG-003: User Profile Menu Overflow on Narrow Mobile Viewports
-- **Test ID:** `UI-004`, `UI-007`
+- **Test ID:** `UI-007` (Viewport responsiveness at required sizes; BUG-003)
 - **Symptom:** In Playwright Mobile Chrome testing (simulating a Google Pixel 5 at 393x851 viewport), clicking `button[aria-label="User profile menu"]` threw an error: `element is outside of the viewport`.
 - **Root Cause Analysis:** In `frontend/src/components/Header.tsx`, the top navigation bar rendered the platform title (`Citizen Cybercrime Intelligence Platform`), the `SOVEREIGN` badge, the portal selector label (`Citizen Service Portal`), and the emergency badge simultaneously. On screens with a width of 393px, this horizontal content forced the right-aligned user profile dropdown button off the visible screen edge.
 - **Remediation Implemented:** Enhanced responsive styling in `frontend/src/components/Header.tsx`:
@@ -258,7 +258,7 @@ graph TD
 
 ### 6.1 Prototype Functional Completeness
 The CCIP / Astraea Enclave codebase has achieved an exceptional level of functional maturity:
-- **Backend Test Suite:** 61 unique test nodes verified across 11 test files (68 raw executions).
+- **Backend Test Suite:** 65 unique test nodes verified across 12 test files (72 raw executions; 100% pass).
 - **Frontend Test Suite:** 35 unique Playwright scenarios passed cleanly across Chromium and Mobile Chrome.
 - **Static Type Safety:** 0 TypeScript compilation errors; 2,488 modules bundled successfully.
 - **Database Migrations:** Schema revision `b4c19d28e7f1` verified; `tracking_token` successfully added to complaints.
