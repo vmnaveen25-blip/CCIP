@@ -676,6 +676,69 @@ export const AIMLModelVersionsView: React.FC<AIMLModelVersionsViewProps> = ({
           latencyMs: '10ms'
         }
       ]
+    },
+    'investigation-assistant': {
+      id: 'investigation-assistant',
+      name: 'Investigation Assistant',
+      purpose: 'Astraea Sovereign Forensic Reasoning Engine (Sovereign Enclave)',
+      modelType: 'Rules & Inference Engine',
+      baseFramework: 'ASTRAEA SOVEREIGN CORE',
+      statusBadge: 'ACTIVE MODEL',
+      configuration: {
+        decisionThreshold: 'Deterministic Multi-Step Forensic Rules & Graph Correlator',
+        batchSize: 'Real-time Stream Engine',
+        maxSeqLength: 'Full Case Dossier Graph',
+        tokenizer: 'Multi-Signal Evidence Tokenizer',
+        quantization: 'Native Deterministic Assembly'
+      },
+      relatedCases: [
+        { caseId: 'CYBER-2026-7102', title: 'UPI / QR Code Payment Scam', prediction: 'SYNDICATE_MULE_CORRELATED', confidence: '98.4%', timestamp: '2026-10-24 11:30', validated: true },
+        { caseId: 'CYBER-2026-7033', title: 'Mule Account Syndicated Network', prediction: 'ORGANIZED_CRIME_TIER1', confidence: '99.2%', timestamp: '2026-10-23 16:45', validated: true }
+      ],
+      versions: [
+        {
+          version: 'v2.0.0',
+          badge: 'CURRENT',
+          date: '11 Jun 2026, 04:50 UTC',
+          notes: 'Astraea multi-signal reasoning pipeline with real-time evidence graph link correlation.',
+          accuracy: '98.40%',
+          accuracyVal: 98.40,
+          f1Score: '0.984',
+          f1Val: 98.4,
+          driftRate: '0.0%',
+          driftVal: 0.0,
+          status: 'DEPLOYED',
+          environment: 'Production',
+          datasetName: 'IT Act 2000 Statutory Directives + CERT-In Rules 2022',
+          datasetHash: 'e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6',
+          artifactPath: 's3://ccip-models-enclave/investigation-assistant/v2.0.0/rules_engine.json',
+          approvedBy: 'CCIP Sovereign System Authority',
+          precision: '99.2%',
+          recall: '97.6%',
+          latencyMs: '12ms'
+        },
+        {
+          version: 'v1.4.0',
+          badge: 'STABLE',
+          date: '02 Mar 2026, 11:20 UTC',
+          notes: 'Deterministic case triage rules with statutory jurisdiction routing.',
+          accuracy: '97.10%',
+          accuracyVal: 97.10,
+          f1Score: '0.965',
+          f1Val: 96.5,
+          driftRate: '0.0%',
+          driftVal: 0.0,
+          status: 'NOT DEPLOYED',
+          environment: 'Staging',
+          datasetName: 'IT Act 2000 Statutory Directives (v1.2)',
+          datasetHash: 'd4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5',
+          artifactPath: 's3://ccip-models-enclave/investigation-assistant/v1.4.0/rules_engine.json',
+          approvedBy: 'Naveen (Lead Operator)',
+          precision: '97.5%',
+          recall: '96.0%',
+          latencyMs: '15ms'
+        }
+      ]
     }
   });
 

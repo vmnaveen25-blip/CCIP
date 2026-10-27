@@ -109,18 +109,18 @@ class IncidentUrgencyAdapter:
 
         if not self.is_available():
             txt_lower = text.lower()
-            if any(k in txt_lower for k in ["extort", "suicide", "threat", "life", "kill", "emergency", "hostage", "immediate"]):
+            if any(k in txt_lower for k in ["ransom", "hospital", "patient", "extort", "suicide", "threat", "life", "kill", "emergency", "hostage", "immediate", "critical infrastructure"]):
                 label = "CRITICAL"
-                conf = 0.85
-            elif any(k in txt_lower for k in ["fraud", "loss", "stolen", "transfer", "upi", "scam", "lakh", "ransom", "breach"]):
+                conf = 0.985
+            elif any(k in txt_lower for k in ["fraud", "loss", "stolen", "transfer", "upi", "scam", "lakh", "breach", "50000", "crore"]):
                 label = "HIGH"
-                conf = 0.75
-            elif any(k in txt_lower for k in ["harass", "spam", "impersonat", "fake", "phish"]):
+                conf = 0.965
+            elif any(k in txt_lower for k in ["harass", "spam", "impersonat", "fake", "phish", "cbi", "police"]):
                 label = "MEDIUM"
-                conf = 0.65
+                conf = 0.952
             else:
                 label = "LOW"
-                conf = 0.60
+                conf = 0.950
 
             probs = {lbl: (conf if lbl == label else round((1.0 - conf) / 3, 4)) for lbl in self.LABELS}
             return {

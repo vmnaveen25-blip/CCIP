@@ -22,7 +22,7 @@ from app.models.threat_intelligence import ThreatFeed, CorrelatedGraphNode
 from app.models.investigation_finding import InvestigationFinding
 from app.models.department import Department
 from app.models.audit_log import AuditLog
-from app.core.permissions import get_current_user, require_specialist, require_police, require_admin
+from app.core.permissions import get_current_user, get_optional_current_user, require_specialist, require_police, require_admin
 from app.services.complaint_service import complaint_service
 from app.ai.model_manager import model_manager
 
@@ -278,7 +278,7 @@ async def get_admin_dashboard_summary(
 # -----------------------------------------------------------------------------
 @router.get("/ai/dashboard-summary")
 async def get_ai_dashboard_summary(
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_optional_current_user)
 ) -> Dict[str, Any]:
     """Returns genuine model registry telemetry and evaluation metrics loaded from disk."""
     status_info = model_manager.get_status()

@@ -110,6 +110,7 @@ export const AIMLDeploymentRollbackView: React.FC<AIMLDeploymentRollbackViewProp
     'CryptoTracer — v4.1-Canary',
     'Email Threat Classifier — v1.0.0',
     'SMS Scam Classifier — v1.0.0',
+    'Investigation Assistant — v2.0.0',
     'Cybercrime Complaint Classifier — v1.1.0',
     'Cyber NER Transformer — v4.0.0',
     'Case Similarity Transformer — v1.0.0',

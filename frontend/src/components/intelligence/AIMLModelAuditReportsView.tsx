@@ -538,6 +538,254 @@ export const AIMLModelAuditReportsView: React.FC<AIMLModelAuditReportsViewProps>
         { name: 'Public bulletin board archive footprint', score: -0.37, formattedScore: '-0.37', direction: 'negative' }
       ],
       explanationSummary: 'Legitimate public bulletin board discussion archive.'
+    },
+
+    // -------------------------------------------------------------------------
+    // Complaint Classifier Audit Records
+    // -------------------------------------------------------------------------
+    {
+      id: 'rec-cc-1',
+      auditId: 'AUD-2025-0312-7011',
+      caseId: 'CR-2026-8821',
+      modelId: 'complaint-classifier',
+      modelName: 'Complaint Classifier',
+      modelVersion: '1.1.0',
+      inputType: 'Complaint',
+      inputDisplay: 'Mule account UPI fraudulent transfer complaint',
+      rawInputSnippet: 'Someone sent a fake QR code and debited 50000 rupees via PhonePe UPI without consent.',
+      timestamp: '12 Jun 2026, 11:15',
+      timestampRaw: '2026-06-12T11:15:00Z',
+      prediction: 'Malicious',
+      riskLevel: 'High',
+      confidence: 0.96,
+      isReviewed: true,
+      reviewedOn: '12 Jun 2026, 11:45',
+      reviewedBy: 'Analyst-01',
+      reviewNotes: 'Verified unauthorized UPI pull transaction matching classic payment redirection fraud.',
+      contributingFactors: [
+        { name: 'Unauthorized debit lure keywords', score: 0.44, formattedScore: '+0.44', direction: 'positive', description: 'DeBERTa detected unapproved payment flow semantics.' },
+        { name: 'Specific financial quantum (> ₹25k)', score: 0.31, formattedScore: '+0.31', direction: 'positive', description: 'High loss threshold triggers urgent police jurisdiction.' },
+        { name: 'Third-party payment gateway indicator', score: 0.18, formattedScore: '+0.18', direction: 'positive', description: 'UPI merchant API identifier flagged in entity list.' }
+      ],
+      explanationSummary: 'Classified under UPI Financial Fraud with 96% confidence based on non-consensual QR code debit language.'
+    },
+    {
+      id: 'rec-cc-2',
+      auditId: 'AUD-2025-0310-7012',
+      caseId: 'CR-2026-7492',
+      modelId: 'complaint-classifier',
+      modelName: 'Complaint Classifier',
+      modelVersion: '1.1.0',
+      inputType: 'Complaint',
+      inputDisplay: 'Police officer digital arrest intimidation narrative',
+      rawInputSnippet: 'Caller claimed to be CBI officer stating a parcel containing narcotics was intercepted in Mumbai airport.',
+      timestamp: '10 Jun 2026, 09:20',
+      timestampRaw: '2026-06-10T09:20:00Z',
+      prediction: 'Critical',
+      riskLevel: 'High',
+      confidence: 0.98,
+      isReviewed: true,
+      reviewedOn: '10 Jun 2026, 09:50',
+      reviewedBy: 'Analyst-02',
+      reviewNotes: 'High-severity digital arrest syndicate operation. Urgent account freeze request issued.',
+      contributingFactors: [
+        { name: 'Law enforcement impersonation semantics', score: 0.52, formattedScore: '+0.52', direction: 'positive', description: 'CBI / police rank impersonation detected.' },
+        { name: 'Contraband parcel coercion tactic', score: 0.38, formattedScore: '+0.38', direction: 'positive', description: 'Classic customs intimidation template.' }
+      ],
+      explanationSummary: 'Triaged as Identity Theft & Extortion under Digital Arrest category requiring immediate 1930 escalation.'
+    },
+
+    // -------------------------------------------------------------------------
+    // Email Threat Classifier Audit Records
+    // -------------------------------------------------------------------------
+    {
+      id: 'rec-em-1',
+      auditId: 'AUD-2026-0610-5011',
+      caseId: 'CYBER-2026-9104',
+      modelId: 'email-threat',
+      modelName: 'Email Threat Classifier',
+      modelVersion: '1.0.0',
+      inputType: 'Email',
+      inputDisplay: 'Urgent Wire Transfer / Fake CFO Mandate',
+      rawInputSnippet: 'Subject: Urgent: Confidential Project Wire Transfer. Please process the attached offshore supplier invoice immediately.',
+      timestamp: '10 Jun 2026, 14:18',
+      timestampRaw: '2026-06-10T14:18:00Z',
+      prediction: 'Malicious',
+      riskLevel: 'High',
+      confidence: 0.98,
+      isReviewed: true,
+      reviewedOn: '10 Jun 2026, 15:00',
+      reviewedBy: 'Analyst-01',
+      reviewNotes: 'Executive impersonation BEC attack originating from typo-squatted executive domain.',
+      contributingFactors: [
+        { name: 'Executive authority pressure cues', score: 0.49, formattedScore: '+0.49', direction: 'positive', description: 'DistilBERT detected high-urgency executive payment directive.' },
+        { name: 'Lookalike sender domain header', score: 0.35, formattedScore: '+0.35', direction: 'positive', description: 'Domain age under 3 days with mismatched SPF/DKIM.' }
+      ],
+      explanationSummary: 'Flagged as BEC / Executive Impersonation threat due to urgent offshore payment request.'
+    },
+    {
+      id: 'rec-em-2',
+      auditId: 'AUD-2026-0608-5012',
+      caseId: 'CYBER-2026-9022',
+      modelId: 'email-threat',
+      modelName: 'Email Threat Classifier',
+      modelVersion: '1.0.0',
+      inputType: 'Email',
+      inputDisplay: 'Internal Architecture Review Slide Deck',
+      rawInputSnippet: 'Good afternoon team, please review the attached slide deck before our 3 PM architecture review.',
+      timestamp: '08 Jun 2026, 11:05',
+      timestampRaw: '2026-06-08T11:05:00Z',
+      prediction: 'Benign',
+      riskLevel: 'Low',
+      confidence: 0.02,
+      isReviewed: true,
+      reviewedOn: '08 Jun 2026, 11:20',
+      reviewedBy: 'Analyst-03',
+      contributingFactors: [
+        { name: 'Standard corporate calendar phrasing', score: -0.46, formattedScore: '-0.46', direction: 'negative', description: 'Internal team cadence language.' }
+      ],
+      explanationSummary: 'Verified safe internal communication with zero deceptive heuristics.'
+    },
+
+    // -------------------------------------------------------------------------
+    // SMS Scan Classifier Audit Records
+    // -------------------------------------------------------------------------
+    {
+      id: 'rec-sms-1',
+      auditId: 'AUD-2026-0608-4011',
+      caseId: 'CR-2026-6104',
+      modelId: 'sms-scam',
+      modelName: 'SMS Scan Classifier',
+      modelVersion: '1.0.0',
+      inputType: 'SMS',
+      inputDisplay: 'Electricity Bill Power Cut Disconnection Smish',
+      rawInputSnippet: 'Dear consumer, your electricity power will be disconnected tonight at 9:30 PM due to unpaid bill. Call officer immediately at 9876543210.',
+      timestamp: '08 Jun 2026, 16:40',
+      timestampRaw: '2026-06-08T16:40:00Z',
+      prediction: 'Spam',
+      riskLevel: 'High',
+      confidence: 0.99,
+      isReviewed: true,
+      reviewedOn: '08 Jun 2026, 17:10',
+      reviewedBy: 'Analyst-01',
+      reviewNotes: 'Known power disconnection smishing campaign active across northern state grids.',
+      contributingFactors: [
+        { name: 'Disconnection deadline threat cue', score: 0.51, formattedScore: '+0.51', direction: 'positive', description: 'Urgent shutoff intimidation vocabulary.' },
+        { name: 'Personal mobile number as support line', score: 0.36, formattedScore: '+0.36', direction: 'positive', description: 'Lack of official IVR or toll-free helpline.' }
+      ],
+      explanationSummary: 'Detected high-confidence smishing attempt targeting utility bill panic.'
+    },
+
+    // -------------------------------------------------------------------------
+    // Investigation Assistant Audit Records
+    // -------------------------------------------------------------------------
+    {
+      id: 'rec-ia-1',
+      auditId: 'AUD-2026-0611-3011',
+      caseId: 'CR-2026-7033',
+      modelId: 'investigation-assistant',
+      modelName: 'Investigation Assistant',
+      modelVersion: 'v2.0.0',
+      inputType: 'Case Vectors',
+      inputDisplay: 'Cross-Jurisdiction Syndicate Link Correlator',
+      rawInputSnippet: 'Mule bank account ICICI-9821034421 shared between Bangalore and Delhi cyber cells.',
+      timestamp: '11 Jun 2026, 16:50',
+      timestampRaw: '2026-06-11T16:50:00Z',
+      prediction: 'Linked',
+      riskLevel: 'High',
+      confidence: 0.98,
+      isReviewed: true,
+      reviewedOn: '11 Jun 2026, 17:15',
+      reviewedBy: 'Analyst-01',
+      reviewNotes: 'Cross-case correlation established 4 interconnected complaint nodes sharing single UPI endpoint.',
+      contributingFactors: [
+        { name: 'Exact Bank Account & IFSC collision', score: 0.58, formattedScore: '+0.58', direction: 'positive', description: 'Deterministic rule matched 4 separate FIR filings.' },
+        { name: 'Temporal proximity within 48 hours', score: 0.28, formattedScore: '+0.28', direction: 'positive', description: 'Rapid fund dispersion pattern.' }
+      ],
+      explanationSummary: 'Astraea sovereign rules engine linked 4 interstate complaints into a unified cyber syndicate dossier.'
+    },
+
+    // -------------------------------------------------------------------------
+    // Cyber NER Transformer Audit Records
+    // -------------------------------------------------------------------------
+    {
+      id: 'rec-ner-1',
+      auditId: 'AUD-2026-0603-2011',
+      caseId: 'CYBER-2026-8842',
+      modelId: 'cyber-ner',
+      modelName: 'Cyber NER Transformer',
+      modelVersion: 'cyber-ner-bootstrap-v4.0.0',
+      inputType: 'OSINT Text',
+      inputDisplay: 'Malware C2 & Crypto Ransomware IOC Extraction',
+      rawInputSnippet: 'Attacker hosted C2 on 198.51.100.24 and requested 0.45 BTC to 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa.',
+      timestamp: '03 Jun 2026, 16:30',
+      timestampRaw: '2026-06-03T16:30:00Z',
+      prediction: 'Malicious',
+      riskLevel: 'High',
+      confidence: 0.95,
+      isReviewed: true,
+      reviewedOn: '03 Jun 2026, 17:00',
+      reviewedBy: 'Analyst-02',
+      contributingFactors: [
+        { name: 'IPv4 C2 Address Token Span', score: 0.47, formattedScore: '+0.47', direction: 'positive', description: 'Identified actionable C2 host IP.' },
+        { name: 'Bitcoin Base58 Wallet Address Token Span', score: 0.44, formattedScore: '+0.44', direction: 'positive', description: 'Recognized crypto ledger destination.' }
+      ],
+      explanationSummary: 'Extracted 2 critical indicators (IP_ADDRESS and CRYPTO_WALLET) with high span confidence.'
+    },
+
+    // -------------------------------------------------------------------------
+    // Case Similarity Transformer Audit Records
+    // -------------------------------------------------------------------------
+    {
+      id: 'rec-cs-1',
+      auditId: 'AUD-2026-0601-1011',
+      caseId: 'CR-2026-8821',
+      modelId: 'case-similarity',
+      modelName: 'Case Similarity Transformer',
+      modelVersion: 'case-similarity-bootstrap-v1.0.0',
+      inputType: 'Case Vectors',
+      inputDisplay: 'Fake Courier Customs Impersonation Narrative Pair',
+      rawInputSnippet: 'Victim received an automated call claiming customs confiscated a courier with illegal contraband in Mumbai.',
+      timestamp: '01 Jun 2026, 10:00',
+      timestampRaw: '2026-06-01T10:00:00Z',
+      prediction: 'Linked',
+      riskLevel: 'Medium',
+      confidence: 0.92,
+      isReviewed: true,
+      reviewedOn: '01 Jun 2026, 10:30',
+      reviewedBy: 'Analyst-03',
+      contributingFactors: [
+        { name: 'all-MiniLM-L6-v2 Cosine Similarity: 0.88', score: 0.48, formattedScore: '+0.48', direction: 'positive', description: 'Dense embedding vectors exhibit close angular proximity.' }
+      ],
+      explanationSummary: 'Semantic cosine similarity matched case with 6 other courier customs complaints across Karnataka and Maharashtra.'
+    },
+
+    // -------------------------------------------------------------------------
+    // Incident Urgency Classifier Audit Records
+    // -------------------------------------------------------------------------
+    {
+      id: 'rec-iu-1',
+      auditId: 'AUD-2026-0528-0911',
+      caseId: 'CR-2026-7492',
+      modelId: 'incident-urgency',
+      modelName: 'Incident Urgency Classifier',
+      modelVersion: 'incident-urgency-v1.0.0',
+      inputType: 'Complaint',
+      inputDisplay: 'Ongoing Active Ransomware Encryption Alert',
+      rawInputSnippet: 'All departmental hospital servers are encrypted with .lock extension and demanding 50 BTC. Intensive Care patient systems offline.',
+      timestamp: '28 May 2026, 15:45',
+      timestampRaw: '2026-05-28T15:45:00Z',
+      prediction: 'Critical',
+      riskLevel: 'High',
+      confidence: 0.99,
+      isReviewed: true,
+      reviewedOn: '28 May 2026, 15:55',
+      reviewedBy: 'Analyst-01',
+      contributingFactors: [
+        { name: 'Critical infrastructure healthcare impact', score: 0.58, formattedScore: '+0.58', direction: 'positive', description: 'Life-safety critical systems offline.' },
+        { name: 'Active ongoing ransomware encryption', score: 0.39, formattedScore: '+0.39', direction: 'positive', description: 'Zero-hour emergency dispatch required.' }
+      ],
+      explanationSummary: 'Classified as CRITICAL urgency requiring instant CERT-In national cyber incident response.'
     }
   ]);
 
@@ -550,11 +798,6 @@ export const AIMLModelAuditReportsView: React.FC<AIMLModelAuditReportsViewProps>
   // Review Status toggle / modal
   const [isEditReviewOpen, setIsEditReviewOpen] = useState<boolean>(false);
   const [editNotes, setEditNotes] = useState<string>('');
-
-  // The active selected record
-  const selectedRecord = useMemo(() => {
-    return records.find(r => r.id === selectedRecordId) || records[0];
-  }, [records, selectedRecordId]);
 
   // Filtered list
   const filteredRecords = useMemo(() => {
@@ -585,6 +828,11 @@ export const AIMLModelAuditReportsView: React.FC<AIMLModelAuditReportsViewProps>
       return b.timestampRaw.localeCompare(a.timestampRaw);
     });
   }, [records, selectedModelFilter, searchQuery, sortBy]);
+
+  // The active selected record (defaults to active filtered match)
+  const selectedRecord = useMemo(() => {
+    return filteredRecords.find(r => r.id === selectedRecordId) || filteredRecords[0] || records[0];
+  }, [filteredRecords, records, selectedRecordId]);
 
   // Handle Review Status update
   const handleSaveReview = () => {
@@ -650,6 +898,13 @@ export const AIMLModelAuditReportsView: React.FC<AIMLModelAuditReportsViewProps>
                 className="bg-transparent text-xs font-mono text-white font-medium focus:outline-none cursor-pointer w-full appearance-none pr-6"
               >
                 <option value="url-phishing" className="bg-[#0b1410] text-white">URL Phishing Detector</option>
+                <option value="complaint-classifier" className="bg-[#0b1410] text-white">Complaint Classifier</option>
+                <option value="email-threat" className="bg-[#0b1410] text-white">Email Threat Classifier</option>
+                <option value="sms-scam" className="bg-[#0b1410] text-white">SMS Scan Classifier</option>
+                <option value="investigation-assistant" className="bg-[#0b1410] text-white">Investigation Assistant</option>
+                <option value="cyber-ner" className="bg-[#0b1410] text-white">Cyber NER Transformer</option>
+                <option value="case-similarity" className="bg-[#0b1410] text-white">Case Similarity Transformer</option>
+                <option value="incident-urgency" className="bg-[#0b1410] text-white">Incident Urgency Classifier</option>
                 <option value="all" className="bg-[#0b1410] text-white">All Registered Models (8)</option>
               </select>
             </div>

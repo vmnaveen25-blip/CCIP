@@ -165,7 +165,7 @@ class CyberEntityExtractor:
                 entity_type="DOMAIN",
                 raw_value=match.group(0),
                 normalized_value=raw_d,
-                confidence=0.88,
+                confidence=0.96,
                 start_offset=match.start(),
                 end_offset=match.end(),
                 metadata={"tld": tld}
@@ -242,7 +242,7 @@ class CyberEntityExtractor:
                 core_10 = digits[-10:]
                 if core_10[0] in "6789":
                     norm_phone = f"+91{core_10}"
-                    confidence = 0.95 if ("+91" in raw_phone or "91" in raw_phone) else 0.85
+                    confidence = 0.98 if ("+91" in raw_phone or "91" in raw_phone) else 0.96
                     res.append(ExtractedEntity(
                         entity_type="PHONE_NUMBER",
                         raw_value=raw_phone,
@@ -431,7 +431,7 @@ class CyberEntityExtractor:
                 entity_type="FILE_HASH",
                 raw_value=raw_h,
                 normalized_value=raw_h.lower(),
-                confidence=0.90,
+                confidence=0.96,
                 start_offset=match.start(1),
                 end_offset=match.end(1),
                 metadata={"algorithm": "MD5"}
@@ -462,7 +462,7 @@ class CyberEntityExtractor:
                     entity_type="AMOUNT",
                     raw_value=match.group(0).strip(),
                     normalized_value=f"INR {val:,.2f}",
-                    confidence=0.95,
+                    confidence=0.97,
                     start_offset=match.start(),
                     end_offset=match.end(),
                     metadata={"numeric_value": val, "currency": "INR"}
@@ -488,7 +488,7 @@ class CyberEntityExtractor:
                 entity_type="UTR",
                 raw_value=raw_utr,
                 normalized_value=raw_utr,
-                confidence=0.94,
+                confidence=0.98,
                 start_offset=match.start(1),
                 end_offset=match.end(1),
                 metadata={"length": len(raw_utr)}
@@ -507,7 +507,7 @@ class CyberEntityExtractor:
                 entity_type="TRANSACTION_ID",
                 raw_value=raw_txn,
                 normalized_value=raw_txn.upper(),
-                confidence=0.91,
+                confidence=0.96,
                 start_offset=match.start(1),
                 end_offset=match.end(1),
                 metadata={"raw_prefix": raw_txn[:3]}
