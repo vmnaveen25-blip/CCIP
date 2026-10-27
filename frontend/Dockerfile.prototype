@@ -1,0 +1,31 @@
+# ==============================================================================
+# CCIP Prototype Frontend — Multi-Stage Build with Reverse Proxy
+# ==============================================================================
+
+# Stage 1: Build Vite Static Assets
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy application source and build production bundle
+COPY . .
+RUN npm run build
+
+# Stage 2: Nginx Web Server with /api/v1 Reverse Proxy
+FROM nginx:alpine
+
+# Copy built production assets
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Install custom Nginx reverse proxy configuration
+COPY nginx.prototype.conf /etc/nginx/conf.d/default.conf
+
+# Expose HTTP port
+EXPOSE 80
+
+# Start Nginx in foreground
+CMD ["nginx", "-g", "daemon off;"]

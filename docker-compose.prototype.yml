@@ -1,0 +1,129 @@
+# ==============================================================================
+# CCIP — Local Prototype Deployment Compose Configuration
+# All external port bindings are strictly bound to 127.0.0.1 (localhost only).
+# Uses frontend/Dockerfile.prototype with Nginx reverse proxy for /api/v1 calls.
+# ==============================================================================
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prototype
+    container_name: ccip_prototype_frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ccip_prototype_backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - DEBUG=${DEBUG:-false}
+      - PORT=8000
+      - HOST=0.0.0.0
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-ccip_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ccip_db}
+      - SYNC_DATABASE_URL=postgresql://${POSTGRES_USER:-ccip_admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ccip_db}
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_REFRESH_SECRET_KEY=${JWT_REFRESH_SECRET_KEY}
+      - STORAGE_BACKEND=minio
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET:-ccip-evidence-vault}
+      - MINIO_SECURE=${MINIO_SECURE:-false}
+      - MALWARE_SCANNER_TYPE=${MALWARE_SCANNER_TYPE:-clamav}
+      - CLAMAV_HOST=clamav
+      - CLAMAV_PORT=3310
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      - ALLOW_DEMO_SEEDING=${ALLOW_DEMO_SEEDING:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./backend/storage_vault:/app/storage_vault
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ccip_prototype_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ccip_db}
+      POSTGRES_USER: ${POSTGRES_USER:-ccip_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_prototype_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ccip_admin} -d ${POSTGRES_DB:-ccip_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ccip_prototype_redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_prototype_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-05-10T01-41-38Z}
+    container_name: ccip_prototype_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "127.0.0.1:${MINIO_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_prototype_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  clamav:
+    image: clamav/clamav:1.2_base
+    container_name: ccip_prototype_clamav
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CLAMAV_PORT:-3310}:3310"
+    volumes:
+      - clamav_prototype_data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdscan", "--version"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres_prototype_data:
+  redis_prototype_data:
+  minio_prototype_data:
+  clamav_prototype_data:

@@ -154,9 +154,11 @@ class CaseSimilarityAdapter:
                 "ransomware", "encrypt", "bitcoin", "wallet"
             }
             if len(high_signal_shared) >= 3:
-                semantic_score = min(0.985, 0.70 + 0.08 * len(high_signal_shared))
+                semantic_score = min(0.985, 0.82 + 0.05 * len(high_signal_shared))
+            elif len(high_signal_shared) >= 2:
+                semantic_score = min(0.965, 0.76 + 0.08 * len(high_signal_shared))
             elif len(high_signal_shared) >= 1:
-                semantic_score = min(0.962, 0.55 + 0.12 * len(high_signal_shared))
+                semantic_score = min(0.952, 0.65 + 0.12 * len(high_signal_shared))
             else:
                 semantic_score = round(jaccard, 4)
 

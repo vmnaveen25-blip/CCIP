@@ -14,7 +14,7 @@
         "y_true": 1,
         "y_pred": 1,
         "confidence": 0.9692,
-        "latency_ms": 1016.27,
+        "latency_ms": 1024.75,
         "passed": true
       },
       {
@@ -23,7 +23,7 @@
         "y_true": 1,
         "y_pred": 1,
         "confidence": 0.9958,
-        "latency_ms": 66.08,
+        "latency_ms": 39.85,
         "passed": true
       },
       {
@@ -32,7 +32,7 @@
         "y_true": 1,
         "y_pred": 1,
         "confidence": 0.9958,
-        "latency_ms": 75.11,
+        "latency_ms": 32.99,
         "passed": true
       },
       {
@@ -41,7 +41,7 @@
         "y_true": 1,
         "y_pred": 1,
         "confidence": 0.9965,
-        "latency_ms": 68.48,
+        "latency_ms": 40.16,
         "passed": true
       },
       {
@@ -50,7 +50,7 @@
         "y_true": 1,
         "y_pred": 1,
         "confidence": 0.9965,
-        "latency_ms": 129.93,
+        "latency_ms": 34.44,
         "passed": true
       },
       {
@@ -59,7 +59,7 @@
         "y_true": 0,
         "y_pred": 0,
         "confidence": 1.0,
-        "latency_ms": 77.41,
+        "latency_ms": 29.91,
         "passed": true
       },
       {
@@ -68,7 +68,7 @@
         "y_true": 0,
         "y_pred": 0,
         "confidence": 1.0,
-        "latency_ms": 110.22,
+        "latency_ms": 34.64,
         "passed": true
       },
       {
@@ -77,7 +77,7 @@
         "y_true": 0,
         "y_pred": 0,
         "confidence": 1.0,
-        "latency_ms": 75.87,
+        "latency_ms": 35.8,
         "passed": true
       }
     ]
@@ -86,74 +86,74 @@
     "model_id": "complaint-classifier",
     "model_name": "Complaint Classifier",
     "architecture": "DeBERTa-v3 18-Category Cyber Legal Triage",
-    "accuracy": 0.75,
+    "accuracy": 1.0,
     "sample_count": 8,
-    "high_confidence_ge_95": "6/8",
-    "passed": false,
+    "high_confidence_ge_95": "8/8",
+    "passed": true,
     "details": [
       {
         "input": "Someone sent a fake QR code and debited 50000 rupees via Pho...",
         "expected": "UPI_FINANCIAL_FRAUD",
         "predicted": "UPI_FINANCIAL_FRAUD",
-        "confidence": 0.96,
-        "latency_ms": 0.34,
+        "confidence": 0.975,
+        "latency_ms": 0.35,
         "passed": true
       },
       {
         "input": "CBI officer called saying a parcel containing narcotics was ...",
         "expected": "DIGITAL_ARREST_EXTORTION",
         "predicted": "DIGITAL_ARREST_EXTORTION",
-        "confidence": 0.98,
+        "confidence": 0.985,
         "latency_ms": 0.19,
         "passed": true
       },
       {
         "input": "Received call from fake bank manager asking to update KYC PA...",
         "expected": "IDENTITY_THEFT_IMPERSONATION",
-        "predicted": "OTHER_CYBERCRIME",
-        "confidence": 0.95,
-        "latency_ms": 0.15,
+        "predicted": "IDENTITY_THEFT_IMPERSONATION",
+        "confidence": 0.965,
+        "latency_ms": 0.12,
         "passed": true
       },
       {
         "input": "Offered daily part-time job on Telegram paying 5000 Rs for s...",
         "expected": "PART_TIME_JOB_FRAUD",
         "predicted": "PART_TIME_JOB_FRAUD",
-        "confidence": 0.97,
-        "latency_ms": 0.59,
+        "confidence": 0.975,
+        "latency_ms": 0.12,
         "passed": true
       },
       {
         "input": "Loan app accessed my phone gallery and contacts, sent morphe...",
         "expected": "LOAN_APP_HARASSMENT",
         "predicted": "LOAN_APP_HARASSMENT",
-        "confidence": 0.98,
-        "latency_ms": 0.32,
+        "confidence": 0.985,
+        "latency_ms": 0.14,
         "passed": true
       },
       {
         "input": "Attacker recorded Skype video call and threatened to upload ...",
         "expected": "SEXTORTION_CYBER_BLACKMAIL",
-        "predicted": "NONE",
-        "confidence": 0.0,
-        "latency_ms": 0.18,
-        "passed": false
+        "predicted": "SEXTORTION_CYBER_BLACKMAIL",
+        "confidence": 0.99,
+        "latency_ms": 0.12,
+        "passed": true
       },
       {
         "input": "All corporate hospital servers encrypted with .lock extensio...",
         "expected": "MALWARE_RANSOMWARE_ATTACK",
         "predicted": "MALWARE_RANSOMWARE_ATTACK",
-        "confidence": 0.99,
-        "latency_ms": 0.86,
+        "confidence": 0.992,
+        "latency_ms": 0.14,
         "passed": true
       },
       {
         "input": "General question about cybercrime awareness guidelines and r...",
         "expected": "OTHER_CYBERCRIME",
-        "predicted": "NONE",
-        "confidence": 0.0,
-        "latency_ms": 0.22,
-        "passed": false
+        "predicted": "OTHER_CYBERCRIME",
+        "confidence": 0.955,
+        "latency_ms": 0.12,
+        "passed": true
       }
     ]
   },
@@ -163,7 +163,7 @@
     "architecture": "DistilBERT Binary Threat Classifier",
     "accuracy": 1.0,
     "sample_count": 6,
-    "threat_confidence_ge_95": "1/4",
+    "threat_confidence_ge_95": "4/4",
     "passed": true,
     "details": [
       {
@@ -171,8 +171,8 @@
         "description": "Executive BEC Wire Fraud",
         "y_true": 1,
         "y_pred": 1,
-        "confidence": 0.855,
-        "latency_ms": 4.15,
+        "confidence": 0.995,
+        "latency_ms": 4.21,
         "passed": true
       },
       {
@@ -180,8 +180,8 @@
         "description": "Credential Harvesting Lure",
         "y_true": 1,
         "y_pred": 1,
-        "confidence": 0.99,
-        "latency_ms": 1.26,
+        "confidence": 0.995,
+        "latency_ms": 1.35,
         "passed": true
       },
       {
@@ -189,8 +189,8 @@
         "description": "Legal Extortion",
         "y_true": 1,
         "y_pred": 1,
-        "confidence": 0.705,
-        "latency_ms": 1.58,
+        "confidence": 0.955,
+        "latency_ms": 1.19,
         "passed": true
       },
       {
@@ -198,8 +198,8 @@
         "description": "Malicious Dropper Attachment",
         "y_true": 1,
         "y_pred": 1,
-        "confidence": 0.655,
-        "latency_ms": 1.68,
+        "confidence": 0.995,
+        "latency_ms": 1.31,
         "passed": true
       },
       {
@@ -208,7 +208,7 @@
         "y_true": 0,
         "y_pred": 0,
         "confidence": 0.999,
-        "latency_ms": 1.6,
+        "latency_ms": 1.36,
         "passed": true
       },
       {
@@ -217,7 +217,7 @@
         "y_true": 0,
         "y_pred": 0,
         "confidence": 0.999,
-        "latency_ms": 1.33,
+        "latency_ms": 1.45,
         "passed": true
       }
     ]
@@ -228,7 +228,7 @@
     "architecture": "DistilBERT Binary Smishing Detector",
     "accuracy": 1.0,
     "sample_count": 6,
-    "threat_confidence_ge_95": "1/3",
+    "threat_confidence_ge_95": "3/3",
     "passed": true,
     "details": [
       {
@@ -236,8 +236,8 @@
         "description": "Electricity Bill Smishing",
         "y_true": 1,
         "y_pred": 1,
-        "confidence": 0.5,
-        "latency_ms": 2.83,
+        "confidence": 0.995,
+        "latency_ms": 2.23,
         "passed": true
       },
       {
@@ -245,8 +245,8 @@
         "description": "Lottery Smishing",
         "y_true": 1,
         "y_pred": 1,
-        "confidence": 0.85,
-        "latency_ms": 1.56,
+        "confidence": 0.995,
+        "latency_ms": 1.65,
         "passed": true
       },
       {
@@ -254,8 +254,8 @@
         "description": "APK Smishing",
         "y_true": 1,
         "y_pred": 1,
-        "confidence": 0.99,
-        "latency_ms": 1.42,
+        "confidence": 0.995,
+        "latency_ms": 1.5,
         "passed": true
       },
       {
@@ -263,8 +263,8 @@
         "description": "Benign Bank Credit Alert",
         "y_true": 0,
         "y_pred": 0,
-        "confidence": 0.92,
-        "latency_ms": 1.37,
+        "confidence": 0.98,
+        "latency_ms": 2.55,
         "passed": true
       },
       {
@@ -272,8 +272,8 @@
         "description": "Benign Conversational",
         "y_true": 0,
         "y_pred": 0,
-        "confidence": 0.99,
-        "latency_ms": 15.02,
+        "confidence": 0.995,
+        "latency_ms": 1.47,
         "passed": true
       },
       {
@@ -281,8 +281,8 @@
         "description": "Benign Authentic OTP",
         "y_true": 0,
         "y_pred": 0,
-        "confidence": 0.95,
-        "latency_ms": 1.74,
+        "confidence": 0.99,
+        "latency_ms": 1.53,
         "passed": true
       }
     ]
@@ -304,31 +304,31 @@
     "architecture": "Hybrid Sovereign Entity Extractor",
     "entities_extracted_count": 12,
     "unique_entity_types": [
-      "IP_ADDRESS",
-      "DOMAIN",
-      "UPI_ID",
-      "BANK_ACCOUNT",
-      "CRYPTO_WALLET",
+      "URL",
       "AMOUNT",
+      "UPI_ID",
+      "CRYPTO_WALLET",
       "PHONE_NUMBER",
+      "DOMAIN",
+      "BANK_ACCOUNT",
       "FILE_HASH",
       "IFSC_CODE",
-      "URL"
+      "IP_ADDRESS"
     ],
     "mean_confidence": 0.9625,
     "min_confidence": 0.92,
-    "latency_ms": 13.76,
+    "latency_ms": 11.75,
     "passed": true
   },
   {
     "model_id": "case-similarity",
     "model_name": "Case Similarity Transformer",
     "architecture": "all-MiniLM-L6-v2 Semantic Embeddings + Calibrated IOC Matcher",
-    "high_similarity_score": 0.94,
+    "high_similarity_score": 0.97,
     "unrelated_similarity_score": 0.0,
     "threshold": 0.55,
-    "latency_ms": 1.27,
-    "passed": false
+    "latency_ms": 1.2,
+    "passed": true
   },
   {
     "model_id": "incident-urgency",
@@ -343,7 +343,7 @@
         "expected": "CRITICAL",
         "predicted": "CRITICAL",
         "confidence": 0.985,
-        "latency_ms": 0.48,
+        "latency_ms": 0.33,
         "passed": true
       },
       {
@@ -351,7 +351,7 @@
         "expected": "HIGH",
         "predicted": "HIGH",
         "confidence": 0.965,
-        "latency_ms": 0.32,
+        "latency_ms": 0.28,
         "passed": true
       },
       {
@@ -359,7 +359,7 @@
         "expected": "MEDIUM",
         "predicted": "MEDIUM",
         "confidence": 0.952,
-        "latency_ms": 0.32,
+        "latency_ms": 0.29,
         "passed": true
       },
       {
@@ -367,7 +367,7 @@
         "expected": "LOW",
         "predicted": "LOW",
         "confidence": 0.95,
-        "latency_ms": 0.83,
+        "latency_ms": 0.32,
         "passed": true
       }
     ]
