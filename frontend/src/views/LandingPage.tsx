@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PortalRole, Complaint, UserProfile } from '../types';
 import { 
   Shield, 
@@ -65,6 +65,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [quickTrackId, setQuickTrackId] = useState('');
   const [showTrackModal, setShowTrackModal] = useState(false);
   const [trackError, setTrackError] = useState('');
+
+  // When landing page is mounted/redirected, close any existing active session immediately
+  useEffect(() => {
+    if (currentUser && onLogout) {
+      onLogout();
+    }
+  }, []);
 
   const toggleFaq = (index: number) => {
     setActiveFaq(prev => prev === index ? null : index);
@@ -151,7 +158,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <button onClick={() => scrollToSection('how-it-works')} className="hover:text-white transition-colors">
               How It Works
             </button>
-            <button onClick={() => onNavigatePortal('citizen', 'file-complaint')} className="hover:text-white transition-colors">
+            <button 
+              onClick={() => onOpenAuth ? onOpenAuth('citizen-login') : onNavigatePortal('citizen', 'file-complaint')} 
+              className="hover:text-white transition-colors cursor-pointer"
+            >
               Report Cybercrime
             </button>
             <button onClick={() => scrollToSection('capabilities')} className="hover:text-white transition-colors">
@@ -165,32 +175,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </button>
           </nav>
 
-          {/* Right Action CTAs */}
+          {/* Right Action CTAs - Prompt to Sign In */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button 
-              onClick={() => onNavigatePortal('citizen', 'file-complaint')}
-              className="bg-gradient-to-r from-[#00e676] to-[#00c853] hover:brightness-110 text-[#031508] text-xs font-bold px-3.5 sm:px-4 py-2.5 rounded-md flex items-center gap-1.5 shadow-[0_0_20px_rgba(0,230,118,0.35)] transition duration-200"
+              onClick={() => onOpenAuth ? onOpenAuth('selection') : onNavigatePortal('citizen')}
+              className="bg-gradient-to-r from-[#00e676] to-[#00c853] hover:brightness-110 text-[#031508] text-xs font-bold px-4 sm:px-5 py-2.5 rounded-md flex items-center gap-2 shadow-[0_0_20px_rgba(0,230,118,0.35)] transition duration-200 cursor-pointer"
             >
-              <Megaphone className="w-3.5 h-3.5" />
-              <span>Report Cybercrime</span>
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
             </button>
-            {currentUser ? (
-              <button 
-                onClick={() => onNavigatePortal(currentUser.portal_role || 'citizen')}
-                className="border border-primary/30 hover:border-primary/60 text-primary bg-primary/10 hover:bg-primary/20 text-xs font-semibold px-3 sm:px-3.5 py-2.5 rounded-md flex items-center gap-1.5 transition duration-200"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                <span>Dashboard ({currentUser.full_name?.trim().split(/\s+/)[0] || 'User'})</span>
-              </button>
-            ) : (
-              <button 
-                onClick={() => onOpenAuth ? onOpenAuth('selection') : onNavigatePortal('citizen')}
-                className="border border-white/15 hover:border-white/30 text-[#F8F7F5] bg-white/[0.03] hover:bg-white/[0.08] text-xs font-semibold px-3 sm:px-3.5 py-2.5 rounded-md flex items-center gap-1.5 transition duration-200"
-              >
-                <LogIn className="w-3.5 h-3.5 text-[#96908C]" />
-                <span>Sign In</span>
-              </button>
-            )}
           </div>
         </div>
       </header>
@@ -227,33 +220,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-3.5 pt-2">
-              <button
-                onClick={() => onNavigatePortal('citizen', 'file-complaint')}
-                className="bg-gradient-to-r from-[#00e676] to-[#00c853] hover:brightness-110 text-[#031508] text-xs font-bold px-6 py-3.5 rounded-md flex items-center gap-2 shadow-[0_0_20px_rgba(0,230,118,0.35)] transition-all"
-              >
-                <Megaphone className="w-4 h-4" />
-                <span>Report Cybercrime</span>
-              </button>
-              {currentUser ? (
-                <button
-                  onClick={() => onNavigatePortal(currentUser.portal_role || 'citizen')}
-                  className="border border-primary/40 hover:border-primary/60 text-white bg-primary/20 hover:bg-primary/30 text-xs font-semibold px-6 py-3.5 rounded-md flex items-center gap-2 transition-all shadow-sm"
-                >
-                  <ShieldCheck className="w-4 h-4 text-primary" />
-                  <span>Enter Dashboard ({currentUser.full_name?.trim().split(/\s+/)[0] || 'User'})</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => onOpenAuth ? onOpenAuth('selection') : onNavigatePortal('citizen')}
-                  className="border border-white/20 hover:border-white/40 text-white bg-white/[0.04] hover:bg-white/[0.09] text-xs font-semibold px-6 py-3.5 rounded-md flex items-center gap-2 transition-all"
-                >
-                  <LogIn className="w-4 h-4 text-[#96908C]" />
-                  <span>Sign In</span>
-                </button>
-              )}
-            </div>
 
             {/* Trust Micro-Badges */}
             <div className="pt-4 flex flex-wrap items-center gap-5 text-xs text-[#96908C] border-t border-white/5">
@@ -1083,8 +1049,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button onClick={() => scrollToSection('hero')} className="hover:text-white transition">Terms</button>
               <button onClick={() => scrollToSection('faq')} className="hover:text-white transition">Help</button>
               <button onClick={() => scrollToSection('safety-guidance')} className="hover:text-white transition">Safety Guidance</button>
-              <button onClick={() => onOpenAuth ? onOpenAuth('selection') : onNavigatePortal('citizen')} className="hover:text-white transition">Sign In</button>
-              <button onClick={() => onNavigatePortal('citizen', 'file-complaint')} className="hover:text-[#00e676] transition">File Complaint</button>
+              <button onClick={() => onOpenAuth ? onOpenAuth('selection') : onNavigatePortal('citizen')} className="hover:text-white transition cursor-pointer">Sign In</button>
+              <button onClick={() => onOpenAuth ? onOpenAuth('citizen-login') : onNavigatePortal('citizen', 'file-complaint')} className="hover:text-[#00e676] transition cursor-pointer">File Complaint</button>
             </nav>
 
             {/* Right: Disclaimer */}

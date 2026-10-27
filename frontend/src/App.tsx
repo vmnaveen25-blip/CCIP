@@ -310,6 +310,13 @@ export const App: React.FC = () => {
         }
       }
 
+      // When on the landing page, close session and enforce explicit sign-in
+      if (currentPortal === 'landing') {
+        apiClient.setToken(null);
+        setCurrentUser(null);
+        return;
+      }
+
       const token = apiClient.getToken();
       if (token) {
         try {
@@ -323,13 +330,6 @@ export const App: React.FC = () => {
           apiClient.setToken(null);
           setCurrentUser(null);
         }
-      } else {
-        try {
-          const me = await apiClient.getMe();
-          if (me && me.id) {
-            setCurrentUser(me);
-          }
-        } catch {}
       }
     };
     restoreSession();
@@ -394,6 +394,18 @@ export const App: React.FC = () => {
   };
 
   const handleSelectPortal = (portal: PortalRole, initialTab?: string) => {
+    if (portal === 'landing') {
+      // Accidental or deliberate redirection to landing page: terminate session immediately
+      handleLogout();
+      return;
+    }
+
+    if (!currentUser) {
+      // Must not open until user signs in again
+      handleOpenAuth(portal === 'citizen' ? 'citizen-login' : 'selection');
+      return;
+    }
+
     setCurrentPortal(portal);
     // New key triggers page-enter animation
     setPortalKey(`${portal}-${Date.now()}`);
@@ -405,7 +417,6 @@ export const App: React.FC = () => {
         case 'specialist': setActiveTab('intel-overview');    break;
         case 'aiml':       setActiveTab('ai-dashboard');      break;
         case 'admin':      setActiveTab('admin-dashboard');   break;
-        case 'landing':
         default:           setActiveTab('landing-overview');  break;
       }
     }
@@ -427,6 +438,10 @@ export const App: React.FC = () => {
         setSelectedCaseId(found.id);
       }
     }
+    if (!currentUser) {
+      handleOpenAuth('citizen-login');
+      return;
+    }
     setCurrentPortal('citizen');
     setActiveTab('track-status');
   };
@@ -434,6 +449,10 @@ export const App: React.FC = () => {
   const handleSelectCase = (caseId: string) => {
     setSelectedCaseId(caseId);
     if (currentPortal === 'landing') {
+      if (!currentUser) {
+        handleOpenAuth('citizen-login');
+        return;
+      }
       setCurrentPortal('citizen');
       setActiveTab('track-status');
     }

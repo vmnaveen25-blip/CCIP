@@ -22,7 +22,9 @@ export interface Complaint {
     | 'Ransomware / Extortion'
     | 'Deepfake / AI Fraud'
     | 'Cyber Stalking'
-    | 'Unauthorized Access';
+    | 'Unauthorized Access'
+    | 'Others'
+    | (string & {});
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   status: 
     | 'DRAFT'

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Complaint, UserProfile } from '../../types';
 import { apiClient } from '../../api/client';
 import { 
@@ -28,7 +28,11 @@ import {
   AlertCircle,
   FileCheck,
   User,
-  X
+  X,
+  Eye,
+  ZoomIn,
+  ZoomOut,
+  ExternalLink
 } from 'lucide-react';
 
 interface FileComplaintWizardProps {
@@ -55,12 +59,49 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
 
   // STEP 1 STATE: Incident Information
   const [incidentDateTime, setIncidentDateTime] = useState('2026-06-12T10:30');
-  const [incidentType, setIncidentType] = useState<string>(initialCategory || 'Financial Fraud');
+  const [incidentType, setIncidentType] = useState<string>(() => {
+    const knownTypes = [
+      'Financial Fraud',
+      'UPI / QR Code Payment Scam',
+      'Identity Theft & Impersonation',
+      'Phishing & Malicious APKs',
+      'Cyber Stalking / Social Media Harassment',
+      'Ransomware / Data Extortion',
+      'Illegal Loan App Harassment',
+      'SIM Swap & Telecom Fraud',
+      'Job & Investment / Crypto Scam',
+      'Others'
+    ];
+    if (!initialCategory) return 'Financial Fraud';
+    if (knownTypes.includes(initialCategory)) return initialCategory;
+    return 'Others';
+  });
+  const [customIncidentType, setCustomIncidentType] = useState<string>(() => {
+    const knownTypes = [
+      'Financial Fraud',
+      'UPI / QR Code Payment Scam',
+      'Identity Theft & Impersonation',
+      'Phishing & Malicious APKs',
+      'Cyber Stalking / Social Media Harassment',
+      'Ransomware / Data Extortion',
+      'Illegal Loan App Harassment',
+      'SIM Swap & Telecom Fraud',
+      'Job & Investment / Crypto Scam',
+      'Others'
+    ];
+    if (initialCategory && !knownTypes.includes(initialCategory)) {
+      return initialCategory;
+    }
+    return '';
+  });
   const [incidentDetails, setIncidentDetails] = useState(
     initialDescription || 
     'I received a call from a person claiming to be from a bank who said my account would be blocked. They asked for my OTP and I shared it. Later I found that an amount was debited from my account without my authorization.'
   );
-  const [step1Errors, setStep1Errors] = useState<{ dateTime?: string; type?: string; details?: string }>({});
+  const [step1Errors, setStep1Errors] = useState<{ dateTime?: string; type?: string; customType?: string; details?: string }>({});
+
+  // Effective incident type considers citizen's custom category when 'Others' is selected
+  const effectiveIncidentType = incidentType === 'Others' ? (customIncidentType.trim() || 'Others') : incidentType;
 
   // STEP 2 STATE: Complainant Identity Proof
   const [idFile, setIdFile] = useState<{
@@ -110,6 +151,76 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
     size: '3.8 MB'
   });
 
+  // PREVIEW MODAL STATE & HANDLERS
+  interface DocumentPreviewTarget {
+    name: string;
+    size: string;
+    type?: string;
+    rawFile?: File;
+    kind: 'id' | 'suspect' | 'chat' | 'generic';
+    previewUrl?: string;
+  }
+
+  const [previewTarget, setPreviewTarget] = useState<DocumentPreviewTarget | null>(null);
+  const [previewZoom, setPreviewZoom] = useState<number>(1);
+
+  const openPreview = (target: {
+    name: string;
+    size: string;
+    type?: string;
+    rawFile?: File;
+    kind?: 'id' | 'suspect' | 'chat' | 'generic';
+  }) => {
+    let url: string | undefined = undefined;
+    if (target.rawFile) {
+      try {
+        url = URL.createObjectURL(target.rawFile);
+      } catch (err) {
+        console.warn('Could not generate object URL for preview:', err);
+      }
+    }
+    let kind = target.kind;
+    if (!kind) {
+      const lower = target.name.toLowerCase();
+      if (lower.includes('aadhar') || lower.includes('id') || lower.includes('license') || lower.includes('passport') || lower.includes('pan')) {
+        kind = 'id';
+      } else if (lower.includes('suspect') || lower.includes('photo') || lower.includes('person')) {
+        kind = 'suspect';
+      } else if (lower.includes('chat') || lower.includes('screen') || lower.includes('msg')) {
+        kind = 'chat';
+      } else {
+        kind = 'generic';
+      }
+    }
+    setPreviewZoom(1);
+    setPreviewTarget({
+      name: target.name,
+      size: target.size,
+      type: target.type || target.rawFile?.type || 'image/jpeg',
+      rawFile: target.rawFile,
+      kind: kind || 'generic',
+      previewUrl: url
+    });
+  };
+
+  const closePreview = () => {
+    if (previewTarget?.previewUrl) {
+      URL.revokeObjectURL(previewTarget.previewUrl);
+    }
+    setPreviewTarget(null);
+    setPreviewZoom(1);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && previewTarget) {
+        closePreview();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [previewTarget]);
+
   // STEP 4 STATE: Declaration & Submission
   const [declarationAccepted, setDeclarationAccepted] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,12 +240,14 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
 
   // STEP 1 VALIDATION
   const validateStep1 = (): boolean => {
-    const errors: { dateTime?: string; type?: string; details?: string } = {};
+    const errors: { dateTime?: string; type?: string; customType?: string; details?: string } = {};
     if (!incidentDateTime) {
       errors.dateTime = 'Incident date and time is required.';
     }
     if (!incidentType) {
       errors.type = 'Please select an incident type.';
+    } else if (incidentType === 'Others' && !customIncidentType.trim()) {
+      errors.customType = 'Please specify the custom incident type.';
     }
     // Min 200 characters required as stated in reference UI
     const cleaned = incidentDetails.trim();
@@ -229,9 +342,9 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
     setIsSubmitting(true);
     try {
       const payload = {
-        title: `${incidentType} Report - ${bankMerchant || 'Digital Incident'}`,
+        title: `${effectiveIncidentType} Report - ${bankMerchant || 'Digital Incident'}`,
         description: incidentDetails,
-        category: (incidentType as any) || 'Financial Fraud',
+        category: (effectiveIncidentType as any) || 'Financial Fraud',
         incident_date: incidentDateTime.replace('T', ' ') + ' UTC',
         loss_amount: !isNotFinancialCrime && fraudAmount ? parseFloat(fraudAmount) : 0,
         citizen_name: currentUser?.full_name || 'Naveen Kumar',
@@ -282,9 +395,9 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
       const mockCreated: Complaint = {
         id: 'CASE-' + Math.floor(100000 + Math.random() * 900000),
         referenceNumber: 'CCIP/2026/FIN-' + Math.floor(1000 + Math.random() * 9000),
-        title: `${incidentType} Report`,
+        title: `${effectiveIncidentType} Report`,
         description: incidentDetails,
-        category: incidentType as any,
+        category: effectiveIncidentType as any,
         severity: 'CRITICAL',
         status: 'SUBMITTED',
         citizenName: currentUser?.full_name || 'Naveen Kumar',
@@ -537,7 +650,13 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                   <div className="relative">
                     <select
                       value={incidentType}
-                      onChange={(e) => setIncidentType(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setIncidentType(val);
+                        if (val !== 'Others') {
+                          setStep1Errors((prev) => ({ ...prev, customType: undefined }));
+                        }
+                      }}
                       className="w-full bg-[#030906] border border-[#00e676]/20 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-[#00e676] focus:ring-1 focus:ring-[#00e676]/30 appearance-none cursor-pointer transition-all pr-10"
                     >
                       <option value="Financial Fraud">Financial Fraud</option>
@@ -549,11 +668,49 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                       <option value="Illegal Loan App Harassment">Illegal Loan App Harassment</option>
                       <option value="SIM Swap & Telecom Fraud">SIM Swap &amp; Telecom Fraud</option>
                       <option value="Job & Investment / Crypto Scam">Job &amp; Investment / Crypto Scam</option>
+                      <option value="Others">Others</option>
                     </select>
                     <ChevronDown className="w-4 h-4 text-[#8fa396] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                   {step1Errors.type && (
                     <span className="text-[11px] text-red-400 mt-1 block">{step1Errors.type}</span>
+                  )}
+
+                  {/* Dynamic Custom Incident Type Input when 'Others' is selected */}
+                  {incidentType === 'Others' && (
+                    <div className="mt-3.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <label className="text-xs font-medium text-[#c8ddd0] block mb-1.5 flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          Specify Incident Type <span className="text-red-400">*</span>
+                        </span>
+                        <span className="text-[10px] text-[#00e676] font-mono">Custom Category</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={customIncidentType}
+                        onChange={(e) => {
+                          setCustomIncidentType(e.target.value);
+                          if (step1Errors.customType && e.target.value.trim()) {
+                            setStep1Errors((prev) => ({ ...prev, customType: undefined }));
+                          }
+                        }}
+                        placeholder="e.g., Sextortion, Online Gaming Fraud, Deepfake Harassment..."
+                        className={`w-full bg-[#030906] border ${
+                          step1Errors.customType
+                            ? 'border-red-500/70 focus:border-red-400 focus:ring-red-500/30'
+                            : 'border-[#00e676]/35 focus:border-[#00e676] focus:ring-[#00e676]/30'
+                        } rounded-xl px-4 py-3 text-xs text-white placeholder-[#8fa396]/60 focus:outline-none focus:ring-1 transition-all font-sans`}
+                      />
+                      {step1Errors.customType ? (
+                        <span className="text-[11px] text-red-400 mt-1.5 block">
+                          {step1Errors.customType}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-[#8fa396] mt-1 block">
+                          Please enter your specific incident type. This will be considered as your primary incident category.
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -813,17 +970,32 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-[#00e676] text-[#031508] flex items-center justify-center">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={() => openPreview({
+                          name: idFile.name,
+                          size: idFile.size,
+                          type: idFile.type,
+                          rawFile: idFile.rawFile,
+                          kind: 'id'
+                        })}
+                        className="px-3 py-1.5 rounded-xl bg-[#00e676]/10 hover:bg-[#00e676]/20 text-[#00e676] border border-[#00e676]/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-[0_0_10px_rgba(0,230,118,0.15)] hover:shadow-[0_0_15px_rgba(0,230,118,0.3)] cursor-pointer"
+                        title="Preview uploaded ID document"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Preview</span>
+                      </button>
+                      <div className="w-7 h-7 rounded-full bg-[#00e676] text-[#031508] flex items-center justify-center shrink-0">
                         <Check className="w-3.5 h-3.5 stroke-[3]" />
                       </div>
                       <button
                         type="button"
                         onClick={() => setIdFile(null as any)}
-                        className="w-8 h-8 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/25 flex items-center justify-center transition-colors"
+                        className="w-7 h-7 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/25 flex items-center justify-center transition-colors shrink-0"
                         title="Delete uploaded ID"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -1142,20 +1314,37 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
 
                     {suspectPhoto && (
                       <div className="p-2.5 rounded-xl bg-[#030906] border border-[#00e676]/25 flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded bg-[#00e676]/15 text-[#00e676] flex items-center justify-center">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-6 h-6 rounded bg-[#00e676]/15 text-[#00e676] flex items-center justify-center shrink-0">
                             <User className="w-3.5 h-3.5" />
                           </div>
-                          <span className="text-white font-medium truncate max-w-[150px]">{suspectPhoto.name}</span>
-                          <span className="text-[#8fa396] text-[10px]">({suspectPhoto.size})</span>
+                          <span className="text-white font-medium truncate max-w-[130px]">{suspectPhoto.name}</span>
+                          <span className="text-[#8fa396] text-[10px] shrink-0">({suspectPhoto.size})</span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setSuspectPhoto(null)}
-                          className="text-red-400 hover:text-red-300 p-1"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => openPreview({
+                              name: suspectPhoto.name,
+                              size: suspectPhoto.size,
+                              rawFile: suspectPhoto.rawFile,
+                              kind: 'suspect'
+                            })}
+                            className="px-2.5 py-1 rounded-lg bg-[#00e676]/10 hover:bg-[#00e676]/20 text-[#00e676] border border-[#00e676]/30 text-[11px] font-semibold flex items-center gap-1 transition-all"
+                            title="Preview suspect photograph"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>Preview</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSuspectPhoto(null)}
+                            className="text-red-400 hover:text-red-300 p-1 rounded-lg hover:bg-red-500/10 transition-colors"
+                            title="Remove suspect photo"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1186,20 +1375,37 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
 
                     {otherDoc && (
                       <div className="p-2.5 rounded-xl bg-[#030906] border border-[#00e676]/25 flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded bg-[#00e676]/15 text-[#00e676] flex items-center justify-center">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-6 h-6 rounded bg-[#00e676]/15 text-[#00e676] flex items-center justify-center shrink-0">
                             <FileText className="w-3.5 h-3.5" />
                           </div>
-                          <span className="text-white font-medium truncate max-w-[150px]">{otherDoc.name}</span>
-                          <span className="text-[#8fa396] text-[10px]">({otherDoc.size})</span>
+                          <span className="text-white font-medium truncate max-w-[130px]">{otherDoc.name}</span>
+                          <span className="text-[#8fa396] text-[10px] shrink-0">({otherDoc.size})</span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setOtherDoc(null)}
-                          className="text-red-400 hover:text-red-300 p-1"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => openPreview({
+                              name: otherDoc.name,
+                              size: otherDoc.size,
+                              rawFile: otherDoc.rawFile,
+                              kind: 'chat'
+                            })}
+                            className="px-2.5 py-1 rounded-lg bg-[#00e676]/10 hover:bg-[#00e676]/20 text-[#00e676] border border-[#00e676]/30 text-[11px] font-semibold flex items-center gap-1 transition-all"
+                            title="Preview uploaded document"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>Preview</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setOtherDoc(null)}
+                            className="text-red-400 hover:text-red-300 p-1 rounded-lg hover:bg-red-500/10 transition-colors"
+                            title="Remove document"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1347,7 +1553,11 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                     <span className="text-[#8fa396] block mb-1">Incident Type</span>
                     <div className="flex items-center gap-2 text-white font-medium">
                       <FileText className="w-3.5 h-3.5 text-[#00e676]" />
-                      <span>{incidentType}</span>
+                      <span>
+                        {incidentType === 'Others'
+                          ? `${customIncidentType.trim() || 'Others'} (Others)`
+                          : incidentType}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1416,6 +1626,23 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2 text-xs self-start sm:self-auto">
+                    {idFile && (
+                      <button
+                        type="button"
+                        onClick={() => openPreview({
+                          name: idFile.name,
+                          size: idFile.size,
+                          type: idFile.type,
+                          rawFile: idFile.rawFile,
+                          kind: 'id'
+                        })}
+                        className="px-2.5 py-1 rounded-lg bg-[#00e676]/10 hover:bg-[#00e676]/20 text-[#00e676] border border-[#00e676]/30 text-xs font-semibold flex items-center gap-1 transition-all mr-2 cursor-pointer"
+                        title="Preview ID proof"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Preview</span>
+                      </button>
+                    )}
                     <FileText className="w-4 h-4 text-[#8fa396]" />
                     <span className="text-[#8fa396]">Document Type:</span>
                     <span className="text-white font-medium">{idFile?.documentType || 'Aadhar Card'}</span>
@@ -1504,36 +1731,72 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                 {/* Evidence Documents Preview */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Suspect Photo thumbnail card */}
-                  <div className="p-3 rounded-xl bg-[#030906] border border-[#00e676]/15 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-black border border-[#00e676]/30 flex items-center justify-center shrink-0 overflow-hidden relative">
-                      {/* Hooded suspect silhouette SVG */}
-                      <svg viewBox="0 0 40 40" className="w-10 h-10 text-gray-500 fill-current">
-                        <path d="M20,6 C13,6 10,13 10,21 C10,26 13,31 16,34 L24,34 C27,31 30,26 30,21 C30,13 27,6 20,6 Z M20,13 C22,13 24,15 24,17 C24,19 22,21 20,21 C18,21 16,19 16,17 C16,15 18,13 20,13 Z" />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[11px] text-[#8fa396]">Suspect Photograph (Optional)</span>
-                      <span className="text-xs font-bold text-white">{suspectPhoto?.name || 'suspect_photo.jpg'}</span>
-                      <div className="flex items-center gap-1 text-[10px] text-[#00e676] mt-0.5">
-                        <Check className="w-3 h-3 stroke-[3]" />
-                        <span>{suspectPhoto?.size || '1.2 MB'} • Uploaded</span>
+                  <div className="p-3 rounded-xl bg-[#030906] border border-[#00e676]/15 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-lg bg-black border border-[#00e676]/30 flex items-center justify-center shrink-0 overflow-hidden relative">
+                        {/* Hooded suspect silhouette SVG */}
+                        <svg viewBox="0 0 40 40" className="w-10 h-10 text-gray-500 fill-current">
+                          <path d="M20,6 C13,6 10,13 10,21 C10,26 13,31 16,34 L24,34 C27,31 30,26 30,21 C30,13 27,6 20,6 Z M20,13 C22,13 24,15 24,17 C24,19 22,21 20,21 C18,21 16,19 16,17 C16,15 18,13 20,13 Z" />
+                        </svg>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[11px] text-[#8fa396]">Suspect Photograph (Optional)</span>
+                        <span className="text-xs font-bold text-white truncate">{suspectPhoto?.name || 'suspect_photo.jpg'}</span>
+                        <div className="flex items-center gap-1 text-[10px] text-[#00e676] mt-0.5">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          <span>{suspectPhoto?.size || '1.2 MB'} • Uploaded</span>
+                        </div>
                       </div>
                     </div>
+                    {suspectPhoto && (
+                      <button
+                        type="button"
+                        onClick={() => openPreview({
+                          name: suspectPhoto.name,
+                          size: suspectPhoto.size,
+                          rawFile: suspectPhoto.rawFile,
+                          kind: 'suspect'
+                        })}
+                        className="px-2.5 py-1 rounded-lg bg-[#00e676]/10 hover:bg-[#00e676]/20 text-[#00e676] border border-[#00e676]/30 text-xs font-semibold flex items-center gap-1 transition-all shrink-0 cursor-pointer"
+                        title="Preview photograph"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Preview</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Other Doc thumbnail card */}
-                  <div className="p-3 rounded-xl bg-[#030906] border border-[#00e676]/15 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-[#00e676]/10 border border-[#00e676]/25 text-[#00e676] flex items-center justify-center shrink-0">
-                      <FileText className="w-6 h-6" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[11px] text-[#8fa396]">Other Document (Optional)</span>
-                      <span className="text-xs font-bold text-white">{otherDoc?.name || 'chat_screenshot.jpg'}</span>
-                      <div className="flex items-center gap-1 text-[10px] text-[#00e676] mt-0.5">
-                        <Check className="w-3 h-3 stroke-[3]" />
-                        <span>{otherDoc?.size || '3.8 MB'} • Uploaded</span>
+                  <div className="p-3 rounded-xl bg-[#030906] border border-[#00e676]/15 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-lg bg-[#00e676]/10 border border-[#00e676]/25 text-[#00e676] flex items-center justify-center shrink-0">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[11px] text-[#8fa396]">Other Document (Optional)</span>
+                        <span className="text-xs font-bold text-white truncate">{otherDoc?.name || 'chat_screenshot.jpg'}</span>
+                        <div className="flex items-center gap-1 text-[10px] text-[#00e676] mt-0.5">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          <span>{otherDoc?.size || '3.8 MB'} • Uploaded</span>
+                        </div>
                       </div>
                     </div>
+                    {otherDoc && (
+                      <button
+                        type="button"
+                        onClick={() => openPreview({
+                          name: otherDoc.name,
+                          size: otherDoc.size,
+                          rawFile: otherDoc.rawFile,
+                          kind: 'chat'
+                        })}
+                        className="px-2.5 py-1 rounded-lg bg-[#00e676]/10 hover:bg-[#00e676]/20 text-[#00e676] border border-[#00e676]/30 text-xs font-semibold flex items-center gap-1 transition-all shrink-0 cursor-pointer"
+                        title="Preview document"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Preview</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1620,6 +1883,298 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
               <Send className="w-4 h-4" />
               <span>{isSubmitting ? 'Encrypting & Sealing...' : 'Submit Complaint'}</span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DOCUMENT & IMAGE PREVIEW MODAL WINDOW */}
+      {/* ========================================================================= */}
+      {previewTarget && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+          onClick={closePreview}
+        >
+          <div 
+            className="w-full max-w-3xl bg-[#06140c] border border-[#00e676]/40 rounded-2xl shadow-[0_0_60px_rgba(0,230,118,0.25)] flex flex-col max-h-[92vh] overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-[#00e676]/20 bg-[#030906]/90 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-[#00e676]/15 text-[#00e676] border border-[#00e676]/30 flex items-center justify-center shrink-0">
+                  <Eye className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-bold text-white truncate">
+                      {previewTarget.name}
+                    </h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00e676]/15 border border-[#00e676]/30 text-[#00e676] uppercase shrink-0">
+                      {previewTarget.kind === 'id' ? 'National ID' : previewTarget.kind === 'suspect' ? 'Suspect Photo' : 'Evidence'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-[#8fa396] mt-0.5">
+                    <span>{previewTarget.size}</span>
+                    <span>•</span>
+                    <span className="text-[#00e676] flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Client Verified
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center gap-2 shrink-0">
+                {previewTarget.previewUrl && (
+                  <div className="hidden sm:flex items-center gap-1 bg-[#030906] border border-[#00e676]/20 rounded-lg p-1">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewZoom(prev => Math.max(0.6, prev - 0.2))}
+                      className="p-1.5 text-[#8fa396] hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      title="Zoom Out"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </button>
+                    <span className="text-[11px] font-mono text-[#00e676] px-1.5">
+                      {Math.round(previewZoom * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewZoom(prev => Math.min(2.5, prev + 0.2))}
+                      className="p-1.5 text-[#8fa396] hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      title="Zoom In"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                {previewTarget.previewUrl && (
+                  <a
+                    href={previewTarget.previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 text-[#8fa396] hover:text-[#00e676] hover:bg-[#00e676]/10 rounded-xl transition-colors border border-transparent hover:border-[#00e676]/30"
+                    title="Open Full Resolution in New Tab"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={closePreview}
+                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-red-500/20 text-[#8fa396] hover:text-red-400 border border-white/10 hover:border-red-500/30 flex items-center justify-center transition-colors"
+                  title="Close Preview (Esc)"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Canvas Body */}
+            <div className="p-4 sm:p-6 overflow-auto flex items-center justify-center min-h-[380px] max-h-[65vh] bg-[#020704] relative">
+              {previewTarget.previewUrl ? (
+                previewTarget.type?.includes('pdf') || previewTarget.name.toLowerCase().endsWith('.pdf') ? (
+                  <iframe 
+                    src={previewTarget.previewUrl} 
+                    title={previewTarget.name}
+                    className="w-full h-[520px] rounded-xl border border-[#00e676]/30 bg-white shadow-2xl"
+                  />
+                ) : (
+                  <div className="overflow-auto max-w-full max-h-full flex items-center justify-center p-2">
+                    <img 
+                      src={previewTarget.previewUrl} 
+                      alt={previewTarget.name}
+                      style={{ transform: `scale(${previewZoom})` }}
+                      className="max-h-[500px] max-w-full object-contain rounded-xl border border-[#00e676]/30 shadow-[0_0_35px_rgba(0,0,0,0.8)] transition-transform duration-200"
+                    />
+                  </div>
+                )
+              ) : previewTarget.kind === 'id' ? (
+                /* High Fidelity Realistic Indian Government Aadhaar Preview */
+                <div className="w-full max-w-md bg-gradient-to-b from-[#ffffff] via-[#f9fafb] to-[#f3f4f6] text-[#111827] rounded-2xl p-5 shadow-[0_0_40px_rgba(0,230,118,0.25)] border-2 border-[#138808]/40 relative overflow-hidden select-none">
+                  {/* Top Tricolor Banner */}
+                  <div className="h-2 w-full bg-gradient-to-r from-[#ff9933] via-[#ffffff] to-[#138808] absolute top-0 left-0" />
+                  
+                  {/* Card Header */}
+                  <div className="flex items-center justify-between border-b border-gray-200 pb-3 pt-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-[#138808]/10 flex items-center justify-center border border-[#138808]/30">
+                        <span className="text-xs">🇮🇳</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold tracking-wider text-gray-800 block uppercase">भारत सरकार</span>
+                        <span className="text-[9px] font-semibold tracking-wider text-gray-600 block uppercase">Government of India</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-black tracking-widest text-[#d97706] block">आधार</span>
+                      <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider block">AADHAAR</span>
+                    </div>
+                  </div>
+
+                  {/* Card Main Body */}
+                  <div className="grid grid-cols-12 gap-3.5 my-4 items-center">
+                    {/* Citizen Photo Box */}
+                    <div className="col-span-4 bg-gray-200 rounded-xl border-2 border-gray-400 p-1 flex flex-col items-center justify-center relative shadow-inner overflow-hidden aspect-[3/4]">
+                      <div className="w-full h-full bg-gradient-to-b from-gray-200 to-gray-300 flex items-center justify-center">
+                        <User className="w-12 h-12 text-gray-600 stroke-[1.5]" />
+                      </div>
+                      <span className="absolute bottom-1 bg-black/60 text-[7px] text-white px-1.5 py-0.5 rounded font-mono">
+                        VERIFIED
+                      </span>
+                    </div>
+
+                    {/* Citizen Bio Info */}
+                    <div className="col-span-5 flex flex-col gap-1 text-[11px] leading-tight">
+                      <div className="mb-0.5">
+                        <span className="text-[8px] text-gray-500 block uppercase">Name / नाम</span>
+                        <span className="font-bold text-gray-900 text-xs">{currentUser?.full_name || 'NAVEEN KUMAR'}</span>
+                      </div>
+                      <div className="mb-0.5">
+                        <span className="text-[8px] text-gray-500 block uppercase">DOB / जन्म तिथि</span>
+                        <span className="font-semibold text-gray-800 font-mono">15/08/1992</span>
+                      </div>
+                      <div>
+                        <span className="text-[8px] text-gray-500 block uppercase">Gender / लिंग</span>
+                        <span className="font-semibold text-gray-800">MALE / पुरुष</span>
+                      </div>
+                    </div>
+
+                    {/* QR Code Matrix Box */}
+                    <div className="col-span-3 flex flex-col items-center justify-center gap-1">
+                      <div className="w-16 h-16 bg-white border border-gray-800 rounded-lg p-1 shadow-sm flex flex-col justify-between">
+                        <div className="flex justify-between">
+                          <div className="w-3 h-3 bg-black" />
+                          <div className="w-3 h-3 bg-black" />
+                        </div>
+                        <div className="w-full h-4 bg-[repeating-linear-gradient(45deg,#000,#000_2px,#fff_2px,#fff_4px)]" />
+                        <div className="flex justify-between">
+                          <div className="w-3 h-3 bg-black" />
+                          <div className="w-1.5 h-1.5 bg-black" />
+                        </div>
+                      </div>
+                      <span className="text-[7px] font-mono text-gray-500">DIGITAL QR</span>
+                    </div>
+                  </div>
+
+                  {/* Aadhaar 12-digit Number */}
+                  <div className="text-center py-2 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-xl border border-gray-300 shadow-inner my-2">
+                    <span className="font-mono text-base font-extrabold tracking-[0.25em] text-gray-900">
+                      XXXX XXXX 4920
+                    </span>
+                  </div>
+
+                  {/* Card Footer Slogan */}
+                  <div className="border-t border-gray-200 pt-2 flex items-center justify-between text-[8px] text-gray-600 font-medium">
+                    <span className="text-[#138808] font-bold">मेरा आधार, मेरी पहचान</span>
+                    <span>Unique Identification Authority of India</span>
+                  </div>
+                </div>
+              ) : previewTarget.kind === 'suspect' ? (
+                /* High Fidelity Suspect Photograph Preview */
+                <div className="w-full max-w-md bg-[#030906] border-2 border-red-500/40 rounded-2xl p-5 shadow-[0_0_40px_rgba(239,68,68,0.2)] flex flex-col items-center text-center gap-4 relative overflow-hidden">
+                  <div className="w-full flex items-center justify-between pb-2 border-b border-red-500/20 text-xs">
+                    <span className="text-red-400 font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                      SUSPECT FORENSIC INTELLIGENCE
+                    </span>
+                    <span className="text-[#8fa396] font-mono text-[10px]">CASE EVIDENCE</span>
+                  </div>
+
+                  {/* Forensic Frame */}
+                  <div className="w-48 h-56 rounded-xl bg-black border-2 border-red-500/40 relative flex items-center justify-center overflow-hidden shadow-2xl">
+                    <svg viewBox="0 0 100 120" className="w-full h-full text-gray-600 fill-current opacity-80">
+                      <path d="M50 20 C35 20 28 35 28 55 C28 68 35 80 42 88 L58 88 C65 80 72 68 72 55 C72 35 65 20 50 20 Z" />
+                      <circle cx="50" cy="48" r="8" fill="#1f2937" />
+                      <path d="M20 115 C20 95 35 88 50 88 C65 88 80 95 80 115 Z" />
+                    </svg>
+                    
+                    {/* Reticle Overlay */}
+                    <div className="absolute inset-0 border border-red-500/20 pointer-events-none flex items-center justify-center">
+                      <div className="w-32 h-32 border border-red-500/40 rounded-full animate-ping opacity-25" />
+                      <div className="w-36 h-36 border border-dashed border-red-400/50 rounded-full" />
+                      <div className="absolute top-2 left-2 text-[9px] font-mono text-red-400">FACIAL_ID #8042</div>
+                      <div className="absolute bottom-2 right-2 text-[9px] font-mono text-red-400">MATCH: 94.2%</div>
+                    </div>
+                  </div>
+
+                  <div className="w-full bg-[#06140c] border border-red-500/20 rounded-xl p-3 text-xs text-left grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[#8fa396] text-[10px] block">Target Alias</span>
+                      <span className="text-white font-mono font-bold block">{suspectUrls ? suspectUrls.split('\n')[0] : 'Unknown Scammer'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[#8fa396] text-[10px] block">Suspect Phone</span>
+                      <span className="text-white font-mono block">{suspectPhone || '+91 9876543210'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[#8fa396] text-[10px] block">Forensic Integrity Status</span>
+                      <span className="text-[#00e676] font-mono text-[11px] flex items-center gap-1">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                        SHA-256 Hash Sealed &amp; Appended to Evidence Ledger
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* High Fidelity Chat Screenshot / Document Evidence Preview */
+                <div className="w-full max-w-md bg-[#0b141a] text-white rounded-2xl shadow-[0_0_40px_rgba(0,230,118,0.2)] border border-[#00e676]/30 overflow-hidden text-xs">
+                  {/* Chat header */}
+                  <div className="bg-[#202c33] p-3.5 flex items-center gap-3 border-b border-gray-700">
+                    <div className="w-9 h-9 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center font-bold">
+                      !
+                    </div>
+                    <div>
+                      <span className="font-bold text-sm block text-white">Bank Support Fraudster</span>
+                      <span className="text-[10px] text-red-400 block">+91 98765 43210 • Unverified External</span>
+                    </div>
+                  </div>
+
+                  {/* Chat messages */}
+                  <div className="p-4 flex flex-col gap-3 min-h-[220px] bg-[radial-gradient(#1f2c34_1px,transparent_1px)] bg-[size:16px_16px]">
+                    <div className="self-start max-w-[85%] bg-[#202c33] rounded-2xl rounded-tl-none p-3 shadow text-[#e9edef] leading-relaxed">
+                      <p className="text-xs">Dear Customer, Your SBI Bank account is pending KYC verification. Download this official APK immediately to avoid permanent account block:</p>
+                      <span className="text-[#00e676] font-mono text-[11px] block mt-1 underline">http://sbi-secure-kyc-update.apk</span>
+                      <span className="text-[9px] text-[#8696a0] block text-right mt-1">10:28 AM</span>
+                    </div>
+
+                    <div className="self-end max-w-[80%] bg-[#005c4b] rounded-2xl rounded-tr-none p-3 shadow text-white leading-relaxed">
+                      <p className="text-xs">I installed the app and received an OTP prompt. Is this authorized by RBI?</p>
+                      <span className="text-[9px] text-[#8696a0] block text-right mt-1">10:31 AM ✓✓</span>
+                    </div>
+
+                    <div className="self-start max-w-[85%] bg-[#202c33] rounded-2xl rounded-tl-none p-3 shadow text-[#e9edef] leading-relaxed">
+                      <p className="text-xs">Yes, please share the 6-digit authentication token now to unfreeze your balance of ₹25,000.</p>
+                      <span className="text-[9px] text-[#8696a0] block text-right mt-1">10:32 AM</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#111b21] p-2.5 border-t border-gray-800 flex items-center justify-between text-[11px] text-[#8fa396]">
+                    <span>Evidence File: {previewTarget.name}</span>
+                    <span className="text-[#00e676] font-mono font-medium">AUTHENTICATED</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3.5 sm:p-4 border-t border-[#00e676]/20 bg-[#030906]/95 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-[#8fa396]">
+                <Shield className="w-3.5 h-3.5 text-[#00e676]" />
+                <span className="text-[11px]">
+                  Tamper-evident client preview • Forensic integrity preserved
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={closePreview}
+                className="w-full sm:w-auto px-5 py-2 rounded-xl bg-gradient-to-r from-[#00e676] to-[#00c853] text-[#031508] text-xs font-bold hover:brightness-110 shadow-[0_0_15px_rgba(0,230,118,0.25)] transition-all cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
           </div>
         </div>
       )}

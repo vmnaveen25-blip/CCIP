@@ -47,8 +47,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [currentScreen, setCurrentScreen] = useState<AuthScreenType>(initialScreen);
   
   // Citizen login states (strictly username/email and password, no OTP or Google)
-  const [citizenIdentifier, setCitizenIdentifier] = useState('elena.rostova@cyberdefense.org');
-  const [citizenPassword, setCitizenPassword] = useState('SentinelSafe#2026');
+  const [citizenIdentifier, setCitizenIdentifier] = useState('');
+  const [citizenPassword, setCitizenPassword] = useState('');
   const [showCitizenPassword, setShowCitizenPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
@@ -377,7 +377,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     required
                     value={citizenIdentifier}
                     onChange={(e) => setCitizenIdentifier(e.target.value)}
-                    placeholder="e.g. elena.rostova or name@example.com"
+                    placeholder="e.g. name@example.com or username"
                     className="w-full bg-[#030906] focus:bg-[#071910] text-white placeholder:text-[#8fa396]/50 rounded-xl pl-10 pr-4 py-3 outline-none border border-[#00e676]/20 focus:border-[#00e676] focus:ring-1 focus:ring-[#00e676]/30 text-xs font-sans transition-all"
                   />
                 </div>
@@ -428,21 +428,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   />
                   <span>Remember me on this device</span>
                 </label>
-              </div>
-
-              {/* Demo Quick Fill Hint */}
-              <div className="p-2.5 rounded-lg bg-[#030906] border border-[#00e676]/15 flex items-center justify-between text-[11px] text-[#8fa396]">
-                <span>Demo User: <strong>Elena Rostova</strong></span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCitizenIdentifier('elena.rostova@cyberdefense.org');
-                    setCitizenPassword('SentinelSafe#2026');
-                  }}
-                  className="text-[#00e676] hover:text-[#55ff99] font-semibold text-[11px] underline underline-offset-2"
-                >
-                  Fill Credentials
-                </button>
               </div>
 
               {/* Submit Button */}
