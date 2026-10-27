@@ -246,6 +246,22 @@ async def update_complaint(
             }
         )
 
+        # Notify citizen owner of status transition
+        try:
+            if complaint.citizen_id:
+                from app.services.notification_service import notification_service
+                await notification_service.create_notification(
+                    db=db,
+                    user_id=complaint.citizen_id,
+                    title=f"CASE STATUS UPDATE: {req.status}",
+                    message=f"Complaint #{complaint.reference_number} has transitioned to {req.status} by {current_user.full_name}.",
+                    notification_type="STATUS_CHANGE",
+                    severity="INFO",
+                    related_complaint_id=complaint.id
+                )
+        except Exception:
+            pass
+
     if req.financialLoss is not None:
         complaint.financial_loss = req.financialLoss
     if req.suspectInfo:

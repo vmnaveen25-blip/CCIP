@@ -298,6 +298,29 @@ class ComplaintService:
             user_agent=user_agent
         )
 
+        # Real-time Sovereign Enclave Notification
+        try:
+            target_uid = current_user.id if current_user else complaint.citizen_id
+            if target_uid:
+                from app.services.notification_service import notification_service
+                await notification_service.create_notification(
+                    db=db,
+                    user_id=target_uid,
+                    title=f"COMPLAINT REGISTERED: {ref_num}",
+                    message=f"Incident '{complaint.title}' successfully ingested into national enclave. Priority: {triage_severity} ({triage_score}/100).",
+                    notification_type="COMPLAINT_SUBMISSION",
+                    severity=triage_severity if triage_severity in ["CRITICAL", "HIGH"] else "INFO",
+                    related_complaint_id=complaint.id,
+                    related_case_id=linked_case.id,
+                    metadata_json={
+                        "reference_number": ref_num,
+                        "triage_score": triage_score,
+                        "category": complaint.category
+                    }
+                )
+        except Exception as notif_err:
+            logger.warning(f"Could not dispatch complaint creation notification: {notif_err}")
+
         return complaint_full or complaint
 
     @staticmethod

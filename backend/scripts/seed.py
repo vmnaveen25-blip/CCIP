@@ -445,34 +445,38 @@ async def seed_database():
 
         # 9. NOTIFICATIONS
         logger.info("Seeding system notifications...")
-        notifs_data = [
-            {
-                "user_id": users["elena.rostova@cyberdefense.org"].id,
-                "title": "1930 HELPLINE ASSET FREEZE",
-                "message": "Nodal Officer confirmed ₹18,50,000 hold on suspect beneficiary account (Case CYBER-2026-9842).",
-                "notification_type": "ASSET_FREEZE",
-                "severity": "CRITICAL",
-                "is_read": False
-            },
-            {
-                "user_id": users["elena.rostova@cyberdefense.org"].id,
-                "title": "DEEPFAKE SPECTRUM MATCH",
-                "message": "Voice audio match 98.6% confirmed with DarkSynapse syndicate model catalog.",
-                "notification_type": "AI_DETECTION",
-                "severity": "HIGH",
-                "is_read": False
-            },
-            {
-                "user_id": users["elena.rostova@cyberdefense.org"].id,
-                "title": "EVIDENCE SEAL HASHED",
-                "message": "All evidence items sealed into Zero-Knowledge Enclave with SHA-256 signatures.",
-                "notification_type": "EVIDENCE_SEALED",
-                "severity": "INFO",
-                "is_read": False
-            }
-        ]
-        for nt in notifs_data:
-            db.add(Notification(**nt))
+        for user_obj in users.values():
+            notifs_data = [
+                {
+                    "user_id": user_obj.id,
+                    "title": "1930 HELPLINE ASSET FREEZE ACTIVE",
+                    "message": "Nodal Officer confirmed emergency hold protocol active under 1930 Financial Fraud helpline. Golden hour rapid intervention enabled for your registered accounts.",
+                    "notification_type": "ASSET_FREEZE",
+                    "severity": "CRITICAL",
+                    "is_read": False,
+                    "metadata_json": {"source": "NATIONAL_ENCLAVE_NODAL", "helpline": "1930"}
+                },
+                {
+                    "user_id": user_obj.id,
+                    "title": "AI CYBER DEFENSE SHIELD ACTIVE",
+                    "message": "Astraea neural threat scanning, deepfake audio classification, and Zero-Knowledge evidence sealing are active for your profile.",
+                    "notification_type": "AI_DETECTION",
+                    "severity": "INFO",
+                    "is_read": False,
+                    "metadata_json": {"models": ["SpectrogramCNN", "DistilRoBERTa", "XGBoost"]}
+                },
+                {
+                    "user_id": user_obj.id,
+                    "title": "ADVISORY: HIGH-FREQUENCY UPI & APK SCAMS",
+                    "message": "CERT-In national cyber bulletin: Active campaigns detected using fake electricity disconnection alerts and malicious APK install links. Do not share OTPs.",
+                    "notification_type": "ADVISORY",
+                    "severity": "HIGH",
+                    "is_read": False,
+                    "metadata_json": {"bulletin_id": "CERT-IN-2026-09A", "category": "UPI Fraud"}
+                }
+            ]
+            for nt in notifs_data:
+                db.add(Notification(**nt))
 
         await db.commit()
         logger.info("CCIP Enclave database successfully seeded with initial operational data!")

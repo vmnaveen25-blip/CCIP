@@ -26,6 +26,9 @@ async def list_notifications(
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieve operational broadcasts and incident notifications for the authenticated user."""
+    from app.services.notification_service import notification_service
+    await notification_service.seed_default_user_notifications(db, current_user.id)
+
     q = select(Notification).where(Notification.user_id == current_user.id)
     if unread_only:
         q = q.where(Notification.is_read == False)
@@ -48,6 +51,29 @@ async def list_notifications(
     return notifications
 
 
+@router.post("", response_model=NotificationResponse, status_code=status.HTTP_201_CREATED)
+async def create_notification(
+    req: NotificationCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Dispatch a new notification to a target user or current user."""
+    from app.services.notification_service import notification_service
+    target_uid = req.user_id or current_user.id
+    notif = await notification_service.create_notification(
+        db=db,
+        user_id=target_uid,
+        title=req.title,
+        message=req.message,
+        notification_type=req.notification_type,
+        severity=req.severity,
+        related_complaint_id=req.related_complaint_id,
+        related_case_id=req.related_case_id,
+        metadata_json=req.metadata_json or {}
+    )
+    return notif
+
+
 @router.get("/unread-count")
 async def get_unread_notification_count(
     current_user: User = Depends(get_current_user),
@@ -55,6 +81,7 @@ async def get_unread_notification_count(
 ):
     """Retrieve total count of unread notifications."""
     from app.services.notification_service import notification_service
+    await notification_service.seed_default_user_notifications(db, current_user.id)
     count = await notification_service.get_unread_count(db, current_user.id)
     return {"unread_count": count}
 

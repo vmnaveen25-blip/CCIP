@@ -1022,7 +1022,11 @@ class APIClient {
       if (params.skip !== undefined) query.set('skip', params.skip.toString());
     }
     const qStr = query.toString() ? `?${query.toString()}` : '';
-    return await this.request<AppNotification[]>(`/notifications${qStr}`);
+    const rawList = await this.request<AppNotification[]>(`/notifications${qStr}`);
+    return (rawList || []).map(n => ({
+      ...n,
+      type: n.type || n.notification_type || 'INFO'
+    }));
   }
 
   async getUnreadNotificationsCount(): Promise<{ unread_count: number }> {

@@ -28,3 +28,21 @@ class Notification(Base):
     user = relationship("User", back_populates="notifications")
     related_complaint = relationship("Complaint")
     related_case = relationship("Case")
+
+    @property
+    def type(self) -> str:
+        return self.notification_type
+
+    @property
+    def action_link(self) -> str | None:
+        if self.related_case_id:
+            return f"/cases/{self.related_case_id}"
+        if self.related_complaint_id:
+            return f"/complaints/{self.related_complaint_id}"
+        return None
+
+    @property
+    def timestamp_formatted(self) -> str:
+        if self.created_at:
+            return self.created_at.strftime("%Y-%m-%d %H:%M UTC")
+        return ""

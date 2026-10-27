@@ -340,10 +340,26 @@ export const App: React.FC = () => {
 
     enclaveWS.connect();
     const unsubscribe = enclaveWS.subscribe((event) => {
-      if (event.type === 'NOTIFICATION' || event.type === 'ALERT') {
+      if (event.type === 'NOTIFICATION') {
+        if (event.data?.id) {
+          setLiveNotifications(prev => [event.data, ...prev.filter(n => n.id !== event.data.id)]);
+          setUnreadCount(prev => prev + 1);
+        } else {
+          fetchEnclaveData();
+        }
+      } else if (event.type === 'NOTIFICATION_COUNT') {
+        if (typeof event.data?.unread_count === 'number') {
+          setUnreadCount(event.data.unread_count);
+        }
+      } else if (event.type === 'ALERT' || event.type === 'STATUS_CHANGE') {
         fetchEnclaveData();
       }
     });
+
+    // Resilient background sync interval (every 20 seconds)
+    const intervalId = setInterval(() => {
+      fetchEnclaveData();
+    }, 20000);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -354,6 +370,7 @@ export const App: React.FC = () => {
 
     return () => {
       unsubscribe();
+      clearInterval(intervalId);
       enclaveWS.disconnect();
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -497,7 +514,7 @@ export const App: React.FC = () => {
           currentPortal={currentPortal}
           onSelectPortal={handleSelectPortal}
           onOpenOmniSearch={() => setIsOmniSearchOpen(true)}
-          notificationCount={unreadCount > 0 ? unreadCount : (currentPortal === 'citizen' ? 2 : 0)}
+          notificationCount={unreadCount}
           onOpenNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
           onOpenProfileModal={() => setIsProfileModalOpen(true)}
           defconLevel={4}
@@ -530,7 +547,7 @@ export const App: React.FC = () => {
                   Critical Broadcasts & Alerts
                 </span>
                 {unreadCount > 0 && (
-                  <span className="px-1.5 py-0.5 rounded bg-primary/20 text-primary text-[10px] font-mono font-bold animate-badge-pop">
+                  <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-mono font-bold animate-badge-pop">
                     {unreadCount} NEW
                   </span>
                 )}
@@ -554,45 +571,86 @@ export const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2.5 max-h-80 overflow-y-auto text-xs">
+            <div className="flex flex-col gap-2.5 max-h-80 overflow-y-auto text-xs pr-1">
               {liveNotifications.length > 0 ? (
-                liveNotifications.map((notif: any) => (
-                  <div
-                    key={notif.id}
-                    className={`p-3.5 rounded-2xl border transition-all duration-standard slide-up ${
-                      notif.is_read
-                        ? 'bg-[#1a1a1d]/60 border-white/[0.06] text-content-secondary'
-                        : 'bg-[#1e1e21] border-primary/35 text-content-primary shadow-sm'
-                    } flex flex-col gap-1`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-primary font-bold text-[11px] font-mono">
-                        {notif.title || 'ENCLAVE BROADCAST'}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono text-content-muted">
-                          {notif.created_at ? notif.created_at.slice(11, 16) + ' UTC' : 'Recent'}
-                        </span>
-                        {!notif.is_read && (
-                          <button
-                            onClick={() => handleMarkNotificationRead(notif.id)}
-                            className="p-0.5 rounded text-content-muted hover:text-primary transition-colors"
-                            aria-label="Mark as read"
-                          >
-                            <Check className="w-3 h-3" />
-                          </button>
-                        )}
+                liveNotifications.map((notif: any) => {
+                  const sev = (notif.severity || 'INFO').toUpperCase();
+                  const isCrit = sev === 'CRITICAL';
+                  const isHigh = sev === 'HIGH' || sev === 'WARNING';
+                  return (
+                    <div
+                      key={notif.id}
+                      className={`p-3 rounded-2xl border transition-all duration-standard ${
+                        notif.is_read
+                          ? 'bg-[#1a1a1d]/60 border-white/[0.06] text-content-secondary'
+                          : isCrit
+                            ? 'bg-[#1c080a] border-red-500/40 text-content-primary shadow-[0_0_12px_rgba(239,68,68,0.15)] ring-1 ring-red-500/25'
+                            : isHigh
+                              ? 'bg-[#1a1408] border-amber-500/40 text-content-primary shadow-[0_0_12px_rgba(245,158,11,0.12)]'
+                              : 'bg-[#101a14] border-primary/40 text-content-primary shadow-[0_0_12px_rgba(0,230,118,0.1)] ring-1 ring-primary/20'
+                      } flex flex-col gap-1.5`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {!notif.is_read && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 animate-pulse" />
+                          )}
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase shrink-0 border ${
+                            isCrit
+                              ? 'bg-red-500/20 text-red-400 border-red-500/40'
+                              : isHigh
+                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                : 'bg-primary/20 text-primary border-primary/40'
+                          }`}>
+                            {sev}
+                          </span>
+                          <span className={`font-mono font-bold text-[11px] truncate ${notif.is_read ? 'text-[#8fa396]' : 'text-white'}`}>
+                            {notif.title || 'ENCLAVE BROADCAST'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[10px] font-mono text-content-muted">
+                            {notif.created_at ? notif.created_at.slice(11, 16) + ' UTC' : 'Recent'}
+                          </span>
+                          {!notif.is_read && (
+                            <button
+                              onClick={() => handleMarkNotificationRead(notif.id)}
+                              className="p-1 rounded bg-white/[0.05] hover:bg-primary/20 text-content-muted hover:text-primary transition-colors"
+                              title="Mark as read"
+                              aria-label="Mark as read"
+                            >
+                              <Check className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
                       </div>
+                      <p className={`text-[11px] leading-relaxed ${notif.is_read ? 'text-content-muted' : 'text-content-secondary'}`}>
+                        {notif.message || notif.body || 'Statutory incident notification logged in national enclave registry.'}
+                      </p>
+                      {(notif.related_case_id || notif.action_link) && (
+                        <div className="pt-1.5 mt-0.5 border-t border-white/[0.05] flex justify-end">
+                          <button
+                            onClick={() => {
+                              const cid = notif.related_case_id || (notif.action_link ? notif.action_link.split('/').pop() : null);
+                              if (cid) {
+                                setIsNotificationsOpen(false);
+                                handleSelectCase(cid);
+                              }
+                            }}
+                            className="text-[10px] font-mono text-primary hover:underline flex items-center gap-1"
+                          >
+                            <span>Open Case</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-[11px] text-content-secondary leading-relaxed">
-                      {notif.message || notif.body || 'Statutory incident notification logged in national enclave registry.'}
-                    </p>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="p-6 text-center text-content-muted flex flex-col items-center gap-2.5">
                   <Inbox className="w-6 h-6 opacity-30" aria-hidden="true" />
-                  <span className="text-xs font-sans">No unread enclave broadcasts at this time.</span>
+                  <span className="text-xs font-sans">No enclave broadcasts or alerts at this time.</span>
                 </div>
               )}
             </div>
@@ -648,6 +706,7 @@ export const App: React.FC = () => {
             }}
             openCasesCount={complaints.length}
             criticalAlertsCount={complaints.filter(c => c.severity === 'CRITICAL').length}
+            unreadCount={unreadCount}
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
           />
@@ -670,6 +729,11 @@ export const App: React.FC = () => {
                     onSelectCase={handleSelectCase}
                     onSubmitComplaint={handleSubmitComplaint}
                     currentUser={currentUser}
+                    notifications={liveNotifications}
+                    unreadCount={unreadCount}
+                    onMarkNotificationRead={handleMarkNotificationRead}
+                    onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
+                    onRefreshNotifications={fetchEnclaveData}
                   />
                 )}
 

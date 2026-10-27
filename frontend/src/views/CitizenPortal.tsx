@@ -65,6 +65,11 @@ interface CitizenPortalProps {
   onSelectCase: (caseId: string) => void;
   onSubmitComplaint: (newComplaint: Complaint) => void;
   currentUser?: UserProfile | null;
+  notifications?: any[];
+  unreadCount?: number;
+  onMarkNotificationRead?: (id: string) => void;
+  onMarkAllNotificationsRead?: () => void;
+  onRefreshNotifications?: () => void;
 }
 
 export const CitizenPortal: React.FC<CitizenPortalProps> = ({
@@ -74,14 +79,19 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
   selectedCaseId,
   onSelectCase,
   onSubmitComplaint,
-  currentUser
+  currentUser,
+  notifications,
+  unreadCount = 0,
+  onMarkNotificationRead,
+  onMarkAllNotificationsRead,
+  onRefreshNotifications
 }) => {
   const [wizardStep, setWizardStep] = useState(1);
   const [category, setCategory] = useState<Complaint['category']>('Financial Fraud');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [incidentDate, setIncidentDate] = useState('2026-09-04');
-  const [financialLoss, setFinancialLoss] = useState<string>('25000');
+  const [incidentDate, setIncidentDate] = useState('');
+  const [financialLoss, setFinancialLoss] = useState<string>('');
 
   const [telemetrySeries, setTelemetrySeries] = useState<{ month: string; submitted: number; resolved: number }[]>([]);
   const [categoryStats, setCategoryStats] = useState<{ category: string; count: number; percentage: number }[]>([]);
@@ -129,10 +139,17 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
       const notifs = await apiClient.getNotifications();
       if (notifs) {
         setNotificationsList(notifs);
+        onRefreshNotifications?.();
       }
     } catch (e) {}
     setIsLoadingNotifications(false);
   };
+
+  useEffect(() => {
+    if (notifications && notifications.length > 0) {
+      setNotificationsList(notifications);
+    }
+  }, [notifications]);
 
   useEffect(() => {
     fetchStats();
@@ -142,9 +159,13 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
     if (activeTab === 'documents') {
       fetchEvidence();
     } else if (activeTab === 'notifications') {
-      fetchNotifications();
+      if (notifications && notifications.length > 0) {
+        setNotificationsList(notifications);
+      } else {
+        fetchNotifications();
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, notifications]);
   
   const [citizenName, setCitizenName] = useState(currentUser?.full_name || '');
   const [citizenEmail, setCitizenEmail] = useState(currentUser?.email || '');
@@ -372,17 +393,25 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
   };
 
   const handleMarkNotificationRead = async (id: string) => {
-    try {
-      await apiClient.markNotificationRead(id);
-      setNotificationsList(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-    } catch (e) {}
+    setNotificationsList(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    if (onMarkNotificationRead) {
+      onMarkNotificationRead(id);
+    } else {
+      try {
+        await apiClient.markNotificationRead(id);
+      } catch (e) {}
+    }
   };
 
   const handleMarkAllNotificationsRead = async () => {
-    try {
-      await apiClient.markAllNotificationsRead();
-      setNotificationsList(prev => prev.map(n => ({ ...n, is_read: true })));
-    } catch (e) {}
+    setNotificationsList(prev => prev.map(n => ({ ...n, is_read: true })));
+    if (onMarkAllNotificationsRead) {
+      onMarkAllNotificationsRead();
+    } else {
+      try {
+        await apiClient.markAllNotificationsRead();
+      } catch (e) {}
+    }
   };
 
   const handleFinalSubmit = async (e: React.FormEvent) => {
@@ -2096,32 +2125,89 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
                 description="No unread operational advisories or case updates from the national cyber enclave."
               />
             ) : (
-              notificationsList.map((n) => (
-                <div 
-                  key={n.id}
-                  className={`p-4 rounded-2xl border flex flex-col gap-1 text-xs transition-all ${
-                    n.is_read ? 'bg-[#06140c]/60 border-[#00e676]/10' : 'bg-[#06140c] border-[#00e676]/40 shadow-[0_0_15px_rgba(0,230,118,0.1)]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[#00e676] font-bold">{n.title || 'ENCLAVE ALERT'}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[#8fa396] font-mono text-[10px]">
-                        {n.created_at ? n.created_at.slice(0, 16).replace('T', ' ') + ' UTC' : 'Recent'}
-                      </span>
-                      {!n.is_read && (
-                        <button 
-                          onClick={() => handleMarkNotificationRead(n.id)}
-                          className="text-[10px] font-mono text-[#00e676] hover:underline"
-                        >
-                          Mark Read
-                        </button>
-                      )}
+            notificationsList.map((n) => {
+                const sev = (n.severity || 'INFO').toUpperCase();
+                const isCrit = sev === 'CRITICAL';
+                const isHigh = sev === 'HIGH' || sev === 'WARNING';
+                const isSec = (n.type || n.notification_type || '').toLowerCase().includes('sec');
+
+                return (
+                  <div 
+                    key={n.id}
+                    className={`p-4 sm:p-5 rounded-2xl border flex flex-col gap-2.5 text-xs transition-all duration-200 ${
+                      n.is_read 
+                        ? 'bg-[#06140c]/50 border-white/[0.08] text-[#8fa396]' 
+                        : isCrit
+                          ? 'bg-[#140608]/90 border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.15)] ring-1 ring-red-500/20'
+                          : isHigh
+                            ? 'bg-[#140f06]/90 border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.12)] ring-1 ring-amber-500/20'
+                            : 'bg-[#06140c] border-[#00e676]/40 shadow-[0_0_20px_rgba(0,230,118,0.1)] ring-1 ring-[#00e676]/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        {/* Unread indicator */}
+                        {!n.is_read && (
+                          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        )}
+
+                        {/* Severity Pill */}
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${
+                          isCrit 
+                            ? 'bg-red-500/15 text-red-400 border-red-500/40' 
+                            : isHigh 
+                              ? 'bg-amber-500/15 text-amber-300 border-amber-500/40' 
+                              : isSec 
+                                ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40' 
+                                : 'bg-[#00e676]/15 text-[#00e676] border-[#00e676]/40'
+                        }`}>
+                          {sev}
+                        </span>
+
+                        <span className={`font-mono font-bold text-sm ${n.is_read ? 'text-[#c8ddd0]' : 'text-white'}`}>
+                          {n.title || 'ENCLAVE ALERT'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-[#8fa396] font-mono text-[10px] whitespace-nowrap flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-[#4e725b]" />
+                          {n.created_at ? n.created_at.slice(0, 16).replace('T', ' ') + ' UTC' : 'Recent'}
+                        </span>
+                        {!n.is_read && (
+                          <button 
+                            onClick={() => handleMarkNotificationRead(n.id)}
+                            className="px-2.5 py-1 rounded-lg border border-[#00e676]/30 bg-[#00e676]/10 text-[11px] font-mono text-[#00e676] hover:bg-[#00e676]/20 transition-all flex items-center gap-1"
+                          >
+                            <Check className="w-3 h-3" />
+                            <span>Mark Read</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
+
+                    <p className={`text-xs leading-relaxed ${n.is_read ? 'text-[#8fa396]' : 'text-[#c8ddd0]'}`}>
+                      {n.message || n.body}
+                    </p>
+
+                    {/* Action buttons if related case exists */}
+                    {(n.related_case_id || n.action_link) && (
+                      <div className="pt-2 border-t border-white/[0.06] flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const cid = n.related_case_id || (n.action_link ? n.action_link.split('/').pop() : null);
+                            if (cid) onSelectCase(cid);
+                          }}
+                          className="text-[11px] font-mono text-[#00e676] hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <span>Open Associated Case Dossier</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-white font-medium">{n.message || n.body}</p>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

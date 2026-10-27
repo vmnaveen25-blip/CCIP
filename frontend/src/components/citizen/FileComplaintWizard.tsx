@@ -58,7 +58,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
   // STEP 1 STATE: Incident Information
-  const [incidentDateTime, setIncidentDateTime] = useState('2026-06-12T10:30');
+  const [incidentDateTime, setIncidentDateTime] = useState('');
   const [incidentType, setIncidentType] = useState<string>(() => {
     const knownTypes = [
       'Financial Fraud',
@@ -94,10 +94,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
     }
     return '';
   });
-  const [incidentDetails, setIncidentDetails] = useState(
-    initialDescription || 
-    'I received a call from a person claiming to be from a bank who said my account would be blocked. They asked for my OTP and I shared it. Later I found that an amount was debited from my account without my authorization.'
-  );
+  const [incidentDetails, setIncidentDetails] = useState(initialDescription || '');
   const [step1Errors, setStep1Errors] = useState<{ dateTime?: string; type?: string; customType?: string; details?: string }>({});
 
   // Effective incident type considers citizen's custom category when 'Others' is selected
@@ -110,46 +107,35 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
     type: string;
     rawFile?: File;
     documentType: string;
-  }>({
-    name: 'Aadhar_Card.jpg',
-    size: '2.4 MB',
-    type: 'image/jpeg',
-    documentType: 'Aadhar Card'
-  });
+  } | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
 
   // STEP 3 STATE: Additional Details (Financial Crime & Suspect)
   const [isNotFinancialCrime, setIsNotFinancialCrime] = useState(false);
-  const [bankMerchant, setBankMerchant] = useState('State Bank of India');
-  const [utrNumber, setUtrNumber] = useState('SBIN123456789');
-  const [transactionDate, setTransactionDate] = useState('2026-06-10');
-  const [fraudAmount, setFraudAmount] = useState('25000');
+  const [bankMerchant, setBankMerchant] = useState('');
+  const [utrNumber, setUtrNumber] = useState('');
+  const [transactionDate, setTransactionDate] = useState('');
+  const [fraudAmount, setFraudAmount] = useState('');
 
   // Optional Suspect Details
-  const [suspectUrls, setSuspectUrls] = useState(initialSuspectUrl || 'www.fraudsite.com');
-  const [suspectPhone, setSuspectPhone] = useState('+91 9876543210');
-  const [suspectEmail, setSuspectEmail] = useState('frauduser@gmail.com');
-  const [suspectBankAcc, setSuspectBankAcc] = useState('123456789012');
-  const [suspectAddress, setSuspectAddress] = useState('Delhi, India');
+  const [suspectUrls, setSuspectUrls] = useState(initialSuspectUrl || '');
+  const [suspectPhone, setSuspectPhone] = useState('');
+  const [suspectEmail, setSuspectEmail] = useState('');
+  const [suspectBankAcc, setSuspectBankAcc] = useState('');
+  const [suspectAddress, setSuspectAddress] = useState('');
 
   // Step 3 Dual Uploads
   const [suspectPhoto, setSuspectPhoto] = useState<{
     name: string;
     size: string;
     rawFile?: File;
-  } | null>({
-    name: 'suspect_photo.jpg',
-    size: '1.2 MB'
-  });
+  } | null>(null);
 
   const [otherDoc, setOtherDoc] = useState<{
     name: string;
     size: string;
     rawFile?: File;
-  } | null>({
-    name: 'chat_screenshot.jpg',
-    size: '3.8 MB'
-  });
+  } | null>(null);
 
   // PREVIEW MODAL STATE & HANDLERS
   interface DocumentPreviewTarget {
@@ -637,6 +623,9 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                       className="w-full bg-[#030906] border border-[#00e676]/20 rounded-xl px-4 py-3 text-xs text-white placeholder-[#8fa396] focus:outline-none focus:border-[#00e676] focus:ring-1 focus:ring-[#00e676]/30 transition-all font-mono"
                     />
                   </div>
+                  <span className="text-[10px] text-[#8fa396] mt-1 block">
+                    Format: DD/MM/YYYY hh:mm AM/PM (Select incident date &amp; time)
+                  </span>
                   {step1Errors.dateTime && (
                     <span className="text-[11px] text-red-400 mt-1 block">{step1Errors.dateTime}</span>
                   )}
@@ -728,7 +717,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                     rows={6}
                     value={incidentDetails}
                     onChange={(e) => setIncidentDetails(e.target.value)}
-                    placeholder="Describe what happened, how it happened, and any other relevant information..."
+                    placeholder="Provide a detailed description of what happened, when it occurred, communication channels/apps used, suspect numbers or accounts, and any financial/identity impact (minimum 200 characters)..."
                     className="w-full bg-[#030906] border border-[#00e676]/20 rounded-xl p-4 text-xs text-white placeholder-[#8fa396]/60 focus:outline-none focus:border-[#00e676] focus:ring-1 focus:ring-[#00e676]/30 leading-relaxed resize-none transition-all pb-8"
                   />
                   <div className={`absolute right-3.5 bottom-3 text-[11px] font-mono ${
@@ -1545,7 +1534,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                     <span className="text-[#8fa396] block mb-1">Incident Date and Time</span>
                     <div className="flex items-center gap-2 text-white font-medium">
                       <Calendar className="w-3.5 h-3.5 text-[#00e676]" />
-                      <span>{new Date(incidentDateTime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                      <span>{incidentDateTime ? new Date(incidentDateTime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not specified'}</span>
                     </div>
                   </div>
 
@@ -1565,7 +1554,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                 <div>
                   <span className="text-[#8fa396] block mb-1.5 text-xs">Incident Details</span>
                   <div className="p-3.5 rounded-xl bg-[#030906] border border-[#00e676]/15 text-xs text-[#c8ddd0] leading-relaxed">
-                    {incidentDetails}
+                    {incidentDetails || 'None provided'}
                   </div>
                 </div>
               </div>
@@ -1613,13 +1602,13 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                     </div>
 
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-white">{idFile?.name || 'Aadhar_Card.jpg'}</span>
+                      <span className="text-xs font-bold text-white">{idFile?.name || 'No document attached'}</span>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[11px] text-[#8fa396]">{idFile?.size || '2.4 MB'}</span>
+                        <span className="text-[11px] text-[#8fa396]">{idFile?.size || '0 KB'}</span>
                         <span className="text-[#8fa396]">•</span>
                         <div className="flex items-center gap-1 text-[11px] text-[#00e676] font-medium">
                           <Check className="w-3 h-3 stroke-[3]" />
-                          <span>Uploaded Successfully</span>
+                          <span>{idFile ? 'Uploaded Successfully' : 'Pending upload'}</span>
                         </div>
                       </div>
                     </div>
@@ -1645,7 +1634,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                     )}
                     <FileText className="w-4 h-4 text-[#8fa396]" />
                     <span className="text-[#8fa396]">Document Type:</span>
-                    <span className="text-white font-medium">{idFile?.documentType || 'Aadhar Card'}</span>
+                    <span className="text-white font-medium">{idFile?.documentType || 'Not provided'}</span>
                   </div>
                 </div>
               </div>
@@ -1741,10 +1730,16 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="text-[11px] text-[#8fa396]">Suspect Photograph (Optional)</span>
-                        <span className="text-xs font-bold text-white truncate">{suspectPhoto?.name || 'suspect_photo.jpg'}</span>
+                        <span className="text-xs font-bold text-white truncate">{suspectPhoto ? suspectPhoto.name : 'Not attached (Optional)'}</span>
                         <div className="flex items-center gap-1 text-[10px] text-[#00e676] mt-0.5">
-                          <Check className="w-3 h-3 stroke-[3]" />
-                          <span>{suspectPhoto?.size || '1.2 MB'} • Uploaded</span>
+                          {suspectPhoto ? (
+                            <>
+                              <Check className="w-3 h-3 stroke-[3]" />
+                              <span>{suspectPhoto.size} • Uploaded</span>
+                            </>
+                          ) : (
+                            <span className="text-[#8fa396]">None provided</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1774,10 +1769,16 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="text-[11px] text-[#8fa396]">Other Document (Optional)</span>
-                        <span className="text-xs font-bold text-white truncate">{otherDoc?.name || 'chat_screenshot.jpg'}</span>
+                        <span className="text-xs font-bold text-white truncate">{otherDoc ? otherDoc.name : 'Not attached (Optional)'}</span>
                         <div className="flex items-center gap-1 text-[10px] text-[#00e676] mt-0.5">
-                          <Check className="w-3 h-3 stroke-[3]" />
-                          <span>{otherDoc?.size || '3.8 MB'} • Uploaded</span>
+                          {otherDoc ? (
+                            <>
+                              <Check className="w-3 h-3 stroke-[3]" />
+                              <span>{otherDoc.size} • Uploaded</span>
+                            </>
+                          ) : (
+                            <span className="text-[#8fa396]">None provided</span>
+                          )}
                         </div>
                       </div>
                     </div>

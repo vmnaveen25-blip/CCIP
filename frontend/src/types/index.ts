@@ -308,12 +308,14 @@ export interface AppNotification {
   user_id?: string;
   title: string;
   message: string;
-  type: string;
-  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  type?: string;
+  notification_type?: string;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL' | 'HIGH' | 'LOW' | string;
   is_read: boolean;
   action_link?: string | null;
   metadata_json?: Record<string, any>;
   created_at: string;
+  timestamp_formatted?: string;
 }
 
 export interface DepartmentItem {

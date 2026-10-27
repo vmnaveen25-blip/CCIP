@@ -70,13 +70,13 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
   const [isAllActivitiesOpen, setIsAllActivitiesOpen] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
-  // Standard model catalog based on reference design
+  // Standard model catalog based on reference design (All 8 registered models)
   const modelTableData = useMemo(() => [
     {
       id: 'url-phishing',
       name: 'URL Phishing Detector',
-      purpose: 'Detect and analyse malicious URLs',
-      version: '2.0.0',
+      purpose: 'Zero-Hour Domain, URL Structure & Lexical Threat Scoring',
+      version: '2.0.0-xgboost',
       status: 'Deployed',
       statusType: 'deployed', // green
       accuracy: '97.74%',
@@ -94,69 +94,168 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
       falsePositiveRate: '0.41%'
     },
     {
-      id: 'email-threat',
-      name: 'Email Threat Classifier',
-      purpose: 'Classify phishing, spam and malicious emails',
-      version: '1.0.0',
-      status: 'Testing',
-      statusType: 'testing', // yellow
-      accuracy: '96.79%',
-      driftRate: '1.1%',
-      lastEvaluation: '10 Jun 2026',
-      icon: Mail,
-      actionLabel: 'Evaluate',
-      actionIcon: BarChart3,
-      actionColor: 'slate',
-      architecture: 'DeBERTa-v3 Multi-Header Spam Classifier',
-      dataset: 'Sovereign Mail Quarantine Data (v2.1)',
-      datasetHash: 'f4b2e81a...390d',
-      f1Score: '0.9682',
-      latency: '42ms',
-      falsePositiveRate: '0.82%'
-    },
-    {
-      id: 'sms-scam',
-      name: 'SMS Scam Classifier',
-      purpose: 'Detect smishing and SMS fraud patterns',
-      version: '1.0.0',
-      status: 'Pending Approval',
-      statusType: 'pending', // amber
-      accuracy: '93.21%',
-      driftRate: '2.4%',
-      lastEvaluation: '08 Jun 2026',
-      icon: MessageSquare,
-      actionLabel: 'Review',
-      actionIcon: ShieldCheck,
-      actionColor: 'emerald',
-      architecture: 'DistilBERT Smishing Pattern Classifier',
-      dataset: '1930 Helpline Citizen SMS Reports (v1.8)',
-      datasetHash: '87e209ab...14bc',
-      f1Score: '0.9315',
-      latency: '24ms',
-      falsePositiveRate: '1.15%'
-    },
-    {
       id: 'complaint-classifier',
-      name: 'Cybercrime Complaint Classifier',
-      purpose: 'Classify and triage 18+ complaint categories',
-      version: '1.0.0',
+      name: 'Complaint Classifier',
+      purpose: 'DeBERTa-v3 18-Category Cybercrime Legal Triage & Jurisdiction',
+      version: 'complaint-dataset-v1.1.0',
       status: 'Not Deployed',
       statusType: 'not_deployed', // gray
-      accuracy: '91.05%',
-      driftRate: '3.6%',
+      accuracy: '96.79%',
+      driftRate: '1.1%',
       lastEvaluation: '05 Jun 2026',
       icon: FileText,
       actionLabel: 'View',
       actionIcon: Eye,
       actionColor: 'slate',
       architecture: 'DeBERTa-v3 18-Category Cyber Legal Triage',
-      dataset: 'National Cyber Crime Portal Anonymized Records',
+      dataset: 'National Cyber Crime Portal Anonymized Records (v2.8)',
       datasetHash: '34a1789c...8ef0',
-      f1Score: '0.9140',
+      f1Score: '0.9767',
       latency: '65ms',
-      falsePositiveRate: '1.45%'
+      falsePositiveRate: '0.82%'
+    },
+    {
+      id: 'email-threat',
+      name: 'Email Threat Classifier',
+      purpose: 'DistilBERT Binary Sequence Classification (Threat / Safe)',
+      version: '1.0.0',
+      status: 'Testing',
+      statusType: 'testing', // yellow
+      accuracy: '98.36%',
+      driftRate: '0.6%',
+      lastEvaluation: '10 Jun 2026',
+      icon: Mail,
+      actionLabel: 'Evaluate',
+      actionIcon: BarChart3,
+      actionColor: 'slate',
+      architecture: 'DistilBERT Multi-Header Threat Classifier',
+      dataset: 'Sovereign Enclave Threat Feed Headers (v1.9)',
+      datasetHash: '87e209ab...390d',
+      f1Score: '0.9836',
+      latency: '34ms',
+      falsePositiveRate: '0.38%'
+    },
+    {
+      id: 'sms-scam',
+      name: 'SMS Scan Classifier',
+      purpose: 'DistilBERT Binary Smishing & SMS Fraud Detection',
+      version: '1.0.0',
+      status: 'Pending Approval',
+      statusType: 'pending', // amber
+      accuracy: '98.84%',
+      driftRate: '0.4%',
+      lastEvaluation: '08 Jun 2026',
+      icon: MessageSquare,
+      actionLabel: 'Review',
+      actionIcon: ShieldCheck,
+      actionColor: 'emerald',
+      architecture: 'DistilBERT Fast Smishing Tokenizer',
+      dataset: '1930 Helpline Citizen SMS Reports (v3.1)',
+      datasetHash: '87e209ab...14bc',
+      f1Score: '0.9884',
+      latency: '22ms',
+      falsePositiveRate: '0.29%'
+    },
+    {
+      id: 'investigation-assistant',
+      name: 'Investigation Assistant',
+      purpose: 'Astraea Sovereign Forensic Reasoning Engine (Sovereign Enclave)',
+      version: 'v2.0.0',
+      status: 'Deployed',
+      statusType: 'deployed', // green
+      accuracy: '98.40%',
+      driftRate: '0.0%',
+      lastEvaluation: 'Continuous Live',
+      icon: Sparkles,
+      actionLabel: 'View',
+      actionIcon: Eye,
+      actionColor: 'emerald',
+      architecture: 'Astraea Multi-Signal Rule Pipeline + Evidence Graph Correlator',
+      dataset: 'IT Act 2000 Statutory Directives + CERT-In Rules 2022',
+      datasetHash: 'e5f6a7b8...4e5f',
+      f1Score: '0.9840',
+      latency: '12ms',
+      falsePositiveRate: '0.15%'
+    },
+    {
+      id: 'cyber-ner',
+      name: 'Cyber NER Transformer',
+      purpose: 'DeBERTa-v3 Token Classification (11 Cyber Entity Classes, 23 BIO Labels)',
+      version: 'cyber-ner-bootstrap-v4.0.0',
+      status: 'Not Deployed',
+      statusType: 'not_deployed', // gray
+      accuracy: '95.52%',
+      driftRate: '1.2%',
+      lastEvaluation: '03 Jun 2026',
+      icon: Layers,
+      actionLabel: 'View',
+      actionIcon: Eye,
+      actionColor: 'slate',
+      architecture: 'DeBERTa-v3 Token Classification Model',
+      dataset: 'Cyber Threat Intelligence Entity Corpus (v4.0)',
+      datasetHash: '1a2b3c4d...1a2b',
+      f1Score: '0.9552',
+      latency: '48ms',
+      falsePositiveRate: '0.94%'
+    },
+    {
+      id: 'case-similarity',
+      name: 'Case Similarity Transformer',
+      purpose: 'all-MiniLM-L6-v2 384-d Dense Semantic Embeddings (Cosine Threshold: 0.55)',
+      version: 'case-similarity-bootstrap-v1.0.0',
+      status: 'Not Deployed',
+      statusType: 'not_deployed', // gray
+      accuracy: '92.50%',
+      driftRate: '0.5%',
+      lastEvaluation: '01 Jun 2026',
+      icon: Sliders,
+      actionLabel: 'View',
+      actionIcon: Eye,
+      actionColor: 'slate',
+      architecture: 'all-MiniLM-L6-v2 Dense Embedding Pipeline',
+      dataset: 'Cross-Case Incident Narrative Pairs (v1.0)',
+      datasetHash: '9f8e7d6c...9f8e',
+      f1Score: '0.9250',
+      latency: '28ms',
+      falsePositiveRate: '1.20%'
+    },
+    {
+      id: 'incident-urgency',
+      name: 'Incident Urgency Classifier',
+      purpose: 'DistilRoBERTa-v3 Narrative Urgency Triage (LOW, MEDIUM, HIGH, CRITICAL)',
+      version: 'incident-urgency-v1.0.0',
+      status: 'Not Deployed',
+      statusType: 'not_deployed', // gray
+      accuracy: '89.75%',
+      driftRate: '0.7%',
+      lastEvaluation: '28 May 2026',
+      icon: TrendingUp,
+      actionLabel: 'View',
+      actionIcon: Eye,
+      actionColor: 'slate',
+      architecture: 'DistilRoBERTa-v3 4-Class Softmax Head',
+      dataset: 'Emergency Triage Dispatch Logs (v1.2)',
+      datasetHash: '4a5b6c7d...4a5b',
+      f1Score: '0.8975',
+      latency: '26ms',
+      falsePositiveRate: '1.65%'
     }
   ], []);
+
+  // Dynamic summary statistics computed across all models
+  const totalModelsCount = modelTableData.length;
+  const activeModelsCount = useMemo(() => 
+    modelTableData.filter(m => m.statusType === 'deployed' || m.status === 'Deployed').length,
+    [modelTableData]
+  );
+  const pendingApprovalCount = useMemo(() => 
+    modelTableData.filter(m => m.statusType === 'pending' || m.statusType === 'testing').length,
+    [modelTableData]
+  );
+  const modelsWithDriftCount = useMemo(() => 
+    modelTableData.filter(m => parseFloat(m.driftRate) >= 1.0).length,
+    [modelTableData]
+  );
 
   // Recent activities list matching screenshot
   const recentActivities: ActivityEvent[] = useMemo(() => [
@@ -169,24 +268,38 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
     },
     {
       id: 'act-2',
+      dotColor: 'bg-emerald-400',
+      text: 'Investigation Assistant v2.0.0 operational in Sovereign Enclave',
+      timestamp: '11 Jun 2026, 04:50 PM',
+      modelId: 'investigation-assistant'
+    },
+    {
+      id: 'act-3',
       dotColor: 'bg-sky-400',
-      text: 'Email Threat Classifier evaluation completed',
+      text: 'Email Threat Classifier evaluation completed (98.36% Accuracy)',
       timestamp: '10 Jun 2026, 02:18 PM',
       modelId: 'email-threat'
     },
     {
-      id: 'act-3',
+      id: 'act-4',
       dotColor: 'bg-amber-400',
-      text: 'SMS Scam Classifier submitted for approval',
+      text: 'SMS Scan Classifier submitted for staging review',
       timestamp: '08 Jun 2026, 11:05 AM',
       modelId: 'sms-scam'
     },
     {
-      id: 'act-4',
+      id: 'act-5',
       dotColor: 'bg-slate-400',
-      text: 'Cybercrime Complaint Classifier model registered',
+      text: 'Cybercrime Complaint Classifier calibrated on 18 categories',
       timestamp: '05 Jun 2026, 09:30 AM',
       modelId: 'complaint-classifier'
+    },
+    {
+      id: 'act-6',
+      dotColor: 'bg-purple-400',
+      text: 'Cyber NER Transformer entity token weights registered',
+      timestamp: '03 Jun 2026, 04:30 PM',
+      modelId: 'cyber-ner'
     }
   ], []);
 
@@ -319,13 +432,13 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
               <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#00e676] group-hover:translate-x-0.5 transition-all" />
             </div>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-extrabold text-white font-mono tracking-tight">4</span>
+              <span className="text-2xl font-extrabold text-white font-mono tracking-tight">{totalModelsCount}</span>
               <span className="text-xs font-semibold text-[#00e676] flex items-center font-mono">
-                ↑ +1
+                ↑ +{totalModelsCount - 4}
               </span>
             </div>
             <div className="text-[11px] text-[#6e8d7a] truncate mt-0.5">
-              Registered in system
+              Registered in registry
             </div>
           </div>
         </div>
@@ -344,7 +457,7 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
               <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#00e676] group-hover:translate-x-0.5 transition-all" />
             </div>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-extrabold text-[#00e676] font-mono tracking-tight">1</span>
+              <span className="text-2xl font-extrabold text-[#00e676] font-mono tracking-tight">{activeModelsCount}</span>
               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00e676]/15 text-[#00e676] border border-[#00e676]/30">
                 PROD LIVE
               </span>
@@ -369,7 +482,7 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
               <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#f59e0b] group-hover:translate-x-0.5 transition-all" />
             </div>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-extrabold text-white font-mono tracking-tight">2</span>
+              <span className="text-2xl font-extrabold text-white font-mono tracking-tight">{pendingApprovalCount}</span>
               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30">
                 AWAITING
               </span>
@@ -394,7 +507,7 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
               <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#f59e0b] group-hover:translate-x-0.5 transition-all" />
             </div>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-extrabold text-[#f59e0b] font-mono tracking-tight">1</span>
+              <span className="text-2xl font-extrabold text-[#f59e0b] font-mono tracking-tight">{modelsWithDriftCount}</span>
               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30">
                 ATTENTION
               </span>

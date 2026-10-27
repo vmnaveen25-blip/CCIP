@@ -48,6 +48,7 @@ interface SidebarProps {
   onSelectTab: (tabId: string) => void;
   openCasesCount?: number;
   criticalAlertsCount?: number;
+  unreadCount?: number;
   isOpen?: boolean;
   onClose?: () => void;
 }
@@ -72,6 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   openCasesCount = 14,
   criticalAlertsCount = 5,
+  unreadCount = 0,
   isOpen = false,
   onClose
 }) => {
@@ -95,7 +97,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {
             groupTitle: 'Account & Support',
             items: [
-              { id: 'notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
+              { 
+                id: 'notifications', 
+                label: 'Notifications', 
+                icon: <Bell className="w-4 h-4" />,
+                badge: unreadCount > 0 ? String(unreadCount) : undefined,
+                badgeColor: 'bg-red-500/20 text-red-400 border border-red-500/40 font-mono text-[9px] font-bold shadow-[0_0_8px_rgba(239,68,68,0.4)]'
+              },
               { id: 'profile', label: 'Citizen Profile', icon: <User className="w-4 h-4" /> },
               { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
               { id: 'help-support', label: 'Help & Advisory', icon: <HelpCircle className="w-4 h-4" /> },
