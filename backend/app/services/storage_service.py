@@ -12,9 +12,9 @@ from app.core.logging import logger
 
 class StorageService(ABC):
     @abstractmethod
-    async def save_file(self, file_content: bytes, original_filename: str) -> Tuple[str, str, int, str]:
+    async def save_file(self, file_content: bytes, original_filename: str, quarantine: bool = False) -> Tuple[str, str, int, str]:
         """
-        Save file to storage.
+        Save file to storage (clean evidence store or isolated quarantine staging area).
         Returns: (storage_key, sha256_hash, file_size_bytes, formatted_size)
         """
         pass
@@ -49,23 +49,24 @@ class LocalDiskStorageService(StorageService):
         else:
             return f"{size_bytes / (1024 * 1024 * 1024):.2f} GB"
 
-    async def save_file(self, file_content: bytes, original_filename: str) -> Tuple[str, str, int, str]:
+    async def save_file(self, file_content: bytes, original_filename: str, quarantine: bool = False) -> Tuple[str, str, int, str]:
         file_size = len(file_content)
         sha256_hash = hashlib.sha256(file_content).hexdigest()
         
-        # Unique safe storage key
+        # Unique safe storage key (quarantine staging folder vs. verified evidence folder)
         safe_ext = Path(original_filename).suffix
         unique_name = f"{uuid.uuid4().hex}{safe_ext}"
-        storage_key = f"evidence/{unique_name}"
+        folder = "quarantine" if quarantine else "evidence"
+        storage_key = f"{folder}/{unique_name}"
         
-        dest_path = self.base_dir / "evidence" / unique_name
+        dest_path = self.base_dir / folder / unique_name
         dest_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(dest_path, "wb") as f:
             f.write(file_content)
             
         formatted_size = self._format_size(file_size)
-        logger.info(f"File stored locally: {storage_key} ({formatted_size}, SHA256: {sha256_hash[:12]}...)")
+        logger.info(f"File stored locally ({'QUARANTINE' if quarantine else 'CLEAN'}): {storage_key} ({formatted_size}, SHA256: {sha256_hash[:12]}...)")
         return storage_key, sha256_hash, file_size, formatted_size
 
     async def get_file_bytes(self, storage_key: str) -> bytes:
@@ -108,16 +109,17 @@ class MinIOStorageService(StorageService):
         else:
             return f"{size_bytes / (1024 * 1024):.1f} MB"
 
-    async def save_file(self, file_content: bytes, original_filename: str) -> Tuple[str, str, int, str]:
+    async def save_file(self, file_content: bytes, original_filename: str, quarantine: bool = False) -> Tuple[str, str, int, str]:
         import io
         if not self.client:
             fallback = LocalDiskStorageService()
-            return await fallback.save_file(file_content, original_filename)
+            return await fallback.save_file(file_content, original_filename, quarantine=quarantine)
 
         file_size = len(file_content)
         sha256_hash = hashlib.sha256(file_content).hexdigest()
         safe_ext = Path(original_filename).suffix
-        storage_key = f"evidence/{uuid.uuid4().hex}{safe_ext}"
+        folder = "quarantine" if quarantine else "evidence"
+        storage_key = f"{folder}/{uuid.uuid4().hex}{safe_ext}"
 
         self.client.put_object(
             bucket_name=settings.MINIO_BUCKET,

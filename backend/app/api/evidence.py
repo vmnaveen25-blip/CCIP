@@ -68,6 +68,8 @@ async def list_evidence(
             sha256Hash=ev.sha256_hash,
             verified=ev.is_verified,
             integrity_status=ev.integrity_status,
+            malware_scan_status=ev.malware_scan_status,
+            quarantined=(ev.malware_scan_status in ("INFECTED", "SUSPICIOUS")),
             processing_status=ev.document_processing.processing_status if ev.document_processing else "COMPLETED",
             download_url=f"/api/v1/evidence/{ev.id}/download"
         )
@@ -115,6 +117,8 @@ async def upload_evidence_file(
         sha256Hash=evidence.sha256_hash,
         verified=evidence.is_verified,
         integrity_status=evidence.integrity_status,
+        malware_scan_status=evidence.malware_scan_status,
+        quarantined=(evidence.malware_scan_status in ("INFECTED", "SUSPICIOUS")),
         processing_status=status,
         download_url=f"/api/v1/evidence/{evidence.id}/download"
     )
@@ -160,6 +164,8 @@ async def get_evidence_metadata(
         sha256_hash=ev.sha256_hash,
         integrity_status=ev.integrity_status,
         is_verified=ev.is_verified,
+        malware_scan_status=ev.malware_scan_status,
+        quarantined=(ev.malware_scan_status in ("INFECTED", "SUSPICIOUS")),
         processing_status=status,
         created_at=ev.created_at,
         download_url=f"/api/v1/evidence/{ev.id}/download"

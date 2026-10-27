@@ -483,6 +483,10 @@ class ModelManager:
                 logger.info("Complaint Classifier DeBERTa-v3-base model loaded and cached successfully.")
                 return self._complaint_bundle
 
+            except FileNotFoundError as e:
+                self._complaint_status = "MODEL_NOT_DEPLOYED"
+                logger.info(f"Complaint Classifier weights not deployed: {e}")
+                raise
             except Exception as e:
                 self._complaint_status = "LOAD_FAILED"
                 logger.error(f"Failed to load Complaint Classifier model: {e}", exc_info=True)

@@ -154,6 +154,8 @@ class ComplaintService:
             "evidenceFiles": evidence_files,
             "aiTriageScore": complaint.triage_score,
             "aiPredictedThreatGroup": complaint.predicted_threat_group,
+            "triageExecutionMode": getattr(complaint, "triage_execution_mode", "HEURISTIC_FALLBACK") or "HEURISTIC_FALLBACK",
+            "triageProvenance": getattr(complaint, "triage_provenance_json", {}) or {},
             "assignedUnit": complaint.assigned_unit,
             "assignedOfficer": complaint.assigned_officer,
             "timeline": timeline_events
@@ -178,15 +180,35 @@ class ComplaintService:
         citizen_phone = data.citizenPhone or (current_user.phone_number if current_user else "")
 
         status = ComplaintStatusEnum.DRAFT.value if data.isDraft else ComplaintStatusEnum.SUBMITTED.value
-        triage_score = 90 if data.severity == "CRITICAL" else 75 if data.severity == "HIGH" else 55
+
+        # Execute Server-Side Masking [5] and Reliability-Gated Threat Triage [6]
+        raw_narrative = f"{data.title or ''}\n{data.description or ''}"
+        try:
+            from app.services.threat_triage_service import threat_triage_service
+            triage_res = await threat_triage_service.process_and_triage_narrative(
+                raw_narrative=raw_narrative,
+                financial_loss=data.financialLoss or 0.0,
+                incident_date=data.incidentDate
+            )
+            triage_score = triage_res["triage_score"]
+            triage_severity = triage_res["priority"]
+            triage_mode = triage_res["execution_mode"]
+            triage_category = triage_res.get("threat_category") or data.category
+        except Exception as e:
+            logger.warning(f"Initial threat triage encountered exception: {e}. Using deterministic default.")
+            triage_score = 90 if data.severity == "CRITICAL" else 75 if data.severity == "HIGH" else 55
+            triage_severity = data.severity or "MEDIUM"
+            triage_mode = "HEURISTIC_FALLBACK"
+            triage_category = data.category
+            triage_res = {"execution_mode": triage_mode, "triage_score": triage_score}
 
         complaint = Complaint(
             reference_number=ref_num,
             tracking_token=tracking_token,
             citizen_id=current_user.id if current_user else None,
-            title=data.title or f"{data.category} Incident Report",
-            category=data.category,
-            severity=data.severity or "MEDIUM",
+            title=data.title or f"{triage_category} Incident Report",
+            category=triage_category if triage_category else data.category,
+            severity=triage_severity,
             status=status,
             citizen_name=citizen_name,
             citizen_email=citizen_email,
@@ -198,6 +220,8 @@ class ComplaintService:
             description=data.description,
             triage_score=triage_score,
             predicted_threat_group=None,
+            triage_execution_mode=triage_mode,
+            triage_provenance_json=triage_res,
             assigned_unit=None,
             assigned_officer=None
         )
@@ -216,16 +240,32 @@ class ComplaintService:
         )
         db.add(initial_event)
 
+        # Provenance-Tagged Triage Timeline Event
+        triage_event = ComplaintEvent(
+            complaint_id=complaint.id,
+            title=f"Forensic Threat Triage Executed ({triage_mode})",
+            description=(
+                f"Server-Side Masking Module [5] redacted sensitive victim identity and authentication tokens. "
+                f"Payload delivered to Threat-Triage Engine [6] (Mode: {triage_mode}). "
+                f"Assigned Priority: {triage_severity} (Triage Score: {triage_score}/100, "
+                f"Threat Category: {complaint.category}). Case management queue prioritization applied."
+            ),
+            actor="Astraea Threat-Triage Engine [6]",
+            verified_hash=None,
+            timestamp=now_str
+        )
+        db.add(triage_event)
+
         # Create linked Case for Police and Specialist dispatch (idempotent 1:1)
         linked_case = Case(
             case_number=f"CASE-{ref_num}",
             complaint_id=complaint.id,
             title=complaint.title,
             summary=complaint.description[:500],
-            priority=complaint.severity,
+            priority=triage_severity,
             status=CaseStatusEnum.CASE_CREATED.value,
             risk_score=float(triage_score),
-            is_high_risk=complaint.severity in ["CRITICAL", "HIGH"]
+            is_high_risk=triage_severity in ["CRITICAL", "HIGH"]
         )
         db.add(linked_case)
 

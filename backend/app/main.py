@@ -37,6 +37,7 @@ from app.api.citizen_timeline import router as citizen_timeline_router
 from app.api.intelligence_v2 import router as intelligence_v2_router
 from app.api.pilot import router as pilot_router
 from app.api.investigation_chat import router as investigation_chat_router
+from app.api.triage import router as triage_router
 
 
 
@@ -57,6 +58,10 @@ async def lifespan(app: FastAPI):
                 cols = [c['name'] for c in inspector.get_columns('complaints')]
                 if 'tracking_token' not in cols:
                     sync_conn.execute(text("ALTER TABLE complaints ADD COLUMN tracking_token VARCHAR(64)"))
+                if 'triage_execution_mode' not in cols:
+                    sync_conn.execute(text("ALTER TABLE complaints ADD COLUMN triage_execution_mode VARCHAR(50)"))
+                if 'triage_provenance_json' not in cols:
+                    sync_conn.execute(text("ALTER TABLE complaints ADD COLUMN triage_provenance_json JSON"))
         await conn.run_sync(check_and_add_column)
     logger.info("CCIP Database tables initialized.")
     yield
@@ -168,6 +173,7 @@ app.include_router(citizen_timeline_router, prefix=api_v1_prefix)
 app.include_router(intelligence_v2_router, prefix=api_v1_prefix)
 app.include_router(pilot_router, prefix=api_v1_prefix)
 app.include_router(investigation_chat_router, prefix=api_v1_prefix)
+app.include_router(triage_router, prefix=api_v1_prefix)
 
 
 

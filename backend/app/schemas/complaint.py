@@ -71,6 +71,8 @@ class ComplaintFrontendSchema(BaseModel):
     evidenceFiles: List[EvidenceFileSchema] = []
     aiTriageScore: int = 50
     aiPredictedThreatGroup: Optional[str] = None
+    triageExecutionMode: Optional[str] = "HEURISTIC_FALLBACK"
+    triageProvenance: Optional[Dict[str, Any]] = None
     assignedUnit: Optional[str] = None
     assignedOfficer: Optional[str] = None
     timeline: List[TimelineEventSchema] = []

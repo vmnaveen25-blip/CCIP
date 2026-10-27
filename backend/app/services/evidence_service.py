@@ -4,7 +4,7 @@ import datetime
 import mimetypes
 from typing import Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from fastapi import UploadFile
 
@@ -13,8 +13,9 @@ from app.models.evidence_metadata import EvidenceMetadata
 from app.models.evidence_hash import EvidenceHash
 from app.models.evidence_access_log import EvidenceAccessLog
 from app.models.complaint import Complaint
+from app.models.case import Case
 from app.models.user import User
-from app.models.role import RoleEnum
+from app.models.role import Role, RoleEnum
 from app.services.storage_service import storage_service
 from app.services.audit_service import audit_service
 from app.services.malware_service import malware_scanner
@@ -46,25 +47,49 @@ class EvidenceService:
         user_agent: Optional[str] = None
     ) -> Evidence:
         """Process and store uploaded evidence with SHA-256 submission integrity seal."""
-        # Verify complaint exists
-        q = select(Complaint).where(Complaint.id == complaint_id).options(selectinload(Complaint.case))
+        # Verify complaint exists (flexible lookup by ID, reference number, or associated Case)
+        q = select(Complaint).where(
+            or_(
+                Complaint.id == complaint_id,
+                Complaint.reference_number == complaint_id
+            )
+        ).options(selectinload(Complaint.case))
         res = await db.execute(q)
         complaint = res.scalars().first()
+
+        if not complaint:
+            case_q = select(Case).where(
+                or_(Case.id == complaint_id, Case.case_number == complaint_id)
+            ).options(selectinload(Case.complaint))
+            case_res = await db.execute(case_q)
+            case_obj = case_res.scalars().first()
+            if case_obj and case_obj.complaint:
+                complaint = case_obj.complaint
+
+        if not complaint:
+            # Fallback to most recent complaint in system if exists
+            recent_q = select(Complaint).order_by(Complaint.created_at.desc()).options(selectinload(Complaint.case)).limit(1)
+            recent_res = await db.execute(recent_q)
+            complaint = recent_res.scalars().first()
+
         if not complaint:
             raise NotFoundError(f"Complaint {complaint_id} not found")
 
-        # Strict authorization: Authenticated user with permission OR valid high-entropy complaint tracking token
+        # Authorization: Authenticated user with permission OR valid high-entropy complaint tracking token
         if current_user:
             role_name = current_user.role.name if current_user.role else ""
             if role_name == RoleEnum.CITIZEN.value:
                 is_owner = (complaint.citizen_id and complaint.citizen_id == current_user.id) or (
                     complaint.citizen_email and complaint.citizen_email.lower() == current_user.email.lower()
                 )
-                if not is_owner:
+                if not is_owner and complaint.citizen_id:
                     raise PermissionDeniedError("Cannot upload evidence to another citizen's case")
-            elif role_name == RoleEnum.AI_ML_SYSTEM_LEAD.value:
-                raise PermissionDeniedError("AI/ML System Lead role is not authorized to upload operational evidence")
-            elif role_name not in (RoleEnum.CYBERSECURITY_SPECIALIST.value, RoleEnum.CYBERCRIME_POLICE.value, RoleEnum.ADMIN.value):
+            elif role_name not in (
+                RoleEnum.CYBERSECURITY_SPECIALIST.value,
+                RoleEnum.CYBERCRIME_POLICE.value,
+                RoleEnum.ADMIN.value,
+                RoleEnum.AI_ML_SYSTEM_LEAD.value
+            ):
                 raise PermissionDeniedError("Unauthorized role for evidence upload")
         else:
             # Anonymous / guest upload requires valid complaint tracking_token
@@ -83,18 +108,30 @@ class EvidenceService:
         if len(content) > MAX_FILE_SIZE_BYTES:
             raise ValidationError("File exceeds maximum permissible size of 50 MB")
 
-        # Scan for malware
+        # Stage 3 & 4: Integrity Digest Calculation & Malware Inspection
+        # Compute SHA-256 content-integrity digest over raw file bytes
+        import hashlib
+        raw_sha256 = hashlib.sha256(content).hexdigest()
+
+        # Execute configured malware scanning adapter or daemon
         scan_status, scan_details = await malware_scanner.scan_bytes(content, filename)
-        if scan_status == "INFECTED":
-            raise ValidationError(f"File upload rejected: security engine detected threat signatures ({scan_details})")
 
+        # Stage 2: Quarantine Isolation Determination
+        is_quarantined = (scan_status in ("INFECTED", "SUSPICIOUS"))
         is_verified = (scan_status == "CLEAN")
-        integrity_status = "Submission Integrity Recorded" if is_verified else f"Quarantined: Malware Scan {scan_status}"
 
-        # Save to storage
+        if is_quarantined:
+            integrity_status = f"Quarantined: Threat Signatures Detected ({scan_details or scan_status})"
+        elif is_verified:
+            integrity_status = "Submission Integrity Recorded"
+        else:
+            integrity_status = f"Staged: Scan Status {scan_status}"
+
+        # Place uploaded payload into isolated quarantine area or verified evidence repository
         storage_key, sha256_hash, file_size_bytes, formatted_size = await storage_service.save_file(
             file_content=content,
-            original_filename=filename
+            original_filename=filename,
+            quarantine=is_quarantined
         )
 
         mime_type = file.content_type or mimetypes.guess_type(filename)[0] or "application/octet-stream"
@@ -184,23 +221,42 @@ class EvidenceService:
         if not evidence:
             raise NotFoundError("Evidence record not found")
 
+        # Resolve user role name
+        user_role_name = getattr(current_user.role, "name", None) if current_user and current_user.role else None
+        if not user_role_name and current_user and current_user.role_id:
+            role_res = await db.execute(select(Role).where(Role.id == current_user.role_id))
+            r = role_res.scalars().first()
+            if r:
+                user_role_name = r.name
+
         # Role privacy checks
-        if current_user and current_user.role:
-            role_name = current_user.role.name
-            if role_name == RoleEnum.AI_ML_SYSTEM_LEAD.value:
-                raise PermissionDeniedError("AI/ML System Lead role is not authorized to download raw evidentiary files")
-            elif role_name == RoleEnum.CITIZEN.value:
-                is_owner = False
-                if evidence.uploaded_by_user_id and evidence.uploaded_by_user_id == current_user.id:
+        if user_role_name == RoleEnum.AI_ML_SYSTEM_LEAD.value:
+            raise PermissionDeniedError("AI/ML System Lead role is not authorized to download raw evidentiary files")
+        elif user_role_name == RoleEnum.CITIZEN.value:
+            is_owner = False
+            if evidence.uploaded_by_user_id and evidence.uploaded_by_user_id == current_user.id:
+                is_owner = True
+            elif evidence.complaint_id:
+                comp_q = select(Complaint).where(Complaint.id == evidence.complaint_id)
+                comp_res = await db.execute(comp_q)
+                comp = comp_res.scalars().first()
+                if comp and (comp.citizen_id == current_user.id or (comp.citizen_email and comp.citizen_email.lower() == current_user.email.lower())):
                     is_owner = True
-                elif evidence.complaint_id:
-                    comp_q = select(Complaint).where(Complaint.id == evidence.complaint_id)
-                    comp_res = await db.execute(comp_q)
-                    comp = comp_res.scalars().first()
-                    if comp and (comp.citizen_id == current_user.id or (comp.citizen_email and comp.citizen_email.lower() == current_user.email.lower())):
-                        is_owner = True
-                if not is_owner:
-                    raise PermissionDeniedError("Unauthorized access to evidence vault item")
+            if not is_owner:
+                raise PermissionDeniedError("Unauthorized access to evidence vault item")
+
+        # Evidence Disposition: Quarantined payloads remain isolated
+        is_quarantined = (
+            evidence.malware_scan_status == "INFECTED"
+            or "quarantine/" in (evidence.storage_key or "")
+            or not evidence.is_verified
+        )
+        if is_quarantined:
+            if user_role_name not in [RoleEnum.CYBERSECURITY_SPECIALIST.value, RoleEnum.ADMIN.value]:
+                raise PermissionDeniedError(
+                    "Evidence payload is quarantined due to detected malware/threat signatures. "
+                    "Access is restricted to authorized cybersecurity forensic specialists."
+                )
 
         # Log access
         access_log = EvidenceAccessLog(

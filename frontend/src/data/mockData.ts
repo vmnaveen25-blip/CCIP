@@ -74,6 +74,50 @@ export const INITIAL_COMPLAINTS: Complaint[] = [
     ]
   },
   {
+    id: 'case-6891',
+    referenceNumber: 'CYBER-2026-6891',
+    title: 'Electricity Bill KYC Phishing',
+    category: 'Phishing Attack',
+    severity: 'HIGH',
+    status: 'UNDER_INVESTIGATION',
+    citizenName: 'Devika Pillai',
+    citizenEmail: 'devika.pillai@kseb.org.in',
+    citizenPhone: '+91 98221 11223',
+    incidentDate: '10 Jun 2026, 02:40 PM',
+    reportedDate: '10 Jun 2026, 02:40 PM',
+    financialLoss: 32000,
+    suspectInfo: {
+      alias: 'State Electricity Helpline Impersonator',
+      phone: '+91 98221 11223',
+      website: 'http://electricity-power-bill-update.in',
+      ipAddress: '185.220.101.44',
+      email: 'power-support@quick-bill-pay.in'
+    },
+    description: 'Victim received SMS warning of immediate power disconnection due to unverified KYC. Followed link to phishing portal and lost ₹32,000 to Indiranagar mule account.',
+    evidenceFiles: [
+      {
+        name: 'urgent_sms_screenshot.png',
+        size: '1.1 MB',
+        type: 'image/png',
+        sha256Hash: '8e1a7b...41f9',
+        verified: true
+      }
+    ],
+    aiTriageScore: 81,
+    aiPredictedThreatGroup: 'UNC4192 (DarkSynapse / Banking Trojans)',
+    assignedUnit: 'Cybercrime Rapid Response Cell',
+    assignedOfficer: 'Naveen (Specialist)',
+    timeline: [
+      {
+        timestamp: '10 Jun 2026, 02:40 PM',
+        title: 'Incident Submitted',
+        description: 'Citizen reported urgent disconnection fraud SMS.',
+        actor: 'Citizen Portal',
+        verifiedHash: '0x12fa...6789'
+      }
+    ]
+  },
+  {
     id: 'case-1001',
     referenceNumber: 'CYBER-2026-9842',
     title: 'AI Voice Clone Impersonation UPI & Wire Fraud (₹18,50,000)',

@@ -1,0 +1,6 @@
+component,severity,issue,remediation
+email_threat,MEDIUM,Neural model weights (safetensors/bin) absent in enclave. Running in MODEL_NOT_DEPLOYED.,Provision validated fine-tuned weights for email_threat.
+sms_spam,MEDIUM,Neural model weights (safetensors/bin) absent in enclave. Running in MODEL_NOT_DEPLOYED.,Provision validated fine-tuned weights for sms_spam.
+complaint_classifier,HIGH,Neural model weights (safetensors/bin) absent in enclave. Running in MODEL_NOT_DEPLOYED.,Provision validated fine-tuned weights for complaint_classifier.
+cyber_ner,MEDIUM,Neural model weights (safetensors/bin) absent in enclave. Running in MODEL_NOT_DEPLOYED.,Provision validated fine-tuned weights for cyber_ner.
+investigation_assistant,LOW,Local Ollama runtime (qwen2.5:7b) is offline on port 11434. Generative copilot unavailable.,Start Ollama daemon with qwen2.5:7b model pulled if generative chat is needed.

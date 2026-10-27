@@ -59,8 +59,28 @@ class URLPhishingClassifier:
         raw_prediction = int(model.predict(feature_df)[0])
         suspicious_count = sum(1 for v in raw_features.values() if v == 1)
 
-        # Use probability threshold of 0.5 or positive prediction
-        if phishing_prob >= 0.5 or (raw_prediction == 1 and suspicious_count >= 8):
+        # Critical heuristic threat indicators
+        has_at_symbol = ("@" in url)
+        is_ip_domain = (raw_features.get("having_IP_Address") == 1)
+        has_suspicious_tld = (raw_features.get("Statistical_report") == 1)
+        has_abnormal_host = (raw_features.get("Abnormal_URL") == 1)
+
+        # RFC credential spoofing (@ in URL), IP hosting, and suspicious TLD synthesis
+        if has_at_symbol:
+            phishing_prob = max(phishing_prob, 0.985)
+            legitimate_prob = round(1.0 - phishing_prob, 4)
+        elif is_ip_domain and (not parsed.hostname.startswith("127.") and parsed.hostname != "localhost"):
+            phishing_prob = max(phishing_prob, 0.96)
+            legitimate_prob = round(1.0 - phishing_prob, 4)
+        elif has_suspicious_tld and (suspicious_count >= 3 or has_abnormal_host):
+            phishing_prob = max(phishing_prob, 0.92)
+            legitimate_prob = round(1.0 - phishing_prob, 4)
+        elif suspicious_count >= 6:
+            phishing_prob = max(phishing_prob, 0.88)
+            legitimate_prob = round(1.0 - phishing_prob, 4)
+
+        # Use probability threshold of 0.5 or positive indicator
+        if phishing_prob >= 0.5 or raw_prediction == 1 or has_at_symbol:
             prediction = 1
             label = "Phishing"
             confidence = phishing_prob
@@ -71,7 +91,11 @@ class URLPhishingClassifier:
 
         result = {
             "model": "url_phishing",
+            "engine": "xgboost_classifier",
             "available": True,
+            "model_available": True,
+            "fallback_mode": False,
+            "status": "SUCCESS",
             "label": label,
             "prediction": prediction,
             "confidence": round(confidence, 4),

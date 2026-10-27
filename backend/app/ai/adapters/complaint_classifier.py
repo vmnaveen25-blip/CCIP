@@ -53,6 +53,9 @@ class ComplaintClassifier(BaseAIAdapter):
         if len(clean_text) > 10000:
             clean_text = clean_text[:10000]
 
+        if not self.is_available:
+            raise FileNotFoundError("Complaint Classifier model weights not found in local enclave.")
+
         # Lazy-load or fetch cached model bundle
         model, tokenizer, labels, thresholds, metadata = model_manager.get_complaint_model()
 

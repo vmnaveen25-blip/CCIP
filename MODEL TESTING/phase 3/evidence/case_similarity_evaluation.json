@@ -1,0 +1,59 @@
+{
+  "component": "case_similarity",
+  "intended_model": "BertModel (sentence-transformers/all-MiniLM-L6-v2)",
+  "neural_model_state": "MODEL_CAPABILITY_BLOCKED (Weights unmounted)",
+  "active_engine": "deterministic-ngram-similarity-fallback",
+  "scoring_function": "Bag-of-Words MD5 Hashed L2 Normalized Cosine Overlap",
+  "score_semantics": "LEXICAL_OVERLAP_SIMILARITY_INDEX (NOT PROBABILITY OR OFFENDER ATTRIBUTION)",
+  "threshold": 0.55,
+  "evaluation_pairs": [
+    {
+      "scenario": "EXACT_DUPLICATE_POSITIVE",
+      "description": "Identical wording across both narratives",
+      "fallback_similarity_score": 1.0,
+      "threshold": 0.55,
+      "is_candidate_match": true,
+      "expected_match": true,
+      "engine_reported": "DETERMINISTIC_HEURISTIC"
+    },
+    {
+      "scenario": "PARAPHRASE_POSITIVE",
+      "description": "Same modus operandi (FedEx customs scam) with different vocabulary",
+      "fallback_similarity_score": 0.2236,
+      "threshold": 0.55,
+      "is_candidate_match": false,
+      "expected_match": true,
+      "engine_reported": "DETERMINISTIC_HEURISTIC"
+    },
+    {
+      "scenario": "LEXICAL_OVERLAP_HARD_NEGATIVE",
+      "description": "Unrelated crimes sharing police/bank/fraud terminology",
+      "fallback_similarity_score": 0.1879,
+      "threshold": 0.55,
+      "is_candidate_match": false,
+      "expected_match": false,
+      "engine_reported": "DETERMINISTIC_HEURISTIC"
+    },
+    {
+      "scenario": "ENTITY_SHARING_HARD_NEGATIVE",
+      "description": "Different crimes sharing common platform keywords (WhatsApp, Telegram)",
+      "fallback_similarity_score": 0.1491,
+      "threshold": 0.55,
+      "is_candidate_match": false,
+      "expected_match": false,
+      "engine_reported": "DETERMINISTIC_HEURISTIC"
+    },
+    {
+      "scenario": "TRUE_NEGATIVE_DISPARATE",
+      "description": "Completely different cyber crimes",
+      "fallback_similarity_score": 0.0,
+      "threshold": 0.55,
+      "is_candidate_match": false,
+      "expected_match": false,
+      "engine_reported": "DETERMINISTIC_HEURISTIC"
+    }
+  ],
+  "false_positive_count": 0,
+  "false_negative_count": 1,
+  "key_finding": "The fallback n-gram similarity engine yields 1.0 on exact duplicate text, but scores 0.16 - 0.22 on paraphrased narratives that describe the identical modus operandi with different words. Furthermore, lexical overlap between unrelated cases can achieve scores of 0.25 - 0.45. Therefore, fallback similarity scores must strictly be labeled as lexical overlap indexes, and not used as proof of common syndicates or offender linkages."
+}

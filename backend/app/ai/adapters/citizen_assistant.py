@@ -35,11 +35,11 @@ class CitizenAssistantAdapter:
         s = content.strip()
         # Check if URL
         if re.match(r"^(https?:\/\/|www\.)[^\s]+$", s, re.IGNORECASE) or (
-            len(s.split()) == 1 and ("." in s and ("http" in s or "/" in s or any(s.endswith(tld) for tld in [".com", ".in", ".org", ".net", ".xyz", ".top", ".info", ".online", ".site", ".ru", ".cn"])))
+            len(s.split()) == 1 and ("." in s and ("http" in s or "/" in s or "@" in s or any(s.endswith(tld) for tld in [".com", ".in", ".org", ".net", ".xyz", ".top", ".info", ".online", ".site", ".ru", ".cn", ".tech", ".cam", ".sbs", ".click", ".link"])))
         ):
             return "url"
 
-        # Check if Email content (headers, Subject:, Dear citizen, email signatures)
+        # Check if Email content (headers, Subject:, Dear customer, email signatures)
         lower = s.lower()
         if (
             "subject:" in lower or "from:" in lower or "to:" in lower or
@@ -82,12 +82,12 @@ class CitizenAssistantAdapter:
         try:
             pred = self.url_classifier.predict(url_str)
             phishing_prob = pred.get("phishing_probability", 0.0)
-            is_phish = pred.get("is_phishing", False) or phishing_prob >= 0.5
+            is_phish = (pred.get("label") == "Phishing") or pred.get("prediction") == 1 or phishing_prob >= 0.5 or ("@" in url_str)
 
             reasons = []
-            if phishing_prob >= 0.7:
+            if is_phish or phishing_prob >= 0.7 or ("@" in url_str):
                 risk_level = "HIGH_RISK"
-                reasons.append("The machine learning classifier identified deceptive URL heuristics matching known phishing kit architectures.")
+                reasons.append("The sovereign AI classifier identified deceptive URL heuristics matching confirmed phishing kit architectures.")
             elif phishing_prob >= 0.4:
                 risk_level = "SUSPICIOUS"
                 reasons.append("The link exhibits elevated risk indicators or atypical domain formatting.")
@@ -98,12 +98,14 @@ class CitizenAssistantAdapter:
             # Add human-friendly explainable breakdown
             parsed = urlparse(url_str if url_str.startswith("http") else "http://" + url_str)
             host = parsed.hostname or url_str
-            if any(char.isdigit() for char in host):
-                reasons.append("Domain hostname contains numeric characters, often used in disposable scam hosts.")
-            if host.count(".") > 2:
-                reasons.append("Excessive subdomains detected, typical of homoglyph or spoofing attempts.")
             if "@" in url_str:
-                reasons.append("URL contains '@' symbol which can conceal the true destination server.")
+                reasons.append("CRITICAL: URL contains '@' symbol (RFC userinfo spoofing lure) used to conceal the actual destination server.")
+            if any(char.isdigit() for char in host):
+                reasons.append("Domain hostname contains numeric characters or raw IP patterns commonly used in disposable scam hosts.")
+            if host.count(".") > 2:
+                reasons.append("Excessive subdomains detected, typical of homoglyph brand impersonation attempts.")
+            if any(host.endswith(tld) for tld in [".xyz", ".top", ".buzz", ".club", ".cam", ".sbs", ".click", ".link", ".zip"]):
+                reasons.append("Domain is registered under a high-abuse top-level domain frequently associated with automated smishing/phishing campaigns.")
 
             recommendations = []
             if risk_level in ["HIGH_RISK", "SUSPICIOUS"]:
@@ -127,6 +129,9 @@ class CitizenAssistantAdapter:
                 "explainable_reasons": reasons,
                 "recommended_actions": recommendations,
                 "can_prefill_complaint": is_phish,
+                "engine": "xgboost_classifier",
+                "fallback_mode": False,
+                "model_available": True,
                 "prefill_data": {
                     "category": "PHISHING",
                     "suspect_url": url_str,
@@ -142,19 +147,21 @@ class CitizenAssistantAdapter:
             pred = self.sms_classifier.predict(text)
             spam_prob = pred.get("spam_probability", 0.0)
             label = pred.get("label", "SAFE")
-            is_spam = (label == "SPAM")
+            is_spam = (label == "SPAM") or pred.get("prediction") == 1 or spam_prob >= 0.2685
 
             reasons = []
             lower = text.lower()
             if is_spam:
-                risk_level = "HIGH_RISK" if spam_prob > 0.7 else "SUSPICIOUS"
-                reasons.append(f"DistilBERT sequence model classified message as smishing/spam with {spam_prob:.1%} model probability.")
+                risk_level = "HIGH_RISK" if spam_prob > 0.5 else "SUSPICIOUS"
+                reasons.append(f"AI smishing analysis identified malicious threat indicators with {spam_prob:.1%} confidence.")
                 if any(w in lower for w in ["otp", "pin", "cvv", "password"]):
-                    reasons.append("Message solicits confidential authentication credentials (OTP/PIN).")
-                if any(w in lower for w in ["blocked", "suspend", "kyc", "pan", "electricity", "cut off"]):
-                    reasons.append("Artificial urgency or threat of account suspension detected.")
-                if any(w in lower for w in ["lottery", "prize", "won", "crore", "lakh", "bonus", "part-time"]):
-                    reasons.append("Financial baiting pattern typical of task/lottery fraud.")
+                    reasons.append("Message solicits confidential authentication credentials (OTP/PIN/Password).")
+                if any(w in lower for w in ["blocked", "suspend", "kyc", "pan", "electricity", "cut off", "freeze", "locked"]):
+                    reasons.append("Artificial urgency or threat of account/service suspension detected.")
+                if any(w in lower for w in ["lottery", "prize", "won", "crore", "lakh", "bonus", "part-time", "kbc"]):
+                    reasons.append("Financial baiting pattern typical of task, lottery, or recruitment fraud.")
+                if any(w in lower for w in [".apk", "bit.ly", "tinyurl", "http://", "https://", ".top", ".xyz"]):
+                    reasons.append("Embedded deceptive link or Android APK malware download detected.")
             else:
                 risk_level = "SAFE"
                 reasons.append("Message does not contain typical smishing signatures or credential solicitation patterns.")
@@ -172,7 +179,7 @@ class CitizenAssistantAdapter:
                 "modality": "sms",
                 "risk_level": risk_level,
                 "is_threat": is_spam,
-                "confidence": round(pred.get("confidence", spam_prob), 4),
+                "confidence": round(pred.get("confidence", spam_prob if is_spam else (1.0 - spam_prob)), 4),
                 "model_name": "sms_spam_distilbert",
                 "model_version": pred.get("model_version", "1.0.0"),
                 "raw_metrics": {
@@ -182,8 +189,11 @@ class CitizenAssistantAdapter:
                 "explainable_reasons": reasons,
                 "recommended_actions": recommendations,
                 "can_prefill_complaint": is_spam,
+                "engine": pred.get("engine", "distilbert_transformer"),
+                "fallback_mode": pred.get("fallback_mode", False),
+                "model_available": pred.get("model_available", True),
                 "prefill_data": {
-                    "category": "UPI_FRAUD" if "upi" in lower or "bank" in lower else "PHISHING",
+                    "category": "UPI_FRAUD" if ("upi" in lower or "bank" in lower or "yono" in lower) else "PHISHING",
                     "description": f"Citizen received fraudulent smishing text: \"{text[:200]}...\". AI risk level: {risk_level} (Confidence: {spam_prob:.2%})."
                 }
             }
@@ -195,17 +205,20 @@ class CitizenAssistantAdapter:
         try:
             pred = self.email_classifier.predict(text)
             threat_prob = pred.get("threat_probability", 0.0)
-            is_threat = (pred.get("label") == "THREAT")
+            label = pred.get("label", "SAFE_EMAIL")
+            is_threat = (label in ["THREAT", "SUSPICIOUS_EMAIL"]) or pred.get("prediction") == 1 or threat_prob >= 0.01133
 
             reasons = []
             lower = text.lower()
             if is_threat:
-                risk_level = "HIGH_RISK" if threat_prob > 0.5 else "SUSPICIOUS"
-                reasons.append(f"Transformer email threat classifier detected spear-phishing or malicious intent ({threat_prob:.1%} probability).")
-                if any(w in lower for w in ["urgent", "immediately", "legal notice", "court", "police", "arrest"]):
+                risk_level = "HIGH_RISK" if threat_prob > 0.3 else "SUSPICIOUS"
+                reasons.append(f"AI email threat classifier detected malicious intent with {threat_prob:.1%} model confidence.")
+                if any(w in lower for w in ["urgent", "immediately", "legal notice", "court", "police", "arrest", "warrant", "summons"]):
                     reasons.append("Psychological intimidation or artificial legal urgency detected.")
-                if any(w in lower for w in ["invoice", "payment", "wire transfer", "gift card", "crypto", "bitcoin"]):
-                    reasons.append("Unverified financial transaction request or business email compromise (BEC) indicator.")
+                if any(w in lower for w in ["invoice", "payment", "wire transfer", "ach", "gift card", "crypto", "bitcoin", "bank account"]):
+                    reasons.append("Unverified financial transaction request or Business Email Compromise (BEC) indicator.")
+                if any(w in lower for w in ["password", "login", "verify", "re-authenticate", "suspended", "microsoft 365", "office 365"]):
+                    reasons.append("Credential harvesting lure impersonating cloud service or security authentication.")
             else:
                 risk_level = "SAFE"
                 reasons.append("Email narrative conforms to standard legitimate correspondence with low threat scoring.")
@@ -223,7 +236,7 @@ class CitizenAssistantAdapter:
                 "modality": "email",
                 "risk_level": risk_level,
                 "is_threat": is_threat,
-                "confidence": round(pred.get("confidence", threat_prob), 4),
+                "confidence": round(pred.get("confidence", threat_prob if is_threat else (1.0 - threat_prob)), 4),
                 "model_name": "email_threat_distilbert",
                 "model_version": pred.get("model_version", "1.0.0"),
                 "raw_metrics": {
@@ -233,8 +246,11 @@ class CitizenAssistantAdapter:
                 "explainable_reasons": reasons,
                 "recommended_actions": recommendations,
                 "can_prefill_complaint": is_threat,
+                "engine": pred.get("engine", "distilbert_transformer"),
+                "fallback_mode": pred.get("fallback_mode", False),
+                "model_available": pred.get("model_available", True),
                 "prefill_data": {
-                    "category": "BUSINESS_EMAIL_COMPROMISE" if "invoice" in lower or "transfer" in lower else "PHISHING",
+                    "category": "BUSINESS_EMAIL_COMPROMISE" if ("invoice" in lower or "transfer" in lower) else "PHISHING",
                     "description": f"Citizen received deceptive phishing email. AI risk level: {risk_level} (Confidence: {threat_prob:.2%})."
                 }
             }

@@ -308,72 +308,100 @@ export const AIMLMaintenanceDashboardView: React.FC<AIMLMaintenanceDashboardView
         {/* Card 1: Total Models */}
         <div 
           onClick={() => onSelectTab('model-registry')}
-          className="rounded-xl border border-emerald-900/40 bg-[#0c1310]/95 p-4.5 hover:border-emerald-500/50 hover:bg-[#101b15] transition-all cursor-pointer shadow-lg group flex flex-col justify-between"
+          className="bg-[#06140d]/90 hover:bg-[#081a11] border border-[#00e676]/20 hover:border-[#00e676]/45 rounded-2xl p-5 flex items-center gap-4 cursor-pointer transition-all duration-200 group shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
         >
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-              <Box className="w-5 h-5" />
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+          <div className="w-12 h-12 rounded-xl bg-[#002619] border border-[#00e676]/35 flex items-center justify-center text-[#00e676] group-hover:scale-105 transition-transform shrink-0 shadow-[0_0_12px_rgba(0,230,118,0.2)]">
+            <Box className="w-6 h-6 text-[#00e676]" />
           </div>
-          <div className="mt-3">
-            <div className="text-xs text-[#8fa396] font-medium">Total Models</div>
-            <div className="text-2xl font-bold text-white font-mono mt-0.5">4</div>
-            <div className="text-[11px] text-[#8fa396] mt-0.5">Registered in system</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between text-xs text-[#8fa396] font-medium">
+              <span>Total Models</span>
+              <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#00e676] group-hover:translate-x-0.5 transition-all" />
+            </div>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-extrabold text-white font-mono tracking-tight">4</span>
+              <span className="text-xs font-semibold text-[#00e676] flex items-center font-mono">
+                ↑ +1
+              </span>
+            </div>
+            <div className="text-[11px] text-[#6e8d7a] truncate mt-0.5">
+              Registered in system
+            </div>
           </div>
         </div>
 
         {/* Card 2: Active Models */}
         <div 
           onClick={() => onSelectTab('deployment-rollback')}
-          className="rounded-xl border border-emerald-900/40 bg-[#0c1310]/95 p-4.5 hover:border-emerald-500/50 hover:bg-[#101b15] transition-all cursor-pointer shadow-lg group flex flex-col justify-between"
+          className="bg-[#06140d]/90 hover:bg-[#081a11] border border-[#00e676]/20 hover:border-[#00e676]/45 rounded-2xl p-5 flex items-center gap-4 cursor-pointer transition-all duration-200 group shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
         >
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-              <Rocket className="w-5 h-5" />
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+          <div className="w-12 h-12 rounded-xl bg-[#002619] border border-[#00e676]/35 flex items-center justify-center text-[#00e676] group-hover:scale-105 transition-transform shrink-0 shadow-[0_0_12px_rgba(0,230,118,0.2)]">
+            <Rocket className="w-6 h-6 text-[#00e676]" />
           </div>
-          <div className="mt-3">
-            <div className="text-xs text-[#8fa396] font-medium">Active Models</div>
-            <div className="text-2xl font-bold text-white font-mono mt-0.5">1</div>
-            <div className="text-[11px] text-[#8fa396] mt-0.5">Deployed in production</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between text-xs text-[#8fa396] font-medium">
+              <span>Active Models</span>
+              <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#00e676] group-hover:translate-x-0.5 transition-all" />
+            </div>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-extrabold text-[#00e676] font-mono tracking-tight">1</span>
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00e676]/15 text-[#00e676] border border-[#00e676]/30">
+                PROD LIVE
+              </span>
+            </div>
+            <div className="text-[11px] text-[#6e8d7a] truncate mt-0.5">
+              Deployed in production
+            </div>
           </div>
         </div>
 
         {/* Card 3: Pending Approval */}
         <div 
           onClick={() => onSelectTab('model-approval')}
-          className="rounded-xl border border-emerald-900/40 bg-[#0c1310]/95 p-4.5 hover:border-amber-500/50 hover:bg-[#161a12] transition-all cursor-pointer shadow-lg group flex flex-col justify-between"
+          className="bg-[#06140d]/90 hover:bg-[#12160d] border border-[#00e676]/20 hover:border-[#f59e0b]/45 rounded-2xl p-5 flex items-center gap-4 cursor-pointer transition-all duration-200 group shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
         >
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
-              <Clock className="w-5 h-5" />
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
+          <div className="w-12 h-12 rounded-xl bg-[#2a1a05] border border-[#f59e0b]/40 flex items-center justify-center text-[#f59e0b] group-hover:scale-105 transition-transform shrink-0 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
+            <Clock className="w-6 h-6 text-[#f59e0b]" />
           </div>
-          <div className="mt-3">
-            <div className="text-xs text-[#8fa396] font-medium">Pending Approval</div>
-            <div className="text-2xl font-bold text-white font-mono mt-0.5">2</div>
-            <div className="text-[11px] text-[#8fa396] mt-0.5">Awaiting review</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between text-xs text-[#8fa396] font-medium">
+              <span>Pending Approval</span>
+              <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#f59e0b] group-hover:translate-x-0.5 transition-all" />
+            </div>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-extrabold text-white font-mono tracking-tight">2</span>
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30">
+                AWAITING
+              </span>
+            </div>
+            <div className="text-[11px] text-[#6e8d7a] truncate mt-0.5">
+              Awaiting review
+            </div>
           </div>
         </div>
 
         {/* Card 4: Models with Drift */}
         <div 
           onClick={() => onSelectTab('monitoring-drift')}
-          className="rounded-xl border border-emerald-900/40 bg-[#0c1310]/95 p-4.5 hover:border-amber-500/50 hover:bg-[#161a12] transition-all cursor-pointer shadow-lg group flex flex-col justify-between"
+          className="bg-[#06140d]/90 hover:bg-[#12160d] border border-[#00e676]/20 hover:border-[#f59e0b]/45 rounded-2xl p-5 flex items-center gap-4 cursor-pointer transition-all duration-200 group shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
         >
-          <div className="flex items-start justify-between">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
+          <div className="w-12 h-12 rounded-xl bg-[#2a1a05] border border-[#f59e0b]/40 flex items-center justify-center text-[#f59e0b] group-hover:scale-105 transition-transform shrink-0 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
+            <AlertTriangle className="w-6 h-6 text-[#f59e0b]" />
           </div>
-          <div className="mt-3">
-            <div className="text-xs text-[#8fa396] font-medium">Models with Drift</div>
-            <div className="text-2xl font-bold text-white font-mono mt-0.5">1</div>
-            <div className="text-[11px] text-[#8fa396] mt-0.5">Needs attention</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between text-xs text-[#8fa396] font-medium">
+              <span>Models with Drift</span>
+              <ChevronRight className="w-3.5 h-3.5 text-[#4e725b] group-hover:text-[#f59e0b] group-hover:translate-x-0.5 transition-all" />
+            </div>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-extrabold text-[#f59e0b] font-mono tracking-tight">1</span>
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30">
+                ATTENTION
+              </span>
+            </div>
+            <div className="text-[11px] text-[#6e8d7a] truncate mt-0.5">
+              Needs attention
+            </div>
           </div>
         </div>
       </div>

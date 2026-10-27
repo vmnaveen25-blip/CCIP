@@ -34,6 +34,7 @@ async def list_cases(
     is_high_risk: Optional[bool] = Query(None),
     is_escalated: Optional[bool] = Query(None),
     assigned_to_me: Optional[bool] = Query(False),
+    order_by: Optional[str] = Query("priority_queue"),
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
@@ -46,7 +47,20 @@ async def list_cases(
         selectinload(Case.assigned_officer),
         selectinload(Case.assigned_specialist),
         selectinload(Case.assigned_department)
-    ).order_by(desc(Case.created_at))
+    )
+
+    if order_by == "priority_queue":
+        from sqlalchemy import case as sql_case
+        priority_order = sql_case(
+            (Case.priority == 'CRITICAL', 4),
+            (Case.priority == 'HIGH', 3),
+            (Case.priority == 'MEDIUM', 2),
+            (Case.priority == 'LOW', 1),
+            else_=0
+        )
+        q = q.order_by(desc(priority_order), desc(Case.risk_score), desc(Case.created_at))
+    else:
+        q = q.order_by(desc(Case.created_at))
 
     if status:
         q = q.where(Case.status == status)
@@ -678,4 +692,42 @@ async def get_case_assistant_suggestions(
         "case_id": case_id,
         "suggestions": suggestions
     }
+
+
+@router.post("/{case_id}/triage", summary="Execute Server-Side Masked Threat Triage and Update Priority Queue")
+async def execute_case_threat_triage(
+    case_id: str,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Executes the complete Server-Side Sensitive Masking [5] and Reliability-Gated Triage Engine [6] pipeline:
+    1. Masking Module [5] redacts sensitive citizen identity and authentication credentials.
+    2. Delivers redacted complaint narrative to Threat-Triage Engine [6].
+    3. Engine evaluates Readiness Gate (provisioned, loaded, responsive).
+    4. Routes to Neural Inference or Deterministic Rule-Based Heuristic Fallback.
+    5. Tags result with execution mode provenance.
+    6. Updates Case Priority, Risk Score, and Case Management Priority Queue rank.
+    """
+    from app.services.threat_triage_service import threat_triage_service
+
+    # Locate case and linked complaint
+    q = select(Case).where((Case.id == case_id) | (Case.case_number == case_id)).options(
+        selectinload(Case.complaint)
+    )
+    res = await db.execute(q)
+    c = res.scalars().first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    if not c.complaint:
+        raise HTTPException(status_code=400, detail="Case does not have an associated citizen complaint narrative")
+
+    triage_summary = await threat_triage_service.triage_complaint_and_update_case(
+        db=db,
+        complaint_id=c.complaint.id,
+        actor_name=f"{current_user.full_name} ({current_user.role.name if current_user.role else 'Staff'})"
+    )
+
+    return triage_summary
 

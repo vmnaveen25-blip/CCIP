@@ -15,6 +15,8 @@ class EvidenceResponse(BaseModel):
     sha256_hash: str
     integrity_status: str
     is_verified: bool
+    malware_scan_status: Optional[str] = "CLEAN"
+    quarantined: Optional[bool] = False
     processing_status: Optional[str] = "COMPLETED"
     created_at: datetime
     download_url: Optional[str] = None
@@ -28,6 +30,8 @@ class EvidenceUploadResponse(BaseModel):
     sha256Hash: str
     verified: bool
     integrity_status: str
+    malware_scan_status: Optional[str] = "CLEAN"
+    quarantined: Optional[bool] = False
     processing_status: Optional[str] = "PROCESSING"
     download_url: str
 

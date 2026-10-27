@@ -1,0 +1,81 @@
+{
+  "component": "cyber_ner",
+  "tested_engine": "CYBER_ENTITY_EXTRACTOR_V1 (Rule-based Deterministic Extractor)",
+  "transformer_ner_model": "DebertaV2ForTokenClassification (cyber-ner-bootstrap-v4.0.0)",
+  "transformer_ner_state": "MODEL_CAPABILITY_BLOCKED (Weights absent in enclave)",
+  "rule_extractor_state": "FALLBACK_FUNCTIONAL",
+  "total_test_scenarios": 13,
+  "total_expected_entities": 18,
+  "total_extracted_entities": 23,
+  "metrics": {
+    "overall_precision": 1.0,
+    "overall_recall": 0.6111,
+    "overall_f1": 0.7586,
+    "true_positives": 11,
+    "false_positives": 0,
+    "false_negatives": 7
+  },
+  "confidence_semantics_notice": "Extracted entity confidence values (0.94 - 0.98) represent deterministic rule assignment weights based on canonical regex syntax matching. They are NOT Bayesian posterior probabilities.",
+  "per_entity_type_breakdown": {
+    "URL": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "DOMAIN": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "EMAIL": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 1
+    },
+    "UPI_ID": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0
+    },
+    "PHONE": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 2
+    },
+    "IFSC": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 2
+    },
+    "BANK_ACCOUNT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "IP_ADDRESS": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0
+    },
+    "CRYPTO_WALLET": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0
+    },
+    "HASH": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 2
+    },
+    "AMOUNT": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "UTR": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    }
+  }
+}

@@ -74,6 +74,8 @@ class Complaint(Base):
     # Initial deterministic workflow scoring (no fake AI models claimed)
     triage_score: Mapped[int] = mapped_column(Integer, default=50, nullable=False)
     predicted_threat_group: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
+    triage_execution_mode: Mapped[Optional[str]] = mapped_column(String(50), default="HEURISTIC_FALLBACK", nullable=True)
+    triage_provenance_json: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, default=dict, nullable=True)
     assigned_unit: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
     assigned_officer: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
 

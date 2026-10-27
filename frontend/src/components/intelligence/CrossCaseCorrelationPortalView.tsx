@@ -3,6 +3,7 @@ import ForceGraph3D, { ForceGraphMethods } from 'react-force-graph-3d';
 import * as THREE from 'three';
 import SpriteText from 'three-spritetext';
 import { Complaint } from '../../types';
+import { INITIAL_COMPLAINTS } from '../../data/mockData';
 import {
   Share2,
   RotateCw,
@@ -73,32 +74,23 @@ export interface CorrelationGraphEdge {
   verified: boolean;
 }
 
-export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortalViewProps> = ({
-  onSelectTab,
-  onSelectCase,
-  complaints = [],
-  selectedCaseId
-}) => {
-  // Active Case Selector
-  const [activeCaseId, setActiveCaseId] = useState<string>('case-7102');
-  // Selected Node: 'fake-bank-verify.in' selected by default exactly as shown in reference image
-  const [selectedNodeId, setSelectedNodeId] = useState<string>('node-domain-fake');
-  const [copiedText, setCopiedText] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+export function buildCorrelationGraphForCase(
+  caseId: string,
+  allComplaints: Complaint[]
+): { nodes: CorrelationGraphNode[]; edges: CorrelationGraphEdge[]; defaultSelectedNodeId: string } {
+  const matchedComplaint = allComplaints.find(
+    c => c.id === caseId || c.referenceNumber.toLowerCase() === caseId.toLowerCase()
+  ) || allComplaints.find(c => c.id === 'case-7102') || allComplaints[0];
 
-  // 3D Canvas Refs & Dimensions
-  const containerRef = useRef<HTMLDivElement>(null);
-  const fgRef = useRef<ForceGraphMethods>();
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 920, height: 680 });
-  const [isAutoRotate, setIsAutoRotate] = useState<boolean>(true);
-  const [hoveredNode, setHoveredNode] = useState<any>(null);
+  const normId = matchedComplaint?.id || caseId;
+  const refNum = matchedComplaint?.referenceNumber || 'CYBER-2026-7102';
 
-  // Exactly 9 Nodes matching reference design
-  const [nodes, setNodes] = useState<CorrelationGraphNode[]>([
-    {
-      id: 'node-case-7102',
-      label: 'CYBER-2026-7102',
-      sublabel: 'UPI / QR Payment Scam',
+  // 1. CASE-7033 (CYBER-2026-7033: Mule Account Syndicated Network)
+  if (normId === 'case-7033' || refNum === 'CYBER-2026-7033') {
+    const centerNode: CorrelationGraphNode = {
+      id: 'node-case-7033',
+      label: 'CYBER-2026-7033',
+      sublabel: 'Mule Account Syndicated Network',
       type: 'case',
       iconType: 'case',
       badge: 'ACTIVE CASE',
@@ -112,23 +104,24 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
       fx: 0,
       fy: 0,
       fz: 0,
-      sourceProvenance: 'Citizen complaint narrative & UPI statement',
-      firstSeen: '12 Jun 2026, 10:24 AM',
-      lastSeen: '14 Jun 2026, 11:20 PM',
+      sourceProvenance: 'Delhi Cybercell docket & Citizen complaint (Rahul Verma)',
+      firstSeen: '11 Jun 2026, 03:18 PM',
+      lastSeen: '14 Jun 2026, 06:45 PM',
       statusText: '• ACTIVE CASE',
-      reputation: 'Verified victim complaint (Citizen Portal)',
-      relatedCasesCount: 2,
-      explanation: 'Primary Anchor Case: UPI debit fraud reported by victim Naveen following OTP phishing deception.',
+      reputation: 'Syndicated counterfeit gateway and mule operation (State Cyber Cell)',
+      relatedCasesCount: 3,
+      explanation: 'Primary Anchor Case: Online retail fraud docket where ₹48,500 was debited via counterfeit storefront and fraudulent Razorpay payment gateway mimic.',
       relatedItems: [
-        { id: 'node-domain-fake', label: 'fake-bank-verify.in', typeDesc: 'Domain • contains URL', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
-        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • direct connection', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' },
-        { id: 'node-mobile-suspect', label: '+91 98765 43210', typeDesc: 'Mobile • reported in', badge: 'Verified', badgeType: 'success', iconType: 'mobile' },
-        { id: 'node-bank-acct', label: 'XXXX 6789', typeDesc: 'Bank Account • transaction to', badge: 'Unverified', badgeType: 'warning', iconType: 'bank' }
+        { id: 'node-domain-7033', label: 'mega-deal-electronics.shop', typeDesc: 'Domain • contains URL', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • C2 infrastructure', badge: 'Malicious', badgeType: 'danger', iconType: 'ip' },
+        { id: 'node-bank-mule', label: 'XXXX 8821', typeDesc: 'Bank Account • Axis Indiranagar Mule Pool', badge: 'Unverified', badgeType: 'warning', iconType: 'bank' },
+        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Related Case • shared IP & mule accounts', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
       ]
-    },
-    {
-      id: 'node-domain-fake',
-      label: 'fake-bank-verify.in',
+    };
+
+    const domainNode: CorrelationGraphNode = {
+      id: 'node-domain-7033',
+      label: 'mega-deal-electronics.shop',
       sublabel: 'Domain',
       type: 'domain',
       iconType: 'domain',
@@ -140,21 +133,21 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
       x: -20,
       y: 110,
       z: 15,
-      sourceProvenance: 'Extracted from complaint narrative',
-      firstSeen: '12 Jun 2026, 09:45 AM',
-      lastSeen: '14 Jun 2026, 11:20 PM',
+      sourceProvenance: 'Extracted from transaction logs & complaint narrative',
+      firstSeen: '11 Jun 2026, 03:18 PM',
+      lastSeen: '14 Jun 2026, 06:45 PM',
       statusText: '• MALICIOUS',
-      reputation: 'Known phishing domain (Threat Intelligence)',
+      reputation: 'Known fraudulent storefront (Threat Intelligence)',
       relatedCasesCount: 2,
-      explanation: 'This domain is reported in the current case and also appears in 2 other complaints. It is flagged as malicious by multiple threat intelligence sources.',
+      explanation: 'Counterfeit luxury electronics eCommerce portal used to lure victims. Operates spoofed checkout forms that redirect payments into mule accounts.',
       relatedItems: [
         { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • resolves to', badge: 'Unverified', badgeType: 'danger', iconType: 'ip' },
-        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Related Case • similar URL', badge: 'Related', badgeType: 'info', iconType: 'related-case' },
-        { id: 'node-url-upi', label: 'upi-claim-support.in', typeDesc: 'URL • similar domain', badge: 'Unverified', badgeType: 'warning', iconType: 'url' },
-        { id: 'node-email-fraud', label: 'fraud@okaxis.com', typeDesc: 'Email • mentioned in', badge: 'Unverified', badgeType: 'warning', iconType: 'email' }
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • contains URL', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' },
+        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Related Case • shared infrastructure', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
       ]
-    },
-    {
+    };
+
+    const ipNode: CorrelationGraphNode = {
       id: 'node-ip-c2',
       label: '185.220.101.44',
       sublabel: 'IP Address',
@@ -168,20 +161,48 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
       x: 115,
       y: 85,
       z: -10,
-      sourceProvenance: 'Extracted from complaint narrative (AI NER)',
-      firstSeen: '12 Jun 2026, 10:24 AM',
-      lastSeen: '13 Jun 2026, 03:15 PM',
+      sourceProvenance: 'Netflow Telemetry & DNS Resolution',
+      firstSeen: '09 Jun 2026, 11:15 AM',
+      lastSeen: '14 Jun 2026, 06:45 PM',
       statusText: '• UNVERIFIED',
       reputation: 'Tor Exit Node / Bulletproof Hosting C2 (Threat Intelligence)',
-      relatedCasesCount: 2,
-      explanation: 'This IP address appears in information associated with multiple cases. Because it may be shared hosting infrastructure, further verification is needed before the cases can be treated as related.',
+      relatedCasesCount: 3,
+      explanation: 'Bulletproof C2 host shared by both the counterfeit shopping portal and the UPI phishing campaign. Acts as backend command proxy for DarkSynapse syndicate.',
       relatedItems: [
-        { id: 'node-domain-fake', label: 'fake-bank-verify.in', typeDesc: 'Domain • resolves to', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
-        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Related Case • also used in', badge: 'Related', badgeType: 'info', iconType: 'related-case' },
-        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • direct link', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+        { id: 'node-domain-7033', label: 'mega-deal-electronics.shop', typeDesc: 'Domain • resolves to', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • direct link', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' },
+        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Related Case • also used in', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
       ]
-    },
-    {
+    };
+
+    const case7102Node: CorrelationGraphNode = {
+      id: 'node-case-7102',
+      label: 'CYBER-2026-7102',
+      sublabel: 'Related Case',
+      type: 'related-case',
+      iconType: 'related-case',
+      badge: 'Related',
+      badgeType: 'info',
+      glowColor: '#0284c7',
+      iconBg: '#082f49',
+      iconColor: '#38bdf8',
+      x: 145,
+      y: -15,
+      z: 10,
+      sourceProvenance: 'Bangalore Cybercell docket',
+      firstSeen: '12 Jun 2026, 10:24 AM',
+      lastSeen: '14 Jun 2026, 11:20 PM',
+      statusText: '• RELATED',
+      reputation: 'Verified UPI debit fraud docket (Citizen Portal)',
+      relatedCasesCount: 2,
+      explanation: 'Related UPI Phishing complaint sharing the identical C2 infrastructure (185.220.101.44) and Indiranagar mule account laundering pipeline.',
+      relatedItems: [
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • candidate match', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' },
+        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • shared C2 host', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' }
+      ]
+    };
+
+    const case6891Node: CorrelationGraphNode = {
       id: 'node-case-6891',
       label: 'CYBER-2026-6891',
       sublabel: 'Related Case',
@@ -195,97 +216,22 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
       x: -145,
       y: 85,
       z: 20,
-      sourceProvenance: 'Bangalore Cybercell docket',
+      sourceProvenance: 'State Cyber Cell Cross-Docket Ingest',
       firstSeen: '10 Jun 2026, 02:40 PM',
       lastSeen: '13 Jun 2026, 08:30 AM',
       statusText: '• RELATED',
-      reputation: 'Reported scam campaign (National Cyber Crime Portal)',
-      relatedCasesCount: 3,
-      explanation: 'Electricity Bill KYC Phishing docket sharing identical phishing URL templates and deceptive SMS lures.',
-      relatedItems: [
-        { id: 'node-domain-fake', label: 'fake-bank-verify.in', typeDesc: 'Domain • similar URL', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
-        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • candidate match', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
-      ]
-    },
-    {
-      id: 'node-case-7033',
-      label: 'CYBER-2026-7033',
-      sublabel: 'Related Case',
-      type: 'related-case',
-      iconType: 'related-case',
-      badge: 'Related',
-      badgeType: 'info',
-      glowColor: '#0284c7',
-      iconBg: '#082f49',
-      iconColor: '#38bdf8',
-      x: 145,
-      y: -10,
-      z: 10,
-      sourceProvenance: 'Delhi Cybercell docket',
-      firstSeen: '09 Jun 2026, 11:15 AM',
-      lastSeen: '13 Jun 2026, 05:45 PM',
-      statusText: '• RELATED',
-      reputation: 'Suspected syndicated mule network',
+      reputation: 'Electricity Bill KYC Phishing Campaign',
       relatedCasesCount: 2,
-      explanation: 'Mule account network docket with shared IP infrastructure and matching victim communication patterns.',
+      explanation: 'Phishing campaign operating on identical bulletproof server block with correlated victim payment routing.',
       relatedItems: [
-        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • also used in', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' },
-        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • similar pattern', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • similar pattern', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' },
+        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • shared subnet', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' }
       ]
-    },
-    {
-      id: 'node-email-fraud',
-      label: 'fraud@okaxis.com',
-      sublabel: 'Email Address',
-      type: 'email',
-      iconType: 'email',
-      badge: 'Unverified',
-      badgeType: 'warning',
-      glowColor: '#a855f7',
-      iconBg: '#31104a',
-      iconColor: '#a855f7',
-      x: -140,
-      y: -20,
-      z: -15,
-      sourceProvenance: 'Phishing SMS lure text',
-      firstSeen: '12 Jun 2026, 10:24 AM',
-      lastSeen: '13 Jun 2026, 09:15 AM',
-      statusText: '• UNVERIFIED',
-      reputation: 'Corresponds with Axis Bank Indiranagar mule account',
-      relatedCasesCount: 1,
-      explanation: 'Beneficiary handle reported in scam message. Corresponds with Axis Bank Indiranagar mule account.',
-      relatedItems: [
-        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • mentioned in', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
-      ]
-    },
-    {
-      id: 'node-mobile-suspect',
-      label: '+91 98765 43210',
-      sublabel: 'Mobile Number',
-      type: 'mobile',
-      iconType: 'mobile',
-      badge: 'Verified',
-      badgeType: 'success',
-      glowColor: '#00e676',
-      iconBg: '#052e16',
-      iconColor: '#00e676',
-      x: -110,
-      y: -90,
-      z: 20,
-      sourceProvenance: 'Victim phone call logs (Airtel Karnataka)',
-      firstSeen: '12 Jun 2026, 10:20 AM',
-      lastSeen: '12 Jun 2026, 10:24 AM',
-      statusText: '• VERIFIED',
-      reputation: 'Verified suspect caller number (CDR Record)',
-      relatedCasesCount: 1,
-      explanation: 'Suspect caller number posing as bank anti-fraud executive. Verified carrier subscription and cell tower CDR.',
-      relatedItems: [
-        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • reported in', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
-      ]
-    },
-    {
-      id: 'node-bank-acct',
-      label: 'XXXX 6789',
+    };
+
+    const bankNode: CorrelationGraphNode = {
+      id: 'node-bank-mule',
+      label: 'XXXX 8821',
       sublabel: 'Bank Account',
       type: 'bank',
       iconType: 'bank',
@@ -297,20 +243,22 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
       x: -15,
       y: -125,
       z: -10,
-      sourceProvenance: 'Victim Bank Statement Extract',
-      firstSeen: '12 Jun 2026, 10:24 AM',
-      lastSeen: '12 Jun 2026, 10:25 AM',
+      sourceProvenance: 'Axis Bank Indiranagar Nodal Subpoena Response',
+      firstSeen: '11 Jun 2026, 03:20 PM',
+      lastSeen: '13 Jun 2026, 05:45 PM',
       statusText: '• UNVERIFIED',
-      reputation: 'Axis Bank recipient account (IMPS Debit)',
-      relatedCasesCount: 1,
-      explanation: 'Recipient bank account debited of ₹25,000 via fraudulent IMPS transfer.',
+      reputation: 'Suspected Tier-1 Mule Beneficiary Account',
+      relatedCasesCount: 2,
+      explanation: 'Mule account opened under fictitious KYC receiving multiple retail and UPI scam tranches before rapid ATM cash liquidation.',
       relatedItems: [
-        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • transaction to', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • transaction to', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' },
+        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Related Case • shared mule pool', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
       ]
-    },
-    {
-      id: 'node-url-upi',
-      label: 'upi-claim-support.in',
+    };
+
+    const urlNode: CorrelationGraphNode = {
+      id: 'node-url-gateway',
+      label: 'payment-gateway-mimic.in',
       sublabel: 'URL',
       type: 'url',
       iconType: 'url',
@@ -322,21 +270,868 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
       x: 105,
       y: -105,
       z: 10,
-      sourceProvenance: 'SOC Perimeter Threat Telemetry Match',
-      firstSeen: '11 Jun 2026, 08:15 PM',
-      lastSeen: '13 Jun 2026, 09:00 AM',
+      sourceProvenance: 'Extracted from victim browser history & payment link',
+      firstSeen: '11 Jun 2026, 03:19 PM',
+      lastSeen: '13 Jun 2026, 01:00 PM',
       statusText: '• UNVERIFIED',
-      reputation: 'Suspected phishing claim portal (SOC Telemetry)',
+      reputation: 'Counterfeit Payment Gateway Kit (Threat Intel)',
       relatedCasesCount: 1,
-      explanation: 'Secondary phishing landing page discovered in telemetry simulating NPCI compensation claim portal.',
+      explanation: 'Fake payment checkout page spoofing Razorpay / PayU brand identity to harvest card credentials and execute unauthorized IMPS transfers.',
       relatedItems: [
-        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • similar domain', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • gateway URL', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
       ]
-    }
-  ]);
+    };
 
-  // Exactly 10 Edges matching reference design
-  const [edges] = useState<CorrelationGraphEdge[]>([
+    const mobileNode: CorrelationGraphNode = {
+      id: 'node-mobile-7033',
+      label: '+91 98112 87654',
+      sublabel: 'Mobile Number',
+      type: 'mobile',
+      iconType: 'mobile',
+      badge: 'Verified',
+      badgeType: 'success',
+      glowColor: '#00e676',
+      iconBg: '#052e16',
+      iconColor: '#00e676',
+      x: -110,
+      y: -90,
+      z: 20,
+      sourceProvenance: 'WhatsApp merchant communication logs',
+      firstSeen: '11 Jun 2026, 02:45 PM',
+      lastSeen: '12 Jun 2026, 11:10 AM',
+      statusText: '• VERIFIED',
+      reputation: 'Verified suspect SIM (Jio Telecom Subpoena)',
+      relatedCasesCount: 1,
+      explanation: 'Mobile number used to communicate fake delivery tracking numbers to the victim. Traced to a fake identity Aadhaar in Jamtara, Jharkhand.',
+      relatedItems: [
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • reported in', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const emailNode: CorrelationGraphNode = {
+      id: 'node-email-7033',
+      label: 'support@mega-deal-electronics.shop',
+      sublabel: 'Email Address',
+      type: 'email',
+      iconType: 'email',
+      badge: 'Unverified',
+      badgeType: 'warning',
+      glowColor: '#a855f7',
+      iconBg: '#31104a',
+      iconColor: '#a855f7',
+      x: -140,
+      y: -20,
+      z: -15,
+      sourceProvenance: 'Invoice email confirmation',
+      firstSeen: '11 Jun 2026, 03:22 PM',
+      lastSeen: '12 Jun 2026, 09:30 AM',
+      statusText: '• UNVERIFIED',
+      reputation: 'ProtonMail alias forwarding to scam syndicate',
+      relatedCasesCount: 1,
+      explanation: 'Contact email provided on forged sales receipt. MX records route to anonymous offshore email relay.',
+      relatedItems: [
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Active Case • invoice contact', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const edges: CorrelationGraphEdge[] = [
+      { id: 'e-7033-1', sourceId: 'node-case-7033', targetId: 'node-domain-7033', label: 'contains URL', style: 'solid-red', badgeColor: '#ef4444', verified: false },
+      { id: 'e-7033-2', sourceId: 'node-domain-7033', targetId: 'node-ip-c2', label: 'resolves to', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-7033-3', sourceId: 'node-ip-c2', targetId: 'node-case-7102', label: 'also used in', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-7033-4', sourceId: 'node-ip-c2', targetId: 'node-case-6891', label: 'shared C2 host', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-7033-5', sourceId: 'node-case-7033', targetId: 'node-ip-c2', label: '', style: 'solid-green', badgeColor: '#00e676', verified: true },
+      { id: 'e-7033-6', sourceId: 'node-case-7033', targetId: 'node-case-7102', label: 'similar pattern', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-7033-7', sourceId: 'node-case-7033', targetId: 'node-url-gateway', label: 'mimic gateway', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-7033-8', sourceId: 'node-case-7033', targetId: 'node-bank-mule', label: 'transaction to', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-7033-9', sourceId: 'node-case-7033', targetId: 'node-mobile-7033', label: 'reported in', style: 'solid-green', badgeColor: '#00e676', verified: true },
+      { id: 'e-7033-10', sourceId: 'node-case-7033', targetId: 'node-email-7033', label: 'invoice sender', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false }
+    ];
+
+    return {
+      nodes: [centerNode, domainNode, ipNode, case7102Node, case6891Node, bankNode, urlNode, mobileNode, emailNode],
+      edges,
+      defaultSelectedNodeId: 'node-domain-7033'
+    };
+  }
+
+  // 2. CASE-6891 (CYBER-2026-6891: Electricity Bill KYC Phishing)
+  if (normId === 'case-6891' || refNum === 'CYBER-2026-6891') {
+    const centerNode: CorrelationGraphNode = {
+      id: 'node-case-6891',
+      label: 'CYBER-2026-6891',
+      sublabel: 'Electricity Bill KYC Phishing',
+      type: 'case',
+      iconType: 'case',
+      badge: 'ACTIVE CASE',
+      badgeType: 'active',
+      glowColor: '#00e676',
+      iconBg: '#052e16',
+      iconColor: '#00e676',
+      x: 0,
+      y: 0,
+      z: 0,
+      fx: 0,
+      fy: 0,
+      fz: 0,
+      sourceProvenance: 'Bangalore Cybercell docket & Citizen complaint (Devika Pillai)',
+      firstSeen: '10 Jun 2026, 02:40 PM',
+      lastSeen: '14 Jun 2026, 09:15 AM',
+      statusText: '• ACTIVE CASE',
+      reputation: 'Active smishing campaign targeting electricity consumers across Karnataka',
+      relatedCasesCount: 3,
+      explanation: 'Primary Anchor Case: Electricity Bill KYC Phishing docket sharing identical phishing URL templates and deceptive SMS lures resulting in unauthorized account debits.',
+      relatedItems: [
+        { id: 'node-url-kseb', label: 'electricity-power-bill-update.in', typeDesc: 'URL • contains URL', badge: 'Malicious', badgeType: 'danger', iconType: 'url' },
+        { id: 'node-domain-fake', label: 'fake-bank-verify.in', typeDesc: 'Domain • shared kit', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • C2 proxy', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' },
+        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Related Case • shared kit', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
+      ]
+    };
+
+    const urlNode: CorrelationGraphNode = {
+      id: 'node-url-kseb',
+      label: 'electricity-power-bill-update.in',
+      sublabel: 'URL',
+      type: 'url',
+      iconType: 'url',
+      badge: 'Malicious',
+      badgeType: 'danger',
+      glowColor: '#f59e0b',
+      iconBg: '#38250b',
+      iconColor: '#f59e0b',
+      x: -20,
+      y: 110,
+      z: 15,
+      sourceProvenance: 'Phishing SMS lure message body',
+      firstSeen: '10 Jun 2026, 02:40 PM',
+      lastSeen: '13 Jun 2026, 08:30 AM',
+      statusText: '• MALICIOUS',
+      reputation: 'Known electricity utility phishing landing page (CERT-In Telemetry)',
+      relatedCasesCount: 2,
+      explanation: 'Phishing landing page mimicking State Electricity Board portal demanding immediate payment to avert power cut.',
+      relatedItems: [
+        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • resolves to', badge: 'Unverified', badgeType: 'danger', iconType: 'ip' },
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • primary lure', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const domainNode: CorrelationGraphNode = {
+      id: 'node-domain-fake',
+      label: 'fake-bank-verify.in',
+      sublabel: 'Domain',
+      type: 'domain',
+      iconType: 'domain',
+      badge: 'Malicious',
+      badgeType: 'danger',
+      glowColor: '#f59e0b',
+      iconBg: '#38250b',
+      iconColor: '#f59e0b',
+      x: 105,
+      y: -105,
+      z: 10,
+      sourceProvenance: 'Reverse DNS Telemetry',
+      firstSeen: '12 Jun 2026, 09:45 AM',
+      lastSeen: '14 Jun 2026, 11:20 PM',
+      statusText: '• MALICIOUS',
+      reputation: 'Known phishing domain (Threat Intelligence)',
+      relatedCasesCount: 3,
+      explanation: 'Domain hosting shared payment credential harvest scripts common to both electricity scam and UPI fraud campaigns.',
+      relatedItems: [
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • shared toolkit', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' },
+        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Related Case • common domain', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
+      ]
+    };
+
+    const ipNode: CorrelationGraphNode = {
+      id: 'node-ip-c2',
+      label: '185.220.101.44',
+      sublabel: 'IP Address',
+      type: 'ip',
+      iconType: 'ip',
+      badge: 'Unverified',
+      badgeType: 'warning',
+      glowColor: '#ef4444',
+      iconBg: '#371014',
+      iconColor: '#ef4444',
+      x: 115,
+      y: 85,
+      z: -10,
+      sourceProvenance: 'DNS Resolution of phishing domain',
+      firstSeen: '09 Jun 2026, 11:15 AM',
+      lastSeen: '14 Jun 2026, 06:45 PM',
+      statusText: '• UNVERIFIED',
+      reputation: 'Tor Exit Node / Bulletproof Hosting C2 (Threat Intelligence)',
+      relatedCasesCount: 3,
+      explanation: 'Shared hosting infrastructure resolving both electricity utility and UPI phishing landing portals.',
+      relatedItems: [
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • hosted on', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' },
+        { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Related Case • shared host', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
+      ]
+    };
+
+    const case7102Node: CorrelationGraphNode = {
+      id: 'node-case-7102',
+      label: 'CYBER-2026-7102',
+      sublabel: 'Related Case',
+      type: 'related-case',
+      iconType: 'related-case',
+      badge: 'Related',
+      badgeType: 'info',
+      glowColor: '#0284c7',
+      iconBg: '#082f49',
+      iconColor: '#38bdf8',
+      x: -145,
+      y: 85,
+      z: 20,
+      sourceProvenance: 'Bangalore Cybercell docket',
+      firstSeen: '12 Jun 2026, 10:24 AM',
+      lastSeen: '14 Jun 2026, 11:20 PM',
+      statusText: '• RELATED',
+      reputation: 'UPI / QR Payment Scam',
+      relatedCasesCount: 2,
+      explanation: 'Correlated victim complaint sharing the identical phishing kits and payment deception mechanisms.',
+      relatedItems: [
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • kit match', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const case7033Node: CorrelationGraphNode = {
+      id: 'node-case-7033',
+      label: 'CYBER-2026-7033',
+      sublabel: 'Related Case',
+      type: 'related-case',
+      iconType: 'related-case',
+      badge: 'Related',
+      badgeType: 'info',
+      glowColor: '#0284c7',
+      iconBg: '#082f49',
+      iconColor: '#38bdf8',
+      x: 145,
+      y: -15,
+      z: 10,
+      sourceProvenance: 'Delhi Cybercell docket',
+      firstSeen: '11 Jun 2026, 03:18 PM',
+      lastSeen: '13 Jun 2026, 05:45 PM',
+      statusText: '• RELATED',
+      reputation: 'Mule Account Syndicated Network',
+      relatedCasesCount: 2,
+      explanation: 'Syndicated mule network utilizing the same Tor C2 infrastructure (185.220.101.44) to liquidate stolen funds.',
+      relatedItems: [
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • shared C2', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const bankNode: CorrelationGraphNode = {
+      id: 'node-bank-6891',
+      label: 'XXXX 4321',
+      sublabel: 'Bank Account',
+      type: 'bank',
+      iconType: 'bank',
+      badge: 'Unverified',
+      badgeType: 'warning',
+      glowColor: '#f59e0b',
+      iconBg: '#38250b',
+      iconColor: '#f59e0b',
+      x: -15,
+      y: -125,
+      z: -10,
+      sourceProvenance: 'Victim passbook extract',
+      firstSeen: '10 Jun 2026, 02:45 PM',
+      lastSeen: '10 Jun 2026, 02:46 PM',
+      statusText: '• UNVERIFIED',
+      reputation: 'State Bank of India Indiranagar Branch Mule Pool',
+      relatedCasesCount: 1,
+      explanation: 'Recipient beneficiary account debited ₹32,000 under false bill settlement pretence.',
+      relatedItems: [
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • transfer to', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const mobileNode: CorrelationGraphNode = {
+      id: 'node-mobile-6891',
+      label: '+91 98221 11223',
+      sublabel: 'Mobile Number',
+      type: 'mobile',
+      iconType: 'mobile',
+      badge: 'Verified',
+      badgeType: 'success',
+      glowColor: '#00e676',
+      iconBg: '#052e16',
+      iconColor: '#00e676',
+      x: -110,
+      y: -90,
+      z: 20,
+      sourceProvenance: 'Victim SMS message headers',
+      firstSeen: '10 Jun 2026, 02:30 PM',
+      lastSeen: '10 Jun 2026, 02:40 PM',
+      statusText: '• VERIFIED',
+      reputation: 'Verified SMS spoof sender (Vi Telecom CDR)',
+      relatedCasesCount: 1,
+      explanation: 'SMS broadcast number sending urgent electricity disconnection warnings with disguised phishing links.',
+      relatedItems: [
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • SMS sender', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const emailNode: CorrelationGraphNode = {
+      id: 'node-email-6891',
+      label: 'power-support@quick-bill-pay.in',
+      sublabel: 'Email Address',
+      type: 'email',
+      iconType: 'email',
+      badge: 'Unverified',
+      badgeType: 'warning',
+      glowColor: '#a855f7',
+      iconBg: '#31104a',
+      iconColor: '#a855f7',
+      x: -140,
+      y: -20,
+      z: -15,
+      sourceProvenance: 'Fake receipt PDF metadata',
+      firstSeen: '10 Jun 2026, 02:45 PM',
+      lastSeen: '11 Jun 2026, 10:00 AM',
+      statusText: '• UNVERIFIED',
+      reputation: 'Spoofed support email on fake transaction invoice',
+      relatedCasesCount: 1,
+      explanation: 'Contact email listed on fraudulent receipt designed to delay victim complaint filing.',
+      relatedItems: [
+        { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Active Case • receipt contact', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const edges: CorrelationGraphEdge[] = [
+      { id: 'e-6891-1', sourceId: 'node-case-6891', targetId: 'node-url-kseb', label: 'contains URL', style: 'solid-red', badgeColor: '#ef4444', verified: false },
+      { id: 'e-6891-2', sourceId: 'node-url-kseb', targetId: 'node-ip-c2', label: 'resolves to', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-6891-3', sourceId: 'node-url-kseb', targetId: 'node-domain-fake', label: 'similar kit', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-6891-4', sourceId: 'node-ip-c2', targetId: 'node-case-7033', label: 'shared C2 host', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-6891-5', sourceId: 'node-case-6891', targetId: 'node-ip-c2', label: '', style: 'solid-green', badgeColor: '#00e676', verified: true },
+      { id: 'e-6891-6', sourceId: 'node-case-6891', targetId: 'node-case-7102', label: 'similar pattern', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-6891-7', sourceId: 'node-case-6891', targetId: 'node-domain-fake', label: 'shared toolkit', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-6891-8', sourceId: 'node-case-6891', targetId: 'node-bank-6891', label: 'transaction to', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-6891-9', sourceId: 'node-case-6891', targetId: 'node-mobile-6891', label: 'reported in', style: 'solid-green', badgeColor: '#00e676', verified: true },
+      { id: 'e-6891-10', sourceId: 'node-case-6891', targetId: 'node-email-6891', label: 'invoice sender', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false }
+    ];
+
+    return {
+      nodes: [centerNode, urlNode, domainNode, ipNode, case7102Node, case7033Node, bankNode, mobileNode, emailNode],
+      edges,
+      defaultSelectedNodeId: 'node-url-kseb'
+    };
+  }
+
+  // 3. CASE-1001 (CYBER-2026-9842: AI Voice Clone Impersonation UPI & Wire Fraud)
+  if (normId === 'case-1001' || refNum === 'CYBER-2026-9842') {
+    const centerNode: CorrelationGraphNode = {
+      id: 'node-case-9842',
+      label: 'CYBER-2026-9842',
+      sublabel: 'AI Voice Clone Impersonation UPI & Wire Fraud',
+      type: 'case',
+      iconType: 'case',
+      badge: 'ACTIVE CASE',
+      badgeType: 'active',
+      glowColor: '#00e676',
+      iconBg: '#052e16',
+      iconColor: '#00e676',
+      x: 0,
+      y: 0,
+      z: 0,
+      fx: 0,
+      fy: 0,
+      fz: 0,
+      sourceProvenance: 'Enclave-Alpha forensic ingest & victim complaint (Priya Sharma)',
+      firstSeen: '02 Sep 2026, 02:15 PM',
+      lastSeen: '03 Sep 2026, 10:15 AM',
+      statusText: '• ACTIVE CASE',
+      reputation: 'High-value voice synthesis wire fraud attributed to DarkSynapse Syndicate',
+      relatedCasesCount: 3,
+      explanation: 'Primary Anchor Case: Synthetic deepfake voice synthesis impersonation of Managing Director resulting in ₹18.5L multi-hop mule diversion and cryptocurrency mixer ingress.',
+      relatedItems: [
+        { id: 'node-domain-nexus', label: 'secure-nexus-auth.in', typeDesc: 'Domain • Tycoon2FA credential portal', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • Tor exit C2', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' },
+        { id: 'node-wallet-eth', label: '0x71C...4e89', typeDesc: 'Wallet • Tornado mixer ingress', badge: 'Malicious', badgeType: 'danger', iconType: 'bank' },
+        { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Related Case • shared C2 IP', badge: 'Related', badgeType: 'info', iconType: 'related-case' }
+      ]
+    };
+
+    const domainNode: CorrelationGraphNode = {
+      id: 'node-domain-nexus',
+      label: 'secure-nexus-auth.in',
+      sublabel: 'Domain',
+      type: 'domain',
+      iconType: 'domain',
+      badge: 'Malicious',
+      badgeType: 'danger',
+      glowColor: '#f59e0b',
+      iconBg: '#38250b',
+      iconColor: '#f59e0b',
+      x: -20,
+      y: 110,
+      z: 15,
+      sourceProvenance: 'Extracted from forged invoice email headers',
+      firstSeen: '02 Sep 2026, 02:20 PM',
+      lastSeen: '03 Sep 2026, 08:30 AM',
+      statusText: '• MALICIOUS',
+      reputation: 'Reverse-proxy credential harvester kit (Tycoon2FA Phishing Campaign)',
+      relatedCasesCount: 2,
+      explanation: 'Corporate credential harvesting kit spoofing executive Microsoft 365 login to intercept supplier verification emails.',
+      relatedItems: [
+        { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • resolves to', badge: 'Unverified', badgeType: 'danger', iconType: 'ip' },
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • contains URL', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const ipNode: CorrelationGraphNode = {
+      id: 'node-ip-c2',
+      label: '185.220.101.44',
+      sublabel: 'IP Address',
+      type: 'ip',
+      iconType: 'ip',
+      badge: 'Unverified',
+      badgeType: 'warning',
+      glowColor: '#ef4444',
+      iconBg: '#371014',
+      iconColor: '#ef4444',
+      x: 115,
+      y: 85,
+      z: -10,
+      sourceProvenance: 'Tor exit node telemetry match',
+      firstSeen: '09 Jun 2026, 11:15 AM',
+      lastSeen: '03 Sep 2026, 10:15 AM',
+      statusText: '• UNVERIFIED',
+      reputation: 'Tor Exit Node / Bulletproof Hosting C2 (Threat Intelligence)',
+      relatedCasesCount: 3,
+      explanation: 'Command server utilized to dispatch spoofed emails and coordinate fraudulent banking transfers.',
+      relatedItems: [
+        { id: 'node-domain-nexus', label: 'secure-nexus-auth.in', typeDesc: 'Domain • resolves to', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • direct link', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const walletNode: CorrelationGraphNode = {
+      id: 'node-wallet-eth',
+      label: '0x71C...4e89',
+      sublabel: 'Crypto Wallet',
+      type: 'bank',
+      iconType: 'bank',
+      badge: 'Malicious',
+      badgeType: 'danger',
+      glowColor: '#ef4444',
+      iconBg: '#371014',
+      iconColor: '#ef4444',
+      x: -15,
+      y: -125,
+      z: -10,
+      sourceProvenance: 'On-chain forensic trace (Sovereign Crypto Trace Mesh)',
+      firstSeen: '02 Sep 2026, 04:30 PM',
+      lastSeen: '03 Sep 2026, 10:00 AM',
+      statusText: '• MALICIOUS',
+      reputation: 'Lazarus / DarkSynapse multi-hop mixer ingress contract',
+      relatedCasesCount: 2,
+      explanation: 'Mixer contract on Ethereum mainnet that absorbed ₹12L equivalent USDC before tumbling.',
+      relatedItems: [
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • mixer ingress', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const case7102Node: CorrelationGraphNode = {
+      id: 'node-case-7102',
+      label: 'CYBER-2026-7102',
+      sublabel: 'Related Case',
+      type: 'related-case',
+      iconType: 'related-case',
+      badge: 'Related',
+      badgeType: 'info',
+      glowColor: '#0284c7',
+      iconBg: '#082f49',
+      iconColor: '#38bdf8',
+      x: 145,
+      y: -15,
+      z: 10,
+      sourceProvenance: 'Bangalore Cybercell docket',
+      firstSeen: '12 Jun 2026, 10:24 AM',
+      lastSeen: '14 Jun 2026, 11:20 PM',
+      statusText: '• RELATED',
+      reputation: 'UPI / QR Payment Scam',
+      relatedCasesCount: 2,
+      explanation: 'Shared C2 IP node 185.220.101.44 and DarkSynapse laundering pipeline.',
+      relatedItems: [
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • C2 correlation', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const case7033Node: CorrelationGraphNode = {
+      id: 'node-case-7033',
+      label: 'CYBER-2026-7033',
+      sublabel: 'Related Case',
+      type: 'related-case',
+      iconType: 'related-case',
+      badge: 'Related',
+      badgeType: 'info',
+      glowColor: '#0284c7',
+      iconBg: '#082f49',
+      iconColor: '#38bdf8',
+      x: -145,
+      y: 85,
+      z: 20,
+      sourceProvenance: 'Delhi Cybercell docket',
+      firstSeen: '11 Jun 2026, 03:18 PM',
+      lastSeen: '13 Jun 2026, 05:45 PM',
+      statusText: '• RELATED',
+      reputation: 'Mule Account Syndicated Network',
+      relatedCasesCount: 2,
+      explanation: 'Mule account laundering syndicate linked to the same financial routing networks.',
+      relatedItems: [
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • syndicate match', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const bankNode: CorrelationGraphNode = {
+      id: 'node-bank-hdfc',
+      label: 'HDFC XXXX 1092',
+      sublabel: 'Bank Account',
+      type: 'bank',
+      iconType: 'bank',
+      badge: 'Unverified',
+      badgeType: 'warning',
+      glowColor: '#f59e0b',
+      iconBg: '#38250b',
+      iconColor: '#f59e0b',
+      x: 105,
+      y: -105,
+      z: 10,
+      sourceProvenance: 'I4C / 1930 Emergency Freeze Dispatch',
+      firstSeen: '02 Sep 2026, 04:30 PM',
+      lastSeen: '02 Sep 2026, 05:45 PM',
+      statusText: '• UNVERIFIED',
+      reputation: 'Mule account under Section 102 CrPC debit block',
+      relatedCasesCount: 1,
+      explanation: 'Recipient account into which initial ₹18.5L wire was executed before emergency freeze intervention.',
+      relatedItems: [
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • frozen beneficiary', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const mobileNode: CorrelationGraphNode = {
+      id: 'node-mobile-9842',
+      label: '+91 98112 34567',
+      sublabel: 'Mobile Number',
+      type: 'mobile',
+      iconType: 'mobile',
+      badge: 'Verified',
+      badgeType: 'success',
+      glowColor: '#00e676',
+      iconBg: '#052e16',
+      iconColor: '#00e676',
+      x: -110,
+      y: -90,
+      z: 20,
+      sourceProvenance: 'Airtel CDR and SIP trunk signaling telemetry',
+      firstSeen: '02 Sep 2026, 02:15 PM',
+      lastSeen: '02 Sep 2026, 02:22 PM',
+      statusText: '• VERIFIED',
+      reputation: 'Deepfake VoIP gateway origin',
+      relatedCasesCount: 1,
+      explanation: 'Virtual number routing synthetic voice call from offshore Asterisk SIP server.',
+      relatedItems: [
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • call origin', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const emailNode: CorrelationGraphNode = {
+      id: 'node-email-9842',
+      label: 'finance-verify@secure-nexus-auth.in',
+      sublabel: 'Email Address',
+      type: 'email',
+      iconType: 'email',
+      badge: 'Unverified',
+      badgeType: 'warning',
+      glowColor: '#a855f7',
+      iconBg: '#31104a',
+      iconColor: '#a855f7',
+      x: -140,
+      y: -20,
+      z: -15,
+      sourceProvenance: 'Forged invoice remittance message',
+      firstSeen: '02 Sep 2026, 02:25 PM',
+      lastSeen: '02 Sep 2026, 03:00 PM',
+      statusText: '• UNVERIFIED',
+      reputation: 'Spoofed vendor finance alias',
+      relatedCasesCount: 1,
+      explanation: 'Email sending forged supplier wire instructions following the audio call confirmation.',
+      relatedItems: [
+        { id: 'node-case-9842', label: 'CYBER-2026-9842', typeDesc: 'Active Case • wire instructions', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+      ]
+    };
+
+    const edges: CorrelationGraphEdge[] = [
+      { id: 'e-9842-1', sourceId: 'node-case-9842', targetId: 'node-domain-nexus', label: 'contains URL', style: 'solid-red', badgeColor: '#ef4444', verified: false },
+      { id: 'e-9842-2', sourceId: 'node-domain-nexus', targetId: 'node-ip-c2', label: 'resolves to', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-9842-3', sourceId: 'node-ip-c2', targetId: 'node-case-7102', label: 'also used in', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-9842-4', sourceId: 'node-case-9842', targetId: 'node-case-7033', label: 'syndicate match', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-9842-5', sourceId: 'node-case-9842', targetId: 'node-ip-c2', label: '', style: 'solid-green', badgeColor: '#00e676', verified: true },
+      { id: 'e-9842-6', sourceId: 'node-case-9842', targetId: 'node-case-7102', label: 'similar pattern', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-9842-7', sourceId: 'node-case-9842', targetId: 'node-wallet-eth', label: 'mixer ingress', style: 'solid-red', badgeColor: '#ef4444', verified: false },
+      { id: 'e-9842-8', sourceId: 'node-case-9842', targetId: 'node-bank-hdfc', label: 'wire transfer', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
+      { id: 'e-9842-9', sourceId: 'node-case-9842', targetId: 'node-mobile-9842', label: 'voice call', style: 'solid-green', badgeColor: '#00e676', verified: true },
+      { id: 'e-9842-10', sourceId: 'node-case-9842', targetId: 'node-email-9842', label: 'invoice sender', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false }
+    ];
+
+    return {
+      nodes: [centerNode, domainNode, ipNode, walletNode, case7102Node, case7033Node, bankNode, mobileNode, emailNode],
+      edges,
+      defaultSelectedNodeId: 'node-domain-nexus'
+    };
+  }
+
+  // 4. CASE-7102 (Default / UPI Payment Scam Report)
+  const center7102: CorrelationGraphNode = {
+    id: 'node-case-7102',
+    label: 'CYBER-2026-7102',
+    sublabel: 'UPI / QR Payment Scam',
+    type: 'case',
+    iconType: 'case',
+    badge: 'ACTIVE CASE',
+    badgeType: 'active',
+    glowColor: '#00e676',
+    iconBg: '#052e16',
+    iconColor: '#00e676',
+    x: 0,
+    y: 0,
+    z: 0,
+    fx: 0,
+    fy: 0,
+    fz: 0,
+    sourceProvenance: 'Citizen complaint narrative & UPI statement',
+    firstSeen: '12 Jun 2026, 10:24 AM',
+    lastSeen: '14 Jun 2026, 11:20 PM',
+    statusText: '• ACTIVE CASE',
+    reputation: 'Verified victim complaint (Citizen Portal)',
+    relatedCasesCount: 2,
+    explanation: 'Primary Anchor Case: UPI debit fraud reported by victim Naveen following OTP phishing deception.',
+    relatedItems: [
+      { id: 'node-domain-fake', label: 'fake-bank-verify.in', typeDesc: 'Domain • contains URL', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+      { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • direct connection', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' },
+      { id: 'node-mobile-suspect', label: '+91 98765 43210', typeDesc: 'Mobile • reported in', badge: 'Verified', badgeType: 'success', iconType: 'mobile' },
+      { id: 'node-bank-acct', label: 'XXXX 6789', typeDesc: 'Bank Account • transaction to', badge: 'Unverified', badgeType: 'warning', iconType: 'bank' }
+    ]
+  };
+
+  const domain7102: CorrelationGraphNode = {
+    id: 'node-domain-fake',
+    label: 'fake-bank-verify.in',
+    sublabel: 'Domain',
+    type: 'domain',
+    iconType: 'domain',
+    badge: 'Malicious',
+    badgeType: 'danger',
+    glowColor: '#f59e0b',
+    iconBg: '#38250b',
+    iconColor: '#f59e0b',
+    x: -20,
+    y: 110,
+    z: 15,
+    sourceProvenance: 'Extracted from complaint narrative',
+    firstSeen: '12 Jun 2026, 09:45 AM',
+    lastSeen: '14 Jun 2026, 11:20 PM',
+    statusText: '• MALICIOUS',
+    reputation: 'Known phishing domain (Threat Intelligence)',
+    relatedCasesCount: 2,
+    explanation: 'This domain is reported in the current case and also appears in 2 other complaints. It is flagged as malicious by multiple threat intelligence sources.',
+    relatedItems: [
+      { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • resolves to', badge: 'Unverified', badgeType: 'danger', iconType: 'ip' },
+      { id: 'node-case-6891', label: 'CYBER-2026-6891', typeDesc: 'Related Case • similar URL', badge: 'Related', badgeType: 'info', iconType: 'related-case' },
+      { id: 'node-url-upi', label: 'upi-claim-support.in', typeDesc: 'URL • similar domain', badge: 'Unverified', badgeType: 'warning', iconType: 'url' },
+      { id: 'node-email-fraud', label: 'fraud@okaxis.com', typeDesc: 'Email • mentioned in', badge: 'Unverified', badgeType: 'warning', iconType: 'email' }
+    ]
+  };
+
+  const ip7102: CorrelationGraphNode = {
+    id: 'node-ip-c2',
+    label: '185.220.101.44',
+    sublabel: 'IP Address',
+    type: 'ip',
+    iconType: 'ip',
+    badge: 'Unverified',
+    badgeType: 'warning',
+    glowColor: '#ef4444',
+    iconBg: '#371014',
+    iconColor: '#ef4444',
+    x: 115,
+    y: 85,
+    z: -10,
+    sourceProvenance: 'Extracted from complaint narrative (AI NER)',
+    firstSeen: '12 Jun 2026, 10:24 AM',
+    lastSeen: '13 Jun 2026, 03:15 PM',
+    statusText: '• UNVERIFIED',
+    reputation: 'Tor Exit Node / Bulletproof Hosting C2 (Threat Intelligence)',
+    relatedCasesCount: 2,
+    explanation: 'This IP address appears in information associated with multiple cases. Because it may be shared hosting infrastructure, further verification is needed before the cases can be treated as related.',
+    relatedItems: [
+      { id: 'node-domain-fake', label: 'fake-bank-verify.in', typeDesc: 'Domain • resolves to', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+      { id: 'node-case-7033', label: 'CYBER-2026-7033', typeDesc: 'Related Case • also used in', badge: 'Related', badgeType: 'info', iconType: 'related-case' },
+      { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • direct link', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+    ]
+  };
+
+  const case6891_for7102: CorrelationGraphNode = {
+    id: 'node-case-6891',
+    label: 'CYBER-2026-6891',
+    sublabel: 'Related Case',
+    type: 'related-case',
+    iconType: 'related-case',
+    badge: 'Related',
+    badgeType: 'info',
+    glowColor: '#0284c7',
+    iconBg: '#082f49',
+    iconColor: '#38bdf8',
+    x: -145,
+    y: 85,
+    z: 20,
+    sourceProvenance: 'Bangalore Cybercell docket',
+    firstSeen: '10 Jun 2026, 02:40 PM',
+    lastSeen: '13 Jun 2026, 08:30 AM',
+    statusText: '• RELATED',
+    reputation: 'Reported scam campaign (National Cyber Crime Portal)',
+    relatedCasesCount: 3,
+    explanation: 'Electricity Bill KYC Phishing docket sharing identical phishing URL templates and deceptive SMS lures.',
+    relatedItems: [
+      { id: 'node-domain-fake', label: 'fake-bank-verify.in', typeDesc: 'Domain • similar URL', badge: 'Malicious', badgeType: 'danger', iconType: 'domain' },
+      { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • candidate match', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+    ]
+  };
+
+  const case7033_for7102: CorrelationGraphNode = {
+    id: 'node-case-7033',
+    label: 'CYBER-2026-7033',
+    sublabel: 'Related Case',
+    type: 'related-case',
+    iconType: 'related-case',
+    badge: 'Related',
+    badgeType: 'info',
+    glowColor: '#0284c7',
+    iconBg: '#082f49',
+    iconColor: '#38bdf8',
+    x: 145,
+    y: -10,
+    z: 10,
+    sourceProvenance: 'Delhi Cybercell docket',
+    firstSeen: '09 Jun 2026, 11:15 AM',
+    lastSeen: '13 Jun 2026, 05:45 PM',
+    statusText: '• RELATED',
+    reputation: 'Suspected syndicated mule network',
+    relatedCasesCount: 2,
+    explanation: 'Mule account network docket with shared IP infrastructure and matching victim communication patterns.',
+    relatedItems: [
+      { id: 'node-ip-c2', label: '185.220.101.44', typeDesc: 'IP Address • also used in', badge: 'Unverified', badgeType: 'warning', iconType: 'ip' },
+      { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • similar pattern', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+    ]
+  };
+
+  const email7102: CorrelationGraphNode = {
+    id: 'node-email-fraud',
+    label: 'fraud@okaxis.com',
+    sublabel: 'Email Address',
+    type: 'email',
+    iconType: 'email',
+    badge: 'Unverified',
+    badgeType: 'warning',
+    glowColor: '#a855f7',
+    iconBg: '#31104a',
+    iconColor: '#a855f7',
+    x: -140,
+    y: -20,
+    z: -15,
+    sourceProvenance: 'Phishing SMS lure text',
+    firstSeen: '12 Jun 2026, 10:24 AM',
+    lastSeen: '13 Jun 2026, 09:15 AM',
+    statusText: '• UNVERIFIED',
+    reputation: 'Corresponds with Axis Bank Indiranagar mule account',
+    relatedCasesCount: 1,
+    explanation: 'Beneficiary handle reported in scam message. Corresponds with Axis Bank Indiranagar mule account.',
+    relatedItems: [
+      { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • mentioned in', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+    ]
+  };
+
+  const mobile7102: CorrelationGraphNode = {
+    id: 'node-mobile-suspect',
+    label: '+91 98765 43210',
+    sublabel: 'Mobile Number',
+    type: 'mobile',
+    iconType: 'mobile',
+    badge: 'Verified',
+    badgeType: 'success',
+    glowColor: '#00e676',
+    iconBg: '#052e16',
+    iconColor: '#00e676',
+    x: -110,
+    y: -90,
+    z: 20,
+    sourceProvenance: 'Victim phone call logs (Airtel Karnataka)',
+    firstSeen: '12 Jun 2026, 10:20 AM',
+    lastSeen: '12 Jun 2026, 10:24 AM',
+    statusText: '• VERIFIED',
+    reputation: 'Verified suspect caller number (CDR Record)',
+    relatedCasesCount: 1,
+    explanation: 'Suspect caller number posing as bank anti-fraud executive. Verified carrier subscription and cell tower CDR.',
+    relatedItems: [
+      { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • reported in', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+    ]
+  };
+
+  const bank7102: CorrelationGraphNode = {
+    id: 'node-bank-acct',
+    label: 'XXXX 6789',
+    sublabel: 'Bank Account',
+    type: 'bank',
+    iconType: 'bank',
+    badge: 'Unverified',
+    badgeType: 'warning',
+    glowColor: '#f59e0b',
+    iconBg: '#38250b',
+    iconColor: '#f59e0b',
+    x: -15,
+    y: -125,
+    z: -10,
+    sourceProvenance: 'Victim Bank Statement Extract',
+    firstSeen: '12 Jun 2026, 10:24 AM',
+    lastSeen: '12 Jun 2026, 10:25 AM',
+    statusText: '• UNVERIFIED',
+    reputation: 'Axis Bank recipient account (IMPS Debit)',
+    relatedCasesCount: 1,
+    explanation: 'Recipient bank account debited of ₹25,000 via fraudulent IMPS transfer.',
+    relatedItems: [
+      { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • transaction to', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+    ]
+  };
+
+  const url7102: CorrelationGraphNode = {
+    id: 'node-url-upi',
+    label: 'upi-claim-support.in',
+    sublabel: 'URL',
+    type: 'url',
+    iconType: 'url',
+    badge: 'Unverified',
+    badgeType: 'warning',
+    glowColor: '#d97706',
+    iconBg: '#3d2508',
+    iconColor: '#d97706',
+    x: 105,
+    y: -105,
+    z: 10,
+    sourceProvenance: 'SOC Perimeter Threat Telemetry Match',
+    firstSeen: '11 Jun 2026, 08:15 PM',
+    lastSeen: '13 Jun 2026, 09:00 AM',
+    statusText: '• UNVERIFIED',
+    reputation: 'Suspected phishing claim portal (SOC Telemetry)',
+    relatedCasesCount: 1,
+    explanation: 'Secondary phishing landing page discovered in telemetry simulating NPCI compensation claim portal.',
+    relatedItems: [
+      { id: 'node-case-7102', label: 'CYBER-2026-7102', typeDesc: 'Active Case • similar domain', badge: 'ACTIVE CASE', badgeType: 'success', iconType: 'related-case' }
+    ]
+  };
+
+  const edges7102: CorrelationGraphEdge[] = [
     { id: 'edge-1', sourceId: 'node-case-7102', targetId: 'node-domain-fake', label: 'contains URL', style: 'solid-red', badgeColor: '#ef4444', verified: false },
     { id: 'edge-2', sourceId: 'node-domain-fake', targetId: 'node-ip-c2', label: 'resolves to', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
     { id: 'edge-3', sourceId: 'node-domain-fake', targetId: 'node-case-6891', label: 'similar URL', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false },
@@ -347,7 +1142,70 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
     { id: 'edge-8', sourceId: 'node-case-7102', targetId: 'node-bank-acct', label: 'transaction to', style: 'solid-amber', badgeColor: '#f59e0b', verified: false },
     { id: 'edge-9', sourceId: 'node-case-7102', targetId: 'node-mobile-suspect', label: 'reported in', style: 'solid-green', badgeColor: '#00e676', verified: true },
     { id: 'edge-10', sourceId: 'node-case-7102', targetId: 'node-email-fraud', label: 'mentioned in', style: 'dashed-amber', badgeColor: '#f59e0b', verified: false }
-  ]);
+  ];
+
+  return {
+    nodes: [center7102, domain7102, ip7102, case6891_for7102, case7033_for7102, email7102, mobile7102, bank7102, url7102],
+    edges: edges7102,
+    defaultSelectedNodeId: 'node-domain-fake'
+  };
+}
+
+export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortalViewProps> = ({
+  onSelectTab,
+  onSelectCase,
+  complaints = [],
+  selectedCaseId
+}) => {
+  const availableComplaints = useMemo(() => {
+    return complaints && complaints.length > 0 ? complaints : INITIAL_COMPLAINTS;
+  }, [complaints]);
+
+  // Active Case Selector - initializes with selectedCaseId or first complaint
+  const [activeCaseId, setActiveCaseId] = useState<string>(
+    selectedCaseId || availableComplaints[0]?.id || 'case-7102'
+  );
+
+  // Synchronize when parent passes a new selectedCaseId
+  useEffect(() => {
+    if (selectedCaseId) {
+      const match = availableComplaints.find(
+        c => c.id === selectedCaseId || c.referenceNumber.toLowerCase() === selectedCaseId.toLowerCase()
+      );
+      if (match && match.id !== activeCaseId) {
+        setActiveCaseId(match.id);
+      }
+    }
+  }, [selectedCaseId, availableComplaints]);
+
+  // Dynamically derive graph nodes and edges for the active case
+  const currentGraph = useMemo(() => {
+    return buildCorrelationGraphForCase(activeCaseId, availableComplaints);
+  }, [activeCaseId, availableComplaints]);
+
+  const nodes = currentGraph.nodes;
+  const edges = currentGraph.edges;
+
+  // Selected Node in the right inspector
+  const [selectedNodeId, setSelectedNodeId] = useState<string>(currentGraph.defaultSelectedNodeId);
+
+  // Whenever active case changes, re-anchor inspector to default node of that case
+  useEffect(() => {
+    setSelectedNodeId(currentGraph.defaultSelectedNodeId);
+    if (fgRef.current) {
+      fgRef.current.cameraPosition({ x: 0, y: 70, z: 275 }, { x: 0, y: 0, z: 0 }, 900);
+    }
+  }, [activeCaseId, currentGraph.defaultSelectedNodeId]);
+
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // 3D Canvas Refs & Dimensions
+  const containerRef = useRef<HTMLDivElement>(null);
+  const fgRef = useRef<ForceGraphMethods>();
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 920, height: 680 });
+  const [isAutoRotate, setIsAutoRotate] = useState<boolean>(true);
+  const [hoveredNode, setHoveredNode] = useState<any>(null);
 
   // Responsive container observer
   useEffect(() => {
@@ -620,7 +1478,7 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
   const nodeThreeObject = useCallback((node: any) => {
     const isSelected = node.id === selectedNodeId;
     const isHovered = node.id === hoveredNode?.id;
-    const isCenter = node.id === 'node-case-7102';
+    const isCenter = node.badge === 'ACTIVE CASE' || node.type === 'case' || node.id === `node-${activeCaseId}`;
 
     const group = new THREE.Group();
     const radius = isCenter ? 14 : 9;
@@ -777,14 +1635,19 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
             <select
               value={activeCaseId}
               onChange={(e) => {
-                setActiveCaseId(e.target.value);
-                showToast(`Switched active graph anchor to ${e.target.value.toUpperCase()}`);
+                const newId = e.target.value;
+                setActiveCaseId(newId);
+                onSelectCase?.(newId);
+                const found = availableComplaints.find(c => c.id === newId || c.referenceNumber === newId);
+                showToast(`Switched active graph anchor to ${found?.referenceNumber || newId.toUpperCase()}`);
               }}
               className="appearance-none bg-[#05140b] border border-white/10 hover:border-primary/50 rounded-xl pl-3.5 pr-8 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary cursor-pointer shadow-md"
             >
-              <option value="case-7102">CYBER-2026-7102 — UPI / QR Payment Scam</option>
-              <option value="case-6891">CYBER-2026-6891 — Electricity Bill KYC Phishing</option>
-              <option value="case-7033">CYBER-2026-7033 — Mule Account Syndicated Network</option>
+              {availableComplaints.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.referenceNumber} — {c.title}
+                </option>
+              ))}
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-content-muted absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -946,35 +1809,42 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
 
                 {/* Miniature node dots and connecting lines */}
                 <svg className="w-full h-full absolute inset-0 pointer-events-none">
-                  {/* Miniature links */}
-                  <line x1="96" y1="56" x2="88" y2="24" stroke="#ef4444" strokeWidth="1" opacity="0.6" />
-                  <line x1="88" y1="24" x2="135" y2="30" stroke="#f59e0b" strokeWidth="1" opacity="0.6" />
-                  <line x1="88" y1="24" x2="48" y2="30" stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity="0.6" />
-                  <line x1="96" y1="56" x2="135" y2="30" stroke="#00e676" strokeWidth="1.2" opacity="0.7" />
-                  <line x1="96" y1="56" x2="145" y2="58" stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity="0.6" />
-                  <line x1="96" y1="56" x2="130" y2="88" stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity="0.6" />
-                  <line x1="96" y1="56" x2="94" y2="92" stroke="#f59e0b" strokeWidth="1" opacity="0.6" />
-                  <line x1="96" y1="56" x2="60" y2="82" stroke="#00e676" strokeWidth="1.2" opacity="0.7" />
-                  <line x1="96" y1="56" x2="50" y2="58" stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity="0.6" />
-
-                  {/* Center Node dot (green) */}
-                  <circle cx="96" cy="56" r="4.5" fill="#00e676" />
-                  {/* fake-bank-verify.in (amber) */}
-                  <circle cx="88" cy="24" r="3.5" fill="#f59e0b" />
-                  {/* 185.220.101.44 (red) */}
-                  <circle cx="135" cy="30" r="3.5" fill="#ef4444" />
-                  {/* CYBER-2026-6891 (blue) */}
-                  <circle cx="48" cy="30" r="3.5" fill="#38bdf8" />
-                  {/* CYBER-2026-7033 (blue) */}
-                  <circle cx="145" cy="58" r="3.5" fill="#38bdf8" />
-                  {/* fraud@okaxis.com (purple) */}
-                  <circle cx="50" cy="58" r="3" fill="#a855f7" />
-                  {/* +91 98765 43210 (green) */}
-                  <circle cx="60" cy="82" r="3.5" fill="#00e676" />
-                  {/* XXXX 6789 (amber) */}
-                  <circle cx="94" cy="92" r="3.5" fill="#f59e0b" />
-                  {/* upi-claim-support.in (amber) */}
-                  <circle cx="130" cy="88" r="3.5" fill="#d97706" />
+                  {edges.map((edge) => {
+                    const sourceNode = nodes.find(n => n.id === edge.sourceId);
+                    const targetNode = nodes.find(n => n.id === edge.targetId);
+                    if (!sourceNode || !targetNode) return null;
+                    const x1 = 96 + (sourceNode.x || 0) * 0.35;
+                    const y1 = 56 - (sourceNode.y || 0) * 0.32;
+                    const x2 = 96 + (targetNode.x || 0) * 0.35;
+                    const y2 = 56 - (targetNode.y || 0) * 0.32;
+                    return (
+                      <line
+                        key={edge.id}
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke={edge.style === 'solid-green' ? '#00e676' : edge.style === 'solid-red' ? '#ef4444' : '#f59e0b'}
+                        strokeWidth={edge.style === 'solid-green' ? 1.2 : 1}
+                        strokeDasharray={edge.style.includes('dashed') ? '2,2' : undefined}
+                        opacity="0.65"
+                      />
+                    );
+                  })}
+                  {nodes.map((node) => {
+                    const cx = 96 + (node.x || 0) * 0.35;
+                    const cy = 56 - (node.y || 0) * 0.32;
+                    const isCenter = node.badge === 'ACTIVE CASE' || node.type === 'case';
+                    return (
+                      <circle
+                        key={node.id}
+                        cx={cx}
+                        cy={cy}
+                        r={isCenter ? 4.8 : 3.2}
+                        fill={node.glowColor || (isCenter ? '#00e676' : '#f59e0b')}
+                      />
+                    );
+                  })}
                 </svg>
               </div>
 
@@ -994,7 +1864,7 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
                 Node Details
               </span>
               <button 
-                onClick={() => setSelectedNodeId('node-domain-fake')}
+                onClick={() => setSelectedNodeId(currentGraph.defaultSelectedNodeId)}
                 className="text-content-muted hover:text-white transition-colors cursor-pointer"
                 title="Reset to default node"
               >
@@ -1185,6 +2055,19 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
                   <div
                     key={item.id}
                     onClick={() => {
+                      if (item.iconType === 'related-case') {
+                        const targetCase = availableComplaints.find(c =>
+                          c.referenceNumber === item.label ||
+                          `node-${c.id}` === item.id ||
+                          c.id === item.id.replace('node-', '')
+                        );
+                        if (targetCase) {
+                          setActiveCaseId(targetCase.id);
+                          onSelectCase?.(targetCase.id);
+                          showToast(`Switched active graph anchor to ${targetCase.referenceNumber}`);
+                          return;
+                        }
+                      }
                       setSelectedNodeId(item.id);
                       const targetNode = nodes.find(n => n.id === item.id);
                       if (targetNode) handleNodeClick(targetNode);
@@ -1269,6 +2152,7 @@ export const CrossCaseCorrelationPortalView: React.FC<CrossCaseCorrelationPortal
             <div className="pt-2 border-t border-white/[0.08]">
               <button
                 onClick={() => {
+                  onSelectCase?.(activeCaseId);
                   onSelectTab('investigation-workspace');
                   showToast('Navigating to Investigation Workspace for active case.');
                 }}

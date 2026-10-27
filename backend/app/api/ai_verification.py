@@ -262,16 +262,36 @@ async def test_complaint_classifier(req: TextInferenceRequest):
             content={
                 "status": "MODEL_NOT_DEPLOYED",
                 "available": False,
+                "model_available": False,
+                "fallback_mode": False,
                 "model": "complaint_classifier",
-                "message": "Model artifact is not currently deployed."
+                "message": "Complaint Classifier model weights not found in local enclave.",
+                "is_cybercrime": False,
+                "predictions": []
             }
         )
     except RuntimeError as e:
         logger.warning(f"Complaint classifier runtime error: {e}")
+        if not complaint_classifier.is_available or "not found" in str(e).lower():
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    "status": "MODEL_NOT_DEPLOYED",
+                    "available": False,
+                    "model_available": False,
+                    "fallback_mode": False,
+                    "model": "complaint_classifier",
+                    "message": "Complaint Classifier model weights not found in local enclave.",
+                    "is_cybercrime": False,
+                    "predictions": []
+                }
+            )
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={
                 "status": "LOAD_FAILED",
+                "available": False,
+                "model_available": False,
                 "model": "complaint_classifier",
                 "message": str(e)
             }
@@ -279,9 +299,11 @@ async def test_complaint_classifier(req: TextInferenceRequest):
     except Exception as e:
         logger.error(f"Complaint classifier inference error: {e}", exc_info=True)
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={
                 "status": "ERROR",
+                "available": False,
+                "model_available": False,
                 "model": "complaint_classifier",
                 "message": "Inference processing failed."
             }
