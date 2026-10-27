@@ -290,24 +290,32 @@ def run_phase3_validation():
 
     # 10. Feedback Reliability Gate (Deterministic Hard Gates)
     gate_unauth = {
-        "reviewer_authorized": False,
-        "audit_complete": True,
-        "appeal_pending": False,
-        "case_closed": True
+        "case_id": SEEDED_CASE_ID,
+        "target_model": "complaint_classifier",
+        "features": {
+            "reviewer_authorized": False,
+            "audit_complete": True,
+            "appeal_pending": False,
+            "case_closed": True
+        }
     }
     execute_test_condition("GATE-UNAUTH", "Feedback Gate", "FeedbackGateMLP + Hard Gates", "unauthorized-reviewer-override", "POST", "/api/v1/ai/feedback-gate/evaluate", gate_unauth, True, 200, "FALLBACK_EXPECTED", "DETERMINISTIC_RULE_OUTCOME", "HARD_RULES_OVERRIDE emits deterministic 1.0 confidence")
 
     gate_unclosed = {
-        "reviewer_authorized": True,
-        "audit_complete": True,
-        "appeal_pending": False,
-        "case_closed": False
+        "case_id": SEEDED_CASE_ID,
+        "target_model": "complaint_classifier",
+        "features": {
+            "reviewer_authorized": True,
+            "audit_complete": True,
+            "appeal_pending": False,
+            "case_closed": False
+        }
     }
     execute_test_condition("GATE-UNCLOSED", "Feedback Gate", "FeedbackGateMLP + Hard Gates", "unclosed-case-override", "POST", "/api/v1/ai/feedback-gate/evaluate", gate_unclosed, True, 200, "FALLBACK_EXPECTED", "DETERMINISTIC_RULE_OUTCOME", "HARD_RULES_OVERRIDE requires case closure")
 
     # 11. Investigation Assistant Copilot
     execute_test_condition("LLM-STATUS", "Investigation Assistant", "Local Ollama LLM (qwen2.5:7b)", "daemon-liveness-probe", "GET", "/api/v1/investigation-assistant/status", None, True, 200, "BLOCKED_BY_WEIGHTS", "N/A", "Truthfully reports AI_ASSISTANT_UNAVAILABLE without crash")
-    execute_test_condition("LLM-QUERY", "Investigation Assistant", "Local Ollama LLM (qwen2.5:7b)", "copilot-query-probe", "POST", "/api/v1/ai/assistant/query", {"query": "Summarize suspect indicators for CASE-CYBER-2026-2788"}, True, 200, "BLOCKED_BY_WEIGHTS", "N/A", "Returns graceful unavailable message")
+    execute_test_condition("LLM-QUERY", "Investigation Assistant", "Local Ollama LLM (qwen2.5:7b)", "copilot-query-probe", "POST", "/api/v1/ai/assistant/query", {"text": "Summarize suspect indicators for CASE-CYBER-2026-2788"}, True, 200, "BLOCKED_BY_WEIGHTS", "N/A", "Returns graceful unavailable message")
 
     # 12. Document Intelligence
     execute_test_condition("DOC-PROCESS", "Document Intelligence", "Gemini Doc AI (Fallback: Local PDF Parser)", "evidence-pdf-processing", "POST", f"/api/v1/evidence/{SEEDED_EVIDENCE_ID}/process", None, True, 200, "FALLBACK_EXPECTED", "DETERMINISTIC_EXTRACTION", "FALLBACK_OFFLINE mode parsed synthetic PDF indicators")

@@ -21,8 +21,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 BASE_URL = os.getenv("CCIP_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
-STAFF_EMAIL = "s.chen@police.gov"
-STAFF_PASS = "AstraeaEnclave#42"
+STAFF_EMAIL = os.getenv("CCIP_TEST_STAFF_USER", "s.chen@police.gov")
+STAFF_PASS = os.getenv("CCIP_TEST_STAFF_PASSWORD", "[REDACTED_LOCAL_TEST_CREDENTIAL]")
 OUT_DIR = Path("c:/CCIP-main/CCIP-main/MODEL TESTING")
 
 # Output fields for Phase 2 Results CSV

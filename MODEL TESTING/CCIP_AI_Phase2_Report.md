@@ -29,7 +29,7 @@ Phase 2 of the CCIP AI Validation campaign has been executed directly against th
 1. **Eliminated HTTP 500 Unhandled Failures:** Fixed the missing-weights exception propagation in `backend/app/ai/model_manager.py` and `backend/app/api/ai_verification.py`. The endpoint now gracefully and truthfully reports `MODEL_NOT_DEPLOYED` (HTTP 200, `available: false`, `model_available: false`, `predictions: []`).
 2. **Eliminated False Neural Claims:** Added explicit runtime disclosure of `engine: "sovereign_heuristic_fallback"` and `fallback_mode: true` to Email Threat, SMS Spam, and Citizen Assistant responses whenever neural weights are absent. Fallbacks are never labeled as neural inference.
 3. **Automated Regression Suite Added:** Created [`backend/tests/test_model_unavailability_and_fallback_regression.py`](file:///c:/CCIP-main/CCIP-main/backend/tests/test_model_unavailability_and_fallback_regression.py) with 8/8 passing tests covering missing weights, empty input (HTTP 422), whitespace input, malformed payloads, and fallback mode disclosure.
-4. **Legitimate Staff Authentication:** Authenticated with real seeded test credentials (`s.chen@police.gov` / `AstraeaEnclave#42`) via `/api/v1/auth/login`, acquiring genuine JWT tokens with zero key forgery.
+4. **Legitimate Staff Authentication:** Authenticated with real seeded test credentials (`s.chen@police.gov` / `[REDACTED_LOCAL_TEST_CREDENTIAL]`) via `/api/v1/auth/login`, acquiring genuine JWT tokens with zero key forgery.
 5. **Zero Skipped Tests:** Exercised case similarity, incident urgency, cyber NER, relation extraction, cross-case correlation, evidence graph linking, feedback gate hard overrides, document intelligence, and multi-modal routing.
 
 ---

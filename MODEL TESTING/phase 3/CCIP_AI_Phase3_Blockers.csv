@@ -1,0 +1,6 @@
+component,severity,issue,remediation
+complaint_classifier,HIGH,DeBERTa-v3 neural weights (safetensors) absent in enclave. Running in MODEL_NOT_DEPLOYED.,Train or mount fine-tuned weights from CCIP_complaint_classifier_training.zip.
+cyber_ner,HIGH,DeBERTa token classification weights absent in enclave. Running in RULES_ONLY_DEGRADED mode.,Mount calibrated transformer weights to enable hybrid extraction.
+email_threat,MEDIUM,DistilBERT neural weights absent in enclave. Running in sovereign_heuristic_fallback.,Mount calibrated model.safetensors into backend/ml_models/email_threat/.
+sms_spam,MEDIUM,DistilBERT neural weights absent in enclave. Running in sovereign_heuristic_fallback.,Mount calibrated model.safetensors into backend/ml_models/sms_spam/.
+investigation_assistant,LOW,Local Ollama LLM runtime (qwen2.5:7b) is offline on port 11434. Generative copilot unavailable.,Start Ollama daemon with qwen2.5:7b model pulled if generative chat is needed.
