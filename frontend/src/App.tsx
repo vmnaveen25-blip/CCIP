@@ -410,14 +410,15 @@ export const App: React.FC = () => {
     setIsAuthModalOpen(true);
   };
 
-  const handleSelectPortal = (portal: PortalRole, initialTab?: string) => {
+  const handleSelectPortal = (portal: PortalRole, initialTab?: string, userOverride?: UserProfile | null) => {
     if (portal === 'landing') {
       // Accidental or deliberate redirection to landing page: terminate session immediately
       handleLogout();
       return;
     }
 
-    if (!currentUser) {
+    const activeUser = userOverride !== undefined ? userOverride : currentUser;
+    if (!activeUser && !apiClient.getToken()) {
       // Must not open until user signs in again
       handleOpenAuth(portal === 'citizen' ? 'citizen-login' : 'selection');
       return;
@@ -506,7 +507,7 @@ export const App: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#131315] text-content-primary flex flex-col relative w-full max-w-full overflow-x-hidden selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-[#131315] text-content-primary flex flex-col relative w-full max-w-full overflow-x-clip selection:bg-primary selection:text-white">
       
       {/* Global Header */}
       {currentPortal !== 'landing' && (
@@ -673,7 +674,7 @@ export const App: React.FC = () => {
 
       {/* Main Container Layout */}
       {currentPortal === 'landing' ? (
-        <div className="w-full max-w-full flex-1 overflow-x-hidden">
+        <div className="w-full max-w-full flex-1 overflow-x-clip">
           <LandingPage
             onNavigatePortal={handleSelectPortal}
             onTrackCase={handleTrackCase}
@@ -788,16 +789,18 @@ export const App: React.FC = () => {
         onClose={() => setIsAuthModalOpen(false)}
         onAuthenticate={async (role, tab, user) => {
           setIsAuthModalOpen(false);
+          let activeUser = user;
           if (user) {
             setCurrentUser(user);
           }
           try {
             const me = await apiClient.getMe();
             if (me && me.id) {
+              activeUser = me;
               setCurrentUser(me);
             }
           } catch (e) {}
-          handleSelectPortal(role, tab);
+          handleSelectPortal(role, tab, activeUser);
           fetchEnclaveData();
         }}
       />

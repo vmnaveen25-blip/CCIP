@@ -38,6 +38,8 @@ from app.api.intelligence_v2 import router as intelligence_v2_router
 from app.api.pilot import router as pilot_router
 from app.api.investigation_chat import router as investigation_chat_router
 from app.api.triage import router as triage_router
+from app.api.knowledge_materials import router as knowledge_materials_router
+from app.api.public_chat import router as public_chat_router
 
 
 
@@ -174,6 +176,8 @@ app.include_router(intelligence_v2_router, prefix=api_v1_prefix)
 app.include_router(pilot_router, prefix=api_v1_prefix)
 app.include_router(investigation_chat_router, prefix=api_v1_prefix)
 app.include_router(triage_router, prefix=api_v1_prefix)
+app.include_router(knowledge_materials_router, prefix=api_v1_prefix)
+app.include_router(public_chat_router, prefix=api_v1_prefix)
 
 
 

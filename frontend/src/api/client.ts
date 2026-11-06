@@ -1239,6 +1239,166 @@ class APIClient {
       body: JSON.stringify({ notes })
     });
   }
+
+  // =========================================================================
+  // CCIP Admin Knowledge Materials (RAG Document Storage & Ingestion)
+  // =========================================================================
+
+  async getKnowledgeMaterials(params?: {
+    search?: string;
+    category?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<KnowledgeMaterialsListResponse> {
+    const q = new URLSearchParams();
+    if (params?.search) q.append('search', params.search);
+    if (params?.category) q.append('category', params.category);
+    if (params?.page) q.append('page', params.page.toString());
+    if (params?.page_size) q.append('page_size', params.page_size.toString());
+    const queryStr = q.toString() ? `?${q.toString()}` : '';
+    return await this.request<KnowledgeMaterialsListResponse>(`/admin/knowledge-materials${queryStr}`);
+  }
+
+  async getKnowledgeMaterialPreview(id: string): Promise<KnowledgeMaterialPreviewResponse> {
+    return await this.request<KnowledgeMaterialPreviewResponse>(`/admin/knowledge-materials/${id}/preview`);
+  }
+
+  async uploadKnowledgeMaterial(formData: FormData): Promise<{ status: string; message: string; document: any }> {
+    return await this.request<{ status: string; message: string; document: any }>('/admin/knowledge-materials', {
+      method: 'POST',
+      body: formData
+    });
+  }
+
+  async toggleKnowledgeMaterialStatus(id: string, chatbotStatus: 'AVAILABLE' | 'DISABLED'): Promise<{ status: string; material_id: string; chatbot_status: string }> {
+    return await this.request<{ status: string; material_id: string; chatbot_status: string }>(`/admin/knowledge-materials/${id}/chatbot-status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ chatbot_status: chatbotStatus })
+    });
+  }
+
+  async reindexKnowledgeMaterial(id: string): Promise<{ status: string; message: string }> {
+    return await this.request<{ status: string; message: string }>(`/admin/knowledge-materials/${id}/reindex`, {
+      method: 'POST'
+    });
+  }
+
+  async deleteKnowledgeMaterial(id: string): Promise<{ status: string; message: string }> {
+    return await this.request<{ status: string; message: string }>(`/admin/knowledge-materials/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  getKnowledgeMaterialDownloadUrl(id: string): string {
+    return `${API_BASE_URL}/admin/knowledge-materials/${id}/download`;
+  }
+
+  // =========================================================================
+  // CCIP Public Citizen AI Assistant (Chatbot & RAG Grounding)
+  // =========================================================================
+
+  async createPublicChatSession(): Promise<PublicChatSessionResponse> {
+    return await this.request<PublicChatSessionResponse>('/public-chat/session', {
+      method: 'POST'
+    });
+  }
+
+  async sendPublicChatMessage(payload: {
+    session_id: string;
+    session_token: string;
+    message: string;
+  }): Promise<PublicChatMessageResponse> {
+    return await this.request<PublicChatMessageResponse>('/public-chat/message', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async endPublicChatSession(sessionId: string): Promise<{ status: string; message: string }> {
+    return await this.request<{ status: string; message: string }>(`/public-chat/session/${sessionId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async getPublicChatHealth(): Promise<{ status: string; service: string; retrieval_mode: string }> {
+    return await this.request<{ status: string; service: string; retrieval_mode: string }>('/public-chat/health');
+  }
+}
+
+export interface KnowledgeMaterialItemResponse {
+  id: string;
+  title: string;
+  original_filename: string;
+  file_type: 'PDF' | 'DOCX' | 'TXT' | 'MD';
+  size_bytes: number;
+  size_formatted: string;
+  category: string;
+  uploaded_on: string;
+  uploaded_by: string;
+  processing_status: 'PROCESSING' | 'AVAILABLE' | 'FAILED';
+  chatbot_status: 'AVAILABLE' | 'DISABLED';
+  chunks_count: number;
+  file_hash: string;
+}
+
+export interface KnowledgeMaterialsListResponse {
+  items: KnowledgeMaterialItemResponse[];
+  total_items: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  statistics: {
+    total_materials: number;
+    storage_used_bytes: number;
+    storage_used_formatted: string;
+    available_for_chatbot: number;
+  };
+}
+
+export interface KnowledgeMaterialPreviewResponse {
+  id: string;
+  title: string;
+  original_filename: string;
+  file_type: string;
+  file_size_bytes: number;
+  size_formatted: string;
+  category: string;
+  uploaded_by: string;
+  uploaded_on: string;
+  processing_status: string;
+  chatbot_status: string;
+  chunks_count: number;
+  file_hash: string;
+  error_message?: string;
+  preview_chunks: Array<{
+    chunk_index: number;
+    page_number: number;
+    text: string;
+  }>;
+}
+
+export interface PublicChatSessionResponse {
+  status: string;
+  session_id: string;
+  session_token: string;
+  expires_at: string;
+  service_status: string;
+}
+
+export interface PublicChatMessageCitation {
+  source_id: string;
+  title: string;
+  page?: number;
+  similarity_score?: number;
+}
+
+export interface PublicChatMessageResponse {
+  response: string;
+  session_id: string;
+  confidence: number;
+  helpline_triggered: boolean;
+  citations: PublicChatMessageCitation[];
+  processing_time_ms: number;
 }
 
 export const apiClient = new APIClient();

@@ -38,9 +38,19 @@ from app.models.learning_candidate import LearningCandidate
 from app.models.pilot import PilotDatasetRegistry, PilotEvaluationRun, PilotPrediction, PilotHumanReview
 from app.models.investigation_chat import InvestigationConversation, InvestigationMessage
 from app.models.document_processing import DocumentProcessingResult
+from app.models.knowledge_material import (
+    KnowledgeMaterial,
+    KnowledgeChunk,
+    PublicChatSession,
+    PublicChatMessage
+)
 
 __all__ = [
     "Base",
+    "KnowledgeMaterial",
+    "KnowledgeChunk",
+    "PublicChatSession",
+    "PublicChatMessage",
     "DocumentProcessingResult",
     "Role",
     "RoleEnum",

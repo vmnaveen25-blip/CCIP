@@ -67,6 +67,8 @@ backend/ccip.db
 backend/ccip.db-journal
 backend/storage_vault/
 storage_vault/
+backend/storage/
+!backend/storage/**/.gitkeep
 
 # Machine Learning Large Weights (> 100MB requires Git LFS)
 # Comment out the lines below if your repository has Git LFS configured:

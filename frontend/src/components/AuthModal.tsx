@@ -234,7 +234,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
       {/* Solid Sleek Cyber Modal Card */}
-      <div className="modal-panel relative w-full max-w-[440px] my-6 rounded-3xl p-6 sm:p-8 z-10 bg-[#06140c] border border-[#00e676]/25 shadow-[0_32px_96px_rgba(0,0,0,0.85)] text-white">
+      <div role="dialog" aria-label="Authentication Access Gateway" className="modal-panel relative w-full max-w-[440px] my-6 rounded-3xl p-6 sm:p-8 z-10 bg-[#06140c] border border-[#00e676]/25 shadow-[0_32px_96px_rgba(0,0,0,0.85)] text-white">
         
         {/* Top Header Ribbon */}
         <div className="flex items-center justify-between border-b border-[#00e676]/15 pb-3 mb-6">
@@ -261,8 +261,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="flex flex-col gap-6 animate-in fade-in duration-150">
             {/* Title & Subtitle */}
             <div className="flex flex-col items-center text-center gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#00e676]/15 border border-[#00e676]/30 text-[#00e676] flex items-center justify-center shadow-[0_0_24px_rgba(0,230,118,0.2)] mb-1">
-                <ShieldCheck className="w-6 h-6" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#06170e] to-[#020a06] border border-[#00e676]/40 flex items-center justify-center p-1.5 shadow-[0_0_24px_rgba(0,230,118,0.35)] mb-1 overflow-hidden">
+                <img src="/ccip-logo.png" alt="CCIP Logo" className="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]" />
               </div>
               <h1 className="text-xl font-bold text-white tracking-tight font-sans">
                 Sign In to CCIP

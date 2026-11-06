@@ -130,7 +130,7 @@ function bindBackendPlugin(): Plugin {
 
       backendProc = spawn(
         pythonExe,
-        ['-m', 'uvicorn', 'app.main:app', '--reload', '--host', '0.0.0.0', '--port', String(BACKEND_PORT)],
+        ['-m', 'uvicorn', 'app.main:app', '--reload', '--reload-dir', 'app', '--host', '0.0.0.0', '--port', String(BACKEND_PORT)],
         {
           cwd: backendDir,
           stdio: ['ignore', 'pipe', 'pipe'],

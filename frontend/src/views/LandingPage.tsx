@@ -7,22 +7,11 @@ import {
   Lock, 
   FileText, 
   Brain, 
-  BarChart3, 
   UploadCloud, 
-  ClipboardCheck, 
-  Users, 
   Search, 
   CheckCircle2, 
   Check, 
   UserCheck, 
-  Cpu, 
-  Settings, 
-  FolderLock, 
-  Database, 
-  Share2, 
-  Link as LinkIcon, 
-  Briefcase, 
-  Activity, 
   Layers, 
   FileSearch, 
   Key, 
@@ -43,6 +32,7 @@ import {
 } from 'lucide-react';
 
 import { AuthScreenType } from '../components/AuthModal';
+import { FloatingChatbotWidget } from '../components/citizen/FloatingChatbotWidget';
 
 interface LandingPageProps {
   onNavigatePortal: (portal: PortalRole, initialTab?: string) => void;
@@ -123,7 +113,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   ];
 
   return (
-    <div className="flex flex-col text-left font-sans bg-[#030706] text-[#F8F7F5] w-full max-w-full overflow-x-hidden min-h-screen">
+    <div className="flex flex-col text-left font-sans bg-[#030706] text-[#F8F7F5] w-full max-w-full overflow-x-clip min-h-screen">
       {/* 1930 Emergency Cyber Financial Fraud Helpline Top Banner */}
       <div className="bg-gradient-to-r from-[#031508] via-[#062010] to-[#031508] border-b border-[#00e676]/30 py-1.5 px-4 text-center text-xs text-[#00e676] flex flex-wrap items-center justify-center gap-2 sm:gap-3 font-mono z-50 w-full max-w-full overflow-hidden">
         <span className="inline-flex items-center gap-1 font-bold tracking-wider uppercase text-[#031508] bg-[#00e676] px-2 py-0.5 rounded text-[10px] shrink-0">
@@ -138,14 +128,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between gap-3">
           {/* Brand Logo Left */}
           <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink-0" onClick={() => scrollToSection('hero')}>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-[#06140c] to-[#030906] border border-[#00e676]/40 flex items-center justify-center p-2 shadow-[0_0_12px_rgba(0,230,118,0.25)]">
-              <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-[#00e676]" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-[#06140c] to-[#030906] border border-[#00e676]/40 flex items-center justify-center p-1 shadow-[0_0_14px_rgba(0,230,118,0.25)] overflow-hidden hover:border-[#00e676]/70 transition-all">
+              <img src="/ccip-logo.png" alt="CCIP Logo" className="w-full h-full object-contain filter drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]" />
             </div>
             <div className="flex flex-col text-left">
               <span className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-                AI Cybercrime
+                CCIP Enclave
               </span>
-              <span className="text-xs text-[#96908C] tracking-wider font-normal">Intelligence Platform</span>
+              <span className="text-xs text-[#96908C] tracking-wider font-normal">Citizen Cybercrime Platform</span>
             </div>
           </div>
 
@@ -155,17 +145,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-[#00e676] inline-block"></span>
               Home
             </button>
-            <button onClick={() => scrollToSection('how-it-works')} className="hover:text-white transition-colors">
-              How It Works
-            </button>
             <button 
               onClick={() => onOpenAuth ? onOpenAuth('citizen-login') : onNavigatePortal('citizen', 'file-complaint')} 
               className="hover:text-white transition-colors cursor-pointer"
             >
               Report Cybercrime
-            </button>
-            <button onClick={() => scrollToSection('capabilities')} className="hover:text-white transition-colors">
-              Platform Capabilities
             </button>
             <button onClick={() => scrollToSection('safety-guidance')} className="hover:text-white transition-colors">
               Safety Guidance
@@ -263,9 +247,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </svg>
 
               {/* Center Hub Badge */}
-              <div className="relative z-20 text-center px-3.5 py-3 sm:px-4 sm:py-3.5 rounded-xl bg-[#06140c]/95 border border-[#00e676]/40 shadow-[0_0_30px_rgba(0,230,118,0.3)] max-w-[210px] sm:max-w-[240px]">
+              <div className="relative z-20 text-center px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl bg-[#06140c]/95 border border-[#00e676]/40 shadow-[0_0_30px_rgba(0,230,118,0.3)] max-w-[220px] sm:max-w-[250px] flex flex-col items-center">
+                <img src="/ccip-logo.png" alt="CCIP Emblem" className="w-12 h-12 sm:w-14 sm:h-14 object-contain mb-2 drop-shadow-[0_0_12px_rgba(0,230,118,0.45)]" />
                 <div className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-white leading-snug">
-                  AI CYBERCRIME INTELLIGENCE PLATFORM
+                  CITIZEN CYBERCRIME INTELLIGENCE PLATFORM
                 </div>
                 <div className="text-[8px] sm:text-[8.5px] uppercase tracking-wider text-[#96908C] mt-1">
                   PEOPLE • EVIDENCE • INTELLIGENCE • SAFER SOCIETY
@@ -342,366 +327,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <span className="text-[#67C7E7]">Investigate</span>
           <span className="text-white/30">•</span>
           <span className="text-[#19D58A]">Prevent</span>
-        </div>
-      </section>
-
-      {/* Our Platform Principles */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#030706] border-b border-[#00e676]/15 w-full max-w-full overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-10 text-left">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Our <span className="text-[#00e676]">Platform Principles</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-[#96908C] mt-1">
-              Built for trust, transparency and a safer digital world.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Principle 1 */}
-            <div className="bg-[#06140c]/90 p-5 rounded-xl border border-[#00e676]/15 hover:border-[#00e676]/40 transition duration-200">
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3.5">
-                <Lock className="w-5 h-5" />
-              </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-1.5">Secure Complaint Intake</h3>
-              <p className="text-xs text-[#96908C] leading-relaxed">Report incidents through a secure and structured process.</p>
-            </div>
-
-            {/* Principle 2 */}
-            <div className="bg-[#06140c]/90 p-5 rounded-xl border border-[#00e676]/15 hover:border-[#00e676]/40 transition duration-200">
-              <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-3.5">
-                <FileText className="w-5 h-5" />
-              </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-1.5">Evidence-Centered Investigation</h3>
-              <p className="text-xs text-[#96908C] leading-relaxed">Preserve and analyze digital evidence with integrity.</p>
-            </div>
-
-            {/* Principle 3 */}
-            <div className="bg-[#06140c]/90 p-5 rounded-xl border border-[#00e676]/15 hover:border-[#00e676]/40 transition duration-200">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3.5">
-                <Brain className="w-5 h-5" />
-              </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-1.5">Explainable AI Assistance</h3>
-              <p className="text-xs text-[#96908C] leading-relaxed">AI provides transparent insights to support human decision-making.</p>
-            </div>
-
-            {/* Principle 4 */}
-            <div className="bg-[#06140c]/90 p-5 rounded-xl border border-[#00e676]/15 hover:border-[#00e676]/40 transition duration-200">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-3.5">
-                <BarChart3 className="w-5 h-5" />
-              </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-1.5">Controlled Continuous Learning</h3>
-              <p className="text-xs text-[#96908C] leading-relaxed">Improve detection through validated and approved datasets.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8 bg-[#030706] border-b border-[#00e676]/15 w-full max-w-full overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-2">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                How <span className="text-[#00e676]">It Works</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-[#96908C] mt-1">
-                From reporting to resolution — a structured and transparent process.
-              </p>
-            </div>
-            <div className="text-xs font-medium text-[#96908C]">
-              Turn reports into safer communities.
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 relative w-full max-w-full">
-            {/* Step 1 */}
-            <div className="flex flex-col items-center text-center group">
-              <div className="relative w-14 h-14 rounded-full bg-[#06140c] border border-amber-500/40 flex items-center justify-center text-amber-400 mb-3 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
-                <FileText className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#081f13] border border-[#00e676]/20 text-[10px] font-bold text-white flex items-center justify-center">1</span>
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Report Incident</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight max-w-[130px]">Provide details about the cybercrime.</p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="flex flex-col items-center text-center group">
-              <div className="relative w-14 h-14 rounded-full bg-[#06140c] border border-cyan-500/40 flex items-center justify-center text-cyan-400 mb-3 shadow-[0_0_12px_rgba(103,199,231,0.2)]">
-                <UploadCloud className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#081f13] border border-[#00e676]/20 text-[10px] font-bold text-white flex items-center justify-center">2</span>
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Submit Evidence</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight max-w-[130px]">Upload files, links, screenshots, etc.</p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="flex flex-col items-center text-center group">
-              <div className="relative w-14 h-14 rounded-full bg-[#06140c] border border-emerald-500/40 flex items-center justify-center text-emerald-400 mb-3 shadow-[0_0_12px_rgba(25,213,138,0.2)]">
-                <ClipboardCheck className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#081f13] border border-[#00e676]/20 text-[10px] font-bold text-white flex items-center justify-center">3</span>
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Complaint Review</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight max-w-[130px]">Initial verification and categorization.</p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="flex flex-col items-center text-center group">
-              <div className="relative w-14 h-14 rounded-full bg-[#06140c] border border-pink-500/40 flex items-center justify-center text-pink-400 mb-3 shadow-[0_0_12px_rgba(244,114,182,0.2)]">
-                <Users className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#081f13] border border-[#00e676]/20 text-[10px] font-bold text-white flex items-center justify-center">4</span>
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Case Assignment</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight max-w-[130px]">Assigned to appropriate unit or specialist.</p>
-            </div>
-
-            {/* Step 5 */}
-            <div className="flex flex-col items-center text-center group">
-              <div className="relative w-14 h-14 rounded-full bg-[#06140c] border border-yellow-500/40 flex items-center justify-center text-yellow-400 mb-3 shadow-[0_0_12px_rgba(240,214,0,0.2)]">
-                <Search className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#081f13] border border-[#00e676]/20 text-[10px] font-bold text-white flex items-center justify-center">5</span>
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Technical Investigation</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight max-w-[130px]">In-depth analysis and threat intelligence.</p>
-            </div>
-
-            {/* Step 6 */}
-            <div className="flex flex-col items-center text-center group">
-              <div className="relative w-14 h-14 rounded-full bg-[#06140c] border border-emerald-400/40 flex items-center justify-center text-emerald-300 mb-3 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
-                <ShieldCheck className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#081f13] border border-[#00e676]/20 text-[10px] font-bold text-white flex items-center justify-center">6</span>
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Verification</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight max-w-[130px]">Independent review and validation.</p>
-            </div>
-
-            {/* Step 7 */}
-            <div className="flex flex-col items-center text-center group">
-              <div className="relative w-14 h-14 rounded-full bg-[#06140c] border border-[#00e676]/50 flex items-center justify-center text-[#00e676] mb-3 shadow-[0_0_12px_rgba(0,230,118,0.3)]">
-                <CheckCircle2 className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#00e676] text-[10px] font-bold text-[#031508] flex items-center justify-center">7</span>
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Resolution / Follow-up</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight max-w-[130px]">Case closure and status updates.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Who Uses the Platform? */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#030706] border-b border-[#00e676]/15 w-full max-w-full overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-10 text-left">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Who Uses <span className="text-[#00e676]">the Platform?</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-[#96908C] mt-1">
-              A unified platform for a safer digital society.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-full">
-            {/* Role 1 */}
-            <div 
-              onClick={() => onNavigatePortal('citizen')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-[#00e676]/15 hover:border-[#00e676]/40 transition duration-200 cursor-pointer flex flex-col justify-between group"
-            >
-              <div>
-                <div className="w-9 h-9 rounded-lg bg-[#00e676]/10 border border-[#00e676]/30 flex items-center justify-center text-[#00e676] mb-3 group-hover:scale-105 transition-transform">
-                  <UserCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-xs font-bold text-white mb-1 group-hover:text-[#00e676] transition-colors">Citizen / Complainant</h3>
-                <p className="text-[11px] text-[#96908C] leading-relaxed">Report and track cybercrime complaints.</p>
-              </div>
-            </div>
-
-            {/* Role 2 */}
-            <div 
-              onClick={() => onNavigatePortal('specialist')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-[#67C7E7]/40 transition duration-200 cursor-pointer flex flex-col justify-between group"
-            >
-              <div>
-                <div className="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-105 transition-transform">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-xs font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors">Cybersecurity Specialist</h3>
-                <p className="text-[11px] text-[#96908C] leading-relaxed">Analyze evidence and investigate cyber threats.</p>
-              </div>
-            </div>
-
-            {/* Role 4 */}
-            <div 
-              onClick={() => onNavigatePortal('aiml')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-purple-500/40 transition duration-200 cursor-pointer flex flex-col justify-between group"
-            >
-              <div>
-                <div className="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-105 transition-transform">
-                  <Cpu className="w-5 h-5" />
-                </div>
-                <h3 className="text-xs font-bold text-white mb-1 group-hover:text-purple-400 transition-colors">AI/ML Maintenance Specialist</h3>
-                <p className="text-[11px] text-[#96908C] leading-relaxed">Maintain validated AI model lifecycle.</p>
-              </div>
-            </div>
-
-            {/* Role 5 */}
-            <div 
-              onClick={() => onNavigatePortal('admin')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-teal-500/40 transition duration-200 cursor-pointer flex flex-col justify-between group"
-            >
-              <div>
-                <div className="w-9 h-9 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 mb-3 group-hover:scale-105 transition-transform">
-                  <Settings className="w-5 h-5" />
-                </div>
-                <h3 className="text-xs font-bold text-white mb-1 group-hover:text-teal-400 transition-colors">System Administrator</h3>
-                <p className="text-[11px] text-[#96908C] leading-relaxed">Manage security, access and platform operations.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Platform Capabilities */}
-      <section id="capabilities" className="py-16 px-4 sm:px-6 lg:px-8 bg-[#030706] border-b border-[#00e676]/15 w-full max-w-full overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Platform <span className="text-[#00e676]">Capabilities</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-[#96908C] mt-1">
-                An integrated ecosystem for end-to-end cybercrime intelligence.
-              </p>
-            </div>
-            <button 
-              onClick={() => onNavigatePortal('specialist')}
-              className="text-xs font-semibold text-[#00e676] hover:text-[#00c853] flex items-center gap-1 transition-colors"
-            >
-              <span>View All Capabilities</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full max-w-full">
-            {/* Cap 1 */}
-            <div 
-              onClick={() => onNavigatePortal('citizen')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-[#00e676]/15 hover:border-[#00e676]/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-[#00e676]/10 text-[#00e676] flex items-center justify-center mb-2.5">
-                <FolderLock className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Cybercrime Complaint Management</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Structured intake and tracking.</p>
-            </div>
-
-            {/* Cap 2 */}
-            <div 
-              onClick={() => onNavigatePortal('specialist', 'evidence-repository')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-cyan-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-cyan-400 flex items-center justify-center mb-2.5">
-                <Database className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Evidence Management</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Secure storage and analysis.</p>
-            </div>
-
-            {/* Cap 3 */}
-            <div 
-              onClick={() => onNavigatePortal('specialist', 'intel-overview')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-emerald-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2.5">
-                <Share2 className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">IOC &amp; Threat Analysis</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Analyze indicators of compromise.</p>
-            </div>
-
-            {/* Cap 4 */}
-            <div 
-              onClick={() => onNavigatePortal('specialist', 'correlator')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-pink-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center mb-2.5">
-                <LinkIcon className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Cross-Case Correlation</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Identify links across cases.</p>
-            </div>
-
-            {/* Cap 5 */}
-            <div 
-              onClick={() => onNavigatePortal('specialist', 'validation-queue')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-yellow-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-yellow-500/10 text-yellow-400 flex items-center justify-center mb-2.5">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Independent Verification</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Validate findings and evidence.</p>
-            </div>
-
-            {/* Cap 6 */}
-            <div 
-              onClick={() => onNavigatePortal('aiml')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-purple-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-2.5">
-                <Brain className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">AI Investigation Assistant</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">AI-supported analysis and recommendations.</p>
-            </div>
-
-            {/* Cap 7 */}
-            <div 
-              onClick={() => onNavigatePortal('specialist', 'assigned-cases')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-red-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center mb-2.5">
-                <Briefcase className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Cybercrime Case Management</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">End-to-end case lifecycle.</p>
-            </div>
-
-            {/* Cap 8 */}
-            <div 
-              onClick={() => onNavigatePortal('specialist')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-cyan-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-2.5">
-                <Activity className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">SOC Monitoring</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Real-time threat monitoring.</p>
-            </div>
-
-            {/* Cap 9 */}
-            <div 
-              onClick={() => onNavigatePortal('aiml')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-purple-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-300 flex items-center justify-center mb-2.5">
-                <BarChart3 className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">AI/ML Governance</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Controlled model lifecycle and deployment.</p>
-            </div>
-
-            {/* Cap 10 */}
-            <div 
-              onClick={() => onNavigatePortal('admin')}
-              className="bg-[#06140c]/90 p-4 rounded-xl border border-white/5 hover:border-emerald-500/40 transition duration-200 cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2.5">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <h3 className="text-xs font-bold text-white mb-1">Audit &amp; Security</h3>
-              <p className="text-[11px] text-[#96908C] leading-tight">Comprehensive audit logging and access control.</p>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -1034,11 +659,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-[#00e676]/10 text-center md:text-left">
             {/* Left: Logo & Motto */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-md bg-[#06140c] border border-[#00e676]/40 flex items-center justify-center p-1.5 shadow-[0_0_10px_rgba(0,230,118,0.2)]">
-                <Shield className="w-5 h-5 text-[#00e676]" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#06140c] to-[#030906] border border-[#00e676]/40 flex items-center justify-center p-1 shadow-[0_0_10px_rgba(0,230,118,0.2)] overflow-hidden">
+                <img src="/ccip-logo.png" alt="CCIP Logo" className="w-full h-full object-contain filter drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]" />
               </div>
               <div>
-                <div className="text-xs font-bold text-white tracking-wide">AI Cybercrime Intelligence Platform</div>
+                <div className="text-xs font-bold text-white tracking-wide">Citizen Cybercrime Intelligence Platform (CCIP)</div>
                 <div className="text-[10px] text-[#96908C]">People | Evidence | Intelligence | Safer Society</div>
               </div>
             </div>
@@ -1120,6 +745,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* Floating Chatbot Widget (Bottom Right Corner) */}
+      <FloatingChatbotWidget
+        onNavigatePortal={onNavigatePortal}
+        onTrackCase={onTrackCase}
+        onOpenAuth={onOpenAuth}
+      />
     </div>
   );
 };

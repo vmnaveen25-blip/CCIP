@@ -3,6 +3,7 @@ import { SystemAuditLog } from '../types';
 import { apiClient } from '../api/client';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { EmptyState } from '../components/ui/EmptyState';
+import { KnowledgeMaterialsView } from '../components/admin/KnowledgeMaterialsView';
 import { 
   Lock, 
   Server, 
@@ -12228,6 +12229,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
         );
       })()}
+
+      {activeTab === 'knowledge-materials' && (
+        <KnowledgeMaterialsView />
+      )}
       {editingDept && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="w-full max-w-md bg-[#141416] border border-white/[0.12] rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>

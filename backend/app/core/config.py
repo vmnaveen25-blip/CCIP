@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, AnyHttpUrl, field_validator, model_validator
@@ -19,6 +20,17 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     API_V1_PREFIX: str = "/api/v1"
 
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug(cls, v):
+        if isinstance(v, str):
+            v_clean = v.strip().lower()
+            if v_clean in ("release", "prod", "production", "false", "0", "no"):
+                return False
+            if v_clean in ("debug", "dev", "development", "true", "1", "yes"):
+                return True
+        return bool(v)
+
     # CORS
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000"
 
@@ -26,9 +38,9 @@ class Settings(BaseSettings):
     def cors_origin_list(self) -> List[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
-    # Database
-    DATABASE_URL: str = "sqlite+aiosqlite:///./ccip.db"
-    SYNC_DATABASE_URL: str = "sqlite:///./ccip.db"
+    # Database (Authoritative Absolute Path in Backend Directory)
+    DATABASE_URL: str = f"sqlite+aiosqlite:///{(Path(__file__).resolve().parent.parent.parent / 'ccip.db').as_posix()}"
+    SYNC_DATABASE_URL: str = f"sqlite:///{(Path(__file__).resolve().parent.parent.parent / 'ccip.db').as_posix()}"
 
     # Redis & Celery
     REDIS_URL: str = "redis://localhost:6379/0"

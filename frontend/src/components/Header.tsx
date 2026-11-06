@@ -114,9 +114,16 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label="Toggle navigation sidebar"
           title={isSidebarOpen ? "Click logo to hide sidebar" : "Click logo to show sidebar"}
         >
-          <div className="h-10 w-10 rounded-xl bg-[#00e676]/15 border border-[#00e676]/35 flex items-center justify-center relative overflow-hidden shadow-[0_0_18px_rgba(0,230,118,0.25)] group-hover:border-[#00e676]/60 group-hover:shadow-[0_0_24px_rgba(0,230,118,0.4)] group-hover:scale-105 transition-all duration-standard">
-            <ShieldCheck className="w-5 h-5 text-[#00e676]" aria-hidden="true" />
-            <span className={`absolute bottom-1 right-1 w-2 h-2 rounded-full transition-all duration-300 ${isSidebarOpen ? 'bg-[#00e676] shadow-[0_0_8px_#00e676]' : 'bg-[#6e8d7a]/50'}`} />
+          <div className="relative shrink-0">
+            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-br from-[#06170e] to-[#020a06] border border-[#00e676]/40 flex items-center justify-center p-1 shadow-[0_0_18px_rgba(0,230,118,0.25)] group-hover:border-[#00e676]/80 group-hover:shadow-[0_0_24px_rgba(0,230,118,0.45)] group-hover:scale-105 transition-all duration-standard overflow-hidden">
+              <img src="/ccip-logo.png" alt="CCIP Logo" className="w-full h-full object-contain filter drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]" />
+            </div>
+            <span 
+              className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#030706] transition-all duration-300 pointer-events-none ${
+                isSidebarOpen ? 'bg-[#00e676] shadow-[0_0_8px_#00e676]' : 'bg-[#6e8d7a]/50'
+              }`} 
+              aria-hidden="true"
+            />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">

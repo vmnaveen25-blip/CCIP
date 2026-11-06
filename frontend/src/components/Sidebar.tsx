@@ -190,6 +190,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'database-management', label: 'Database & Storage',  icon: <Database className="w-4 h-4" /> },
               { id: 'audit-logs',          label: 'Audit Logs',           icon: <FileText className="w-4 h-4" /> },
               { id: 'system-configuration',label: 'System Configuration', icon: <Sliders className="w-4 h-4" /> },
+              { id: 'knowledge-materials', label: 'Knowledge Materials',  icon: <BookOpen className="w-4 h-4" /> },
             ]
           }
         ];
