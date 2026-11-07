@@ -94,3 +94,4 @@ The 3D canvas supports:
 2. **Entity Type Filtering:** Toggle checkboxes to isolate or highlight specific observables (e.g. show only Wallets and IPs).
 3. **Confidence Threshold Slider:** Sliders to filter out links below a configurable confidence threshold.
 4. **Source Attribution Inspector:** Clicking any node reveals its first seen timestamp, associated cases, and upstream provider attribution.
+

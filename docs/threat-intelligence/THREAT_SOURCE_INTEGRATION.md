@@ -87,3 +87,4 @@ To add a new threat intelligence provider without modifying core pipelines:
 2. Implement `parse_payload(self, raw_data: Any) -> List[Dict[str, Any]]`.
 3. Register the provider code in `ThreatIntelService.ADAPTER_MAP`.
 4. Register the feed via `POST /api/v1/threat-intel/sources` or migration seeds.
+

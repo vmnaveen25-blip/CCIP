@@ -387,3 +387,4 @@ async def enrich_case_intelligence(
 ):
     """Executes automated enrichment for an authorized case against the threat database."""
     return await investigation_enrichment_service.enrich_case(db, case_id=case_id, user=current_user)
+

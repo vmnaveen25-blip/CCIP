@@ -79,3 +79,4 @@ suppression_hash = hashlib.sha256(
 ```
 
 Investigators can update alert statuses via `PATCH /api/v1/threat-intel/alerts/{id}/review`, recording their email identity and review timestamp in the immutable audit log.
+

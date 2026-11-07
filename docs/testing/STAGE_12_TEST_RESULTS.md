@@ -52,3 +52,4 @@
    - Binary output verified with `%PDF-` signature.
    - `X-Report-SHA256` header contains exactly 64 hexadecimal characters.
    - Section 65B / Section 63 statutory certificate generated and styled into final PDF.
+

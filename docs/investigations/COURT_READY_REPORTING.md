@@ -78,3 +78,4 @@ PDF generation is performed natively via `court_dossier_service.render_pdf_dossi
   - `Content-Disposition: attachment; filename="Court_Dossier_...pdf"`
   - `X-Report-SHA256: <64-hex-digest>`
   - `X-Statutory-Act: Section 65B IEA / Section 63 BSA`
+

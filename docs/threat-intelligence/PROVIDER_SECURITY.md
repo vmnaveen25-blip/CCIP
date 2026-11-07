@@ -56,3 +56,4 @@ In `backend/app/core/permissions.py`:
 - The prefix `"/api/v1/threat-intel"` is explicitly registered in `PRIVILEGED_PREFIXES`.
 - Development authentication bypass is **permanently forbidden** on all `/api/v1/threat-intel` routes, even in local development mode.
 - Non-admin attempts to configure or modify feeds (`POST /api/v1/threat-intel/sources`) are rejected with HTTP 403 Forbidden.
+

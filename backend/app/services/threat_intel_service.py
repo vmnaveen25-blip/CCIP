@@ -253,3 +253,4 @@ class ThreatIntelService:
 
 
 threat_intel_service = ThreatIntelService()
+

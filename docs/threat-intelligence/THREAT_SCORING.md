@@ -76,3 +76,4 @@ To maintain strict evidentiary provenance, indicators move through explicit life
 6. **`CONFIRMED`:** Validated by investigator as actively malicious within the operational scope.
 7. **`FALSE_POSITIVE`:** Investigating officer marked the indicator as benign or misattributed. Score is permanently nullified.
 8. **`EXPIRED`:** Indicator has passed its operational validity window without renewed observation.
+

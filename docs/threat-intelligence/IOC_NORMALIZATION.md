@@ -73,3 +73,4 @@ CREATE INDEX ix_threat_indicators_state ON threat_indicators (finding_state);
 ## 4. Unstructured Narrative Extraction Pipeline
 
 The service provides `extract_iocs_from_text(text: str)` which tokenizes free-text incident narratives and FIR statements. Delimiters `[\s,;\"'<>\[\]{}|\\]+` are applied to isolate potential observables, which are then passed through the typing and normalization engine. Duplicate observables within the same narrative are automatically deduplicated.
+

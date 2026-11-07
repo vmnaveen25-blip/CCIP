@@ -92,3 +92,4 @@ Correlated findings are formally stored in `intelligence_relationships`:
 - `ATTRIBUTED_TO_SOURCE`: Attributed by a threat intelligence provider.
 - `SUGGESTED_CORRELATION`: Automated algorithmic candidate.
 - `CONFIRMED_RELATIONSHIP`: Validated by senior investigator.
+

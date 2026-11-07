@@ -148,3 +148,4 @@ class SSRFSafeHttpClient:
 
 
 ssrf_safe_client = SSRFSafeHttpClient()
+
