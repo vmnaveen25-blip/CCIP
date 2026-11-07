@@ -302,3 +302,14 @@ async def seal_court_dossier(
         "sealed_at": version_record.sealed_at.isoformat()
     }
 
+
+@router.get("/court-dossier/{report_code}/verify")
+async def verify_court_dossier_integrity(
+    report_code: str,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """Cryptographically verifies the cryptographic seal and custodial chain of custody for a sealed court dossier."""
+    from app.services.court_dossier_service import court_dossier_service
+    return await court_dossier_service.verify_dossier_integrity(db, report_code)
+

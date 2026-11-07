@@ -5,12 +5,14 @@ feed health monitoring, scoring updates, and alert triggering.
 """
 
 import uuid
+import asyncio
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_, desc, func
 
 from app.core.logging import logger
+from app.core.exceptions import CCIPException
 from app.models.threat_intelligence_v2 import (
     ThreatIntelligenceSource,
     ThreatFeedSync,
@@ -35,6 +37,8 @@ from app.services.threat_alert_engine import threat_alert_engine
 
 
 class ThreatIntelService:
+    _sync_locks: Dict[str, asyncio.Lock] = {}
+
     ADAPTER_MAP = {
         "STIX_TAXII": StixTaxiiAdapter,
         "MISP": MispAdapter,
@@ -129,37 +133,69 @@ class ThreatIntelService:
             reliability=source.source_reliability
         )
 
-    async def sync_source(self, db: AsyncSession, source_id: str, sync_type: str = "MANUAL") -> ThreatFeedSync:
-        """Executes a synchronization cycle for a specific source."""
+    async def sync_source(self, db: AsyncSession, source_id: str, sync_type: str = "MANUAL", force: bool = False) -> ThreatFeedSync:
+        """
+        Executes a synchronization cycle for a specific source.
+        Enforces per-source concurrency mutex and minimum rate limits to prevent duplicate runs.
+        Guarantees that feed ingest errors never erase previously persisted indicators.
+        """
         q = select(ThreatIntelligenceSource).where(ThreatIntelligenceSource.id == source_id)
         res = await db.execute(q)
         source = res.scalars().first()
         if not source:
-            raise ValueError(f"Threat intelligence source '{source_id}' not found.")
+            raise CCIPException(message=f"Threat intelligence source '{source_id}' not found.", status_code=404, code="SOURCE_NOT_FOUND")
 
-        # Create sync audit record
-        sync_record = ThreatFeedSync(
-            source_id=source.id,
-            sync_type=sync_type,
-            started_at=datetime.now(timezone.utc),
-            status="RUNNING"
-        )
-        db.add(sync_record)
-        await db.commit()
-        await db.refresh(sync_record)
+        # Concurrency guard: check if sync is already running
+        if source_id not in self._sync_locks:
+            self._sync_locks[source_id] = asyncio.Lock()
+        lock = self._sync_locks[source_id]
 
-        adapter = self.get_adapter_for_source(source)
-        ingest_res: FeedIngestionResult = await adapter.fetch_feed()
+        if lock.locked():
+            raise CCIPException(
+                message=f"Synchronization for feed '{source.name}' is already actively running. Concurrent duplicate runs rejected.",
+                status_code=409,
+                code="SYNC_ALREADY_IN_PROGRESS"
+            )
 
-        sync_record.completed_at = datetime.now(timezone.utc)
-        if not ingest_res.success:
-            sync_record.status = "FAILED"
-            sync_record.error_message = ingest_res.error_message
-            source.last_sync_status = "FAILED"
-            source.last_failure_reason = ingest_res.error_message
-            source.consecutive_failures += 1
+        # Rate limit guard: minimum 120s between manual runs unless force=True
+        if sync_type == "MANUAL" and not force:
+            if source.last_sync_at:
+                last_dt = source.last_sync_at
+                if last_dt.tzinfo is None:
+                    last_dt = last_dt.replace(tzinfo=timezone.utc)
+                elapsed = (datetime.now(timezone.utc) - last_dt).total_seconds()
+                if elapsed < 120:
+                    raise CCIPException(
+                        message=f"Feed '{source.name}' was synced {int(elapsed)}s ago. Minimum interval between manual syncs is 120s (pass force=True to bypass).",
+                        status_code=429,
+                        code="SYNC_RATE_LIMITED"
+                    )
+
+        async with lock:
+            # Create sync audit record
+            sync_record = ThreatFeedSync(
+                source_id=source.id,
+                sync_type=sync_type,
+                started_at=datetime.now(timezone.utc),
+                status="RUNNING"
+            )
+            db.add(sync_record)
+            source.last_sync_status = "RUNNING"
             await db.commit()
-            return sync_record
+            await db.refresh(sync_record)
+
+            adapter = self.get_adapter_for_source(source)
+            ingest_res: FeedIngestionResult = await adapter.fetch_feed()
+
+            sync_record.completed_at = datetime.now(timezone.utc)
+            if not ingest_res.success:
+                sync_record.status = "FAILED"
+                sync_record.error_message = ingest_res.error_message
+                source.last_sync_status = "FAILED"
+                source.last_failure_reason = ingest_res.error_message
+                source.consecutive_failures += 1
+                await db.commit()
+                return sync_record
 
         # Idempotently persist normalized indicators
         imported = 0

@@ -4,6 +4,7 @@ Exposes endpoints for Feed Sources, Indicators, Alerts, 3D Graph, and Case Enric
 """
 
 from typing import List, Optional, Dict, Any
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_, desc, func
@@ -15,6 +16,7 @@ from app.models.threat_intelligence_v2 import (
     ThreatIntelligenceSource,
     ThreatFeedSync,
     ThreatIndicator,
+    ThreatIndicatorReviewAudit,
     ThreatCampaign,
     ThreatAlert,
     IntelligenceRelationship
@@ -163,11 +165,12 @@ async def update_source(
 @router.post("/sources/{source_id}/sync")
 async def trigger_source_sync(
     source_id: str,
+    force: bool = Query(False, description="Bypass the 120-second minimum sync cooldown window"),
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """Triggers manual ingestion and normalization cycle for a feed."""
-    sync_rec = await threat_intel_service.sync_source(db, source_id, sync_type="MANUAL")
+    """Triggers manual ingestion and normalization cycle for a feed with rate limit and concurrency safeguards."""
+    sync_rec = await threat_intel_service.sync_source(db, source_id, sync_type="MANUAL", force=force)
     return {
         "sync_id": sync_rec.id,
         "status": sync_rec.status,
@@ -277,7 +280,7 @@ async def update_indicator_finding_state(
     current_user: User = Depends(require_specialist),
     db: AsyncSession = Depends(get_db)
 ):
-    """Updates finding state (e.g. FALSE_POSITIVE, CONFIRMED) with audit trail and recalculates scores."""
+    """Updates finding state (e.g. FALSE_POSITIVE, CONFIRMED) with audit trail and recalculates scores while preserving historical intelligence."""
     q = select(ThreatIndicator).where(ThreatIndicator.id == indicator_id)
     res = await db.execute(q)
     ind = res.scalars().first()
@@ -288,11 +291,15 @@ async def update_indicator_finding_state(
     if state not in ThreatFindingState.ALL_STATES:
         raise HTTPException(status_code=400, detail=f"Invalid state '{state}'. Must be one of {ThreatFindingState.ALL_STATES}")
 
+    previous_state = ind.finding_state
+    previous_score = ind.composite_threat_score
+    previous_breakdown = ind.score_breakdown_json or {}
+
     ind.finding_state = state
     is_false_pos = (state == ThreatFindingState.FALSE_POSITIVE)
     is_confirmed = (state in (ThreatFindingState.CONFIRMED, ThreatFindingState.HUMAN_REVIEWED))
 
-    # Recalculate score
+    # Recalculate score with history preservation
     new_score = threat_scoring_engine.calculate_composite_score(
         source_reliability=0.85,
         reported_confidence=ind.confidence_score,
@@ -300,16 +307,96 @@ async def update_indicator_finding_state(
         last_seen=ind.last_seen,
         independent_sources_count=1,
         is_human_reviewed=is_confirmed,
-        is_false_positive=is_false_pos
+        is_false_positive=is_false_pos,
+        preserved_original_score=previous_score,
+        preserved_original_breakdown=previous_breakdown
     )
     ind.composite_threat_score = new_score["composite_score"]
     ind.score_breakdown_json = new_score["breakdown"]
 
+    # Record historical score entry in indicator json list
+    history_entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "previous_state": previous_state,
+        "new_state": state,
+        "previous_score": previous_score,
+        "new_score": new_score["composite_score"],
+        "previous_breakdown": previous_breakdown,
+        "new_breakdown": new_score["breakdown"],
+        "override_reason": req.notes or "Investigator finding state review",
+        "reviewer_id": current_user.id,
+        "reviewer_email": current_user.email
+    }
+    history_list = list(ind.historical_scores_json or [])
+    history_list.append(history_entry)
+    ind.historical_scores_json = history_list
+
+    # Record immutable relational audit entry
+    audit_record = ThreatIndicatorReviewAudit(
+        indicator_id=ind.id,
+        previous_state=previous_state,
+        new_state=state,
+        previous_score=previous_score,
+        new_score=new_score["composite_score"],
+        previous_breakdown_json=previous_breakdown,
+        new_breakdown_json=new_score["breakdown"],
+        override_reason=req.notes or "Investigator finding state review",
+        reviewed_by_user_id=current_user.id,
+        reviewer_email=current_user.email,
+        reviewed_at=datetime.now(timezone.utc)
+    )
+    db.add(audit_record)
+
     await db.commit()
+    await db.refresh(ind)
     return {
         "message": f"Indicator finding state updated to {state}.",
         "indicator_id": ind.id,
-        "new_composite_score": ind.composite_threat_score
+        "new_composite_score": ind.composite_threat_score,
+        "historical_records_count": len(ind.historical_scores_json)
+    }
+
+
+@router.get("/indicators/{indicator_id}/history")
+async def get_indicator_review_history(
+    indicator_id: str,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """Retrieves the complete explainable scoring audit trail and investigator review history for an indicator."""
+    q = select(ThreatIndicator).where(ThreatIndicator.id == indicator_id)
+    res = await db.execute(q)
+    ind = res.scalars().first()
+    if not ind:
+        raise HTTPException(status_code=404, detail="Indicator not found.")
+
+    audit_q = select(ThreatIndicatorReviewAudit).where(
+        ThreatIndicatorReviewAudit.indicator_id == indicator_id
+    ).order_by(desc(ThreatIndicatorReviewAudit.reviewed_at))
+    audit_res = await db.execute(audit_q)
+    audits = audit_res.scalars().all()
+
+    return {
+        "indicator_id": ind.id,
+        "normalized_value": ind.normalized_value,
+        "defanged_value": ind.defanged_value,
+        "current_state": ind.finding_state,
+        "current_score": ind.composite_threat_score,
+        "current_breakdown": ind.score_breakdown_json,
+        "historical_scores": ind.historical_scores_json or [],
+        "audits": [
+            {
+                "id": a.id,
+                "previous_state": a.previous_state,
+                "new_state": a.new_state,
+                "previous_score": a.previous_score,
+                "new_score": a.new_score,
+                "override_reason": a.override_reason,
+                "reviewer_email": a.reviewer_email,
+                "reviewed_at": a.reviewed_at.isoformat()
+            }
+            for a in audits
+        ]
     }
 
 
@@ -372,11 +459,12 @@ async def review_alert(
 @router.get("/graph")
 async def get_intelligence_graph(
     case_id: Optional[str] = Query(None),
+    limit: int = Query(150, ge=10, le=300, description="Maximum relationships returned to prevent browser DOM lag"),
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
-    """Returns 3D entity relationship graph topology for Three.js rendering."""
-    return await investigation_enrichment_service.get_3d_graph_topology(db, case_id=case_id, user=current_user)
+    """Returns 3D entity relationship graph topology with pagination and node volume guards."""
+    return await investigation_enrichment_service.get_3d_graph_topology(db, case_id=case_id, user=current_user, limit=limit)
 
 
 @router.post("/cases/{case_id}/enrich")

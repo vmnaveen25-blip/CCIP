@@ -231,16 +231,31 @@ class InvestigationEnrichmentService:
             "evidence_files_scanned": len(evidences)
         }
 
-    async def get_3d_graph_topology(self, db: AsyncSession, case_id: Optional[str] = None, user: Optional[User] = None) -> Dict[str, Any]:
+    async def get_3d_graph_topology(
+        self,
+        db: AsyncSession,
+        case_id: Optional[str] = None,
+        user: Optional[User] = None,
+        limit: int = 150
+    ) -> Dict[str, Any]:
         """
         Constructs the 3D entity relationship graph nodes and links.
-        Reuses existing Three.js visualization engine conventions.
+        Reuses existing Three.js visualization engine conventions with pagination and node volume guards.
         """
+        safe_limit = max(10, min(limit, 300))
         nodes = []
         links = []
         seen_node_ids = set()
 
-        q = select(IntelligenceRelationship).order_by(desc(IntelligenceRelationship.created_at)).limit(200)
+        q = select(IntelligenceRelationship).order_by(desc(IntelligenceRelationship.created_at))
+        if case_id:
+            q = q.where(
+                or_(
+                    IntelligenceRelationship.source_entity_id == case_id,
+                    IntelligenceRelationship.target_entity_id == case_id
+                )
+            )
+        q = q.limit(safe_limit)
         res = await db.execute(q)
         rels = res.scalars().all()
 

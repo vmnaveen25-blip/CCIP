@@ -73,6 +73,7 @@ class ThreatIndicator(Base):
     reputation_verdict = Column(String(50), default="SUSPICIOUS", nullable=False)  # "MALICIOUS", "SUSPICIOUS", "NEUTRAL", "BENIGN"
     composite_threat_score = Column(Float, default=50.0, nullable=False)  # 0 to 100
     score_breakdown_json = Column(JSON, default=dict, nullable=False)
+    historical_scores_json = Column(JSON, default=list, nullable=False)  # Preserves audit trail of previous scores and overrides
     
     finding_state = Column(String(50), default="UNVERIFIED", nullable=False, index=True)  # "UNVERIFIED", "OBSERVED", "EXTERNALLY_REPORTED", "AI_SUGGESTED", "HUMAN_REVIEWED", "CONFIRMED", "FALSE_POSITIVE", "EXPIRED"
     is_active = Column(Boolean, default=True, nullable=False, index=True)
@@ -172,4 +173,26 @@ class InvestigationReportVersion(Base):
     sealed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
+class ThreatIndicatorReviewAudit(Base):
+    """
+    Immutable audit trail of investigator reviews, score overrides, and false-positive transitions.
+    Guarantees complete forensic provenance for intelligence scoring adjustments.
+    """
+    __tablename__ = "threat_indicator_review_audits"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    indicator_id = Column(String(36), ForeignKey("threat_indicators.id"), nullable=False, index=True)
+    previous_state = Column(String(50), nullable=False)
+    new_state = Column(String(50), nullable=False)
+    previous_score = Column(Float, nullable=False)
+    new_score = Column(Float, nullable=False)
+    previous_breakdown_json = Column(JSON, default=dict, nullable=False)
+    new_breakdown_json = Column(JSON, default=dict, nullable=False)
+    override_reason = Column(Text, nullable=True)
+    reviewed_by_user_id = Column(String(36), nullable=False)
+    reviewer_email = Column(String(200), nullable=False)
+    reviewed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
 

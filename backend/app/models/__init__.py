@@ -54,6 +54,7 @@ from app.models.threat_intelligence_v2 import (
     ThreatIntelligenceSource,
     ThreatFeedSync,
     ThreatIndicator,
+    ThreatIndicatorReviewAudit,
     ThreatCampaign,
     ThreatAlert,
     IntelligenceRelationship,

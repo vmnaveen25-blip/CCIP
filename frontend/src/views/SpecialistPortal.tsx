@@ -5,7 +5,7 @@ import { formatINR } from '../utils/formatters';
 import { MarkdownMessage } from '../components/MarkdownMessage';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { MOCK_CORRELATION_NODES, INITIAL_COMPLAINTS } from '../data/mockData';
-import { CorrelationGraph3D, GraphNode3D, GraphLink3D, getNodeCategory } from '../components/intelligence/CorrelationGraph3D';
+import type { GraphNode3D, GraphLink3D } from '../components/intelligence/CorrelationGraph3D';
 import { ThreatIntelligencePortalView } from '../components/intelligence/ThreatIntelligencePortalView';
 import { SocMonitoringPortalView } from '../components/intelligence/SocMonitoringPortalView';
 import { InvestigationWorkspacePortalView } from '../components/intelligence/InvestigationWorkspacePortalView';

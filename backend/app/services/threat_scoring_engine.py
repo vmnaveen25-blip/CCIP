@@ -84,7 +84,9 @@ class ThreatScoringEngine:
         independent_sources_count: int = 1,
         is_correlated_with_case_evidence: bool = False,
         is_human_reviewed: bool = False,
-        is_false_positive: bool = False
+        is_false_positive: bool = False,
+        preserved_original_score: Optional[float] = None,
+        preserved_original_breakdown: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Produces an explainable breakdown and composite score (0 to 100).
@@ -102,9 +104,11 @@ class ThreatScoringEngine:
                     "corroboration_score": 0.0,
                     "internal_evidence_bonus": 0.0,
                     "human_verification_bonus": 0.0,
-                    "false_positive_override": True
+                    "false_positive_override": True,
+                    "preserved_original_score": preserved_original_score,
+                    "preserved_original_breakdown": preserved_original_breakdown or {}
                 },
-                "explanation": "Finding marked as FALSE_POSITIVE by authorized investigator. Threat score nullified."
+                "explanation": "Finding marked as FALSE_POSITIVE by authorized investigator. Threat score nullified while preserving scoring history."
             }
 
         # Normalize components to 0.0 - 1.0
