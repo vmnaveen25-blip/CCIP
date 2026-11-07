@@ -40,6 +40,7 @@ from app.api.investigation_chat import router as investigation_chat_router
 from app.api.triage import router as triage_router
 from app.api.knowledge_materials import router as knowledge_materials_router
 from app.api.public_chat import router as public_chat_router
+from app.api.threat_intel import router as threat_intel_router
 
 
 
@@ -188,6 +189,7 @@ app.include_router(investigation_chat_router, prefix=api_v1_prefix)
 app.include_router(triage_router, prefix=api_v1_prefix)
 app.include_router(knowledge_materials_router, prefix=api_v1_prefix)
 app.include_router(public_chat_router, prefix=api_v1_prefix)
+app.include_router(threat_intel_router, prefix=api_v1_prefix)
 
 
 

@@ -1396,6 +1396,76 @@ class APIClient {
       body: JSON.stringify({ active, reason })
     });
   }
+
+  // --- Stage 12: Threat Intelligence & Court-Ready Reporting ---
+  async getThreatSources(): Promise<any[]> {
+    return await this.request<any[]>('/threat-intel/sources');
+  }
+
+  async createThreatSource(payload: any): Promise<any> {
+    return await this.request<any>('/threat-intel/sources', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async syncThreatSource(sourceId: string): Promise<any> {
+    return await this.request<any>(`/threat-intel/sources/${sourceId}/sync`, {
+      method: 'POST'
+    });
+  }
+
+  async getThreatIndicators(params?: { ioc_type?: string; finding_state?: string; search?: string }): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (params?.ioc_type) q.append('ioc_type', params.ioc_type);
+    if (params?.finding_state) q.append('finding_state', params.finding_state);
+    if (params?.search) q.append('search', params.search);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return await this.request<any[]>(`/threat-intel/indicators${qs}`);
+  }
+
+  async updateIndicatorFindingState(indicatorId: string, findingState: string, notes?: string): Promise<any> {
+    return await this.request<any>(`/threat-intel/indicators/${indicatorId}/finding-state`, {
+      method: 'PATCH',
+      body: JSON.stringify({ finding_state: findingState, notes })
+    });
+  }
+
+  async getThreatAlerts(params?: { severity?: string; review_status?: string }): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (params?.severity) q.append('severity', params.severity);
+    if (params?.review_status) q.append('review_status', params.review_status);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return await this.request<any[]>(`/threat-intel/alerts${qs}`);
+  }
+
+  async reviewThreatAlert(alertId: string, reviewStatus: string, notes?: string): Promise<any> {
+    return await this.request<any>(`/threat-intel/alerts/${alertId}/review`, {
+      method: 'PATCH',
+      body: JSON.stringify({ review_status: reviewStatus, notes })
+    });
+  }
+
+  async getThreatGraph(caseId?: string): Promise<any> {
+    const qs = caseId ? `?case_id=${encodeURIComponent(caseId)}` : '';
+    return await this.request<any>(`/threat-intel/graph${qs}`);
+  }
+
+  async enrichCaseThreatIntel(caseId: string): Promise<any> {
+    return await this.request<any>(`/threat-intel/cases/${caseId}/enrich`, {
+      method: 'POST'
+    });
+  }
+
+  async getCourtDossier(caseId: string): Promise<any> {
+    return await this.request<any>(`/reports/court-dossier/${caseId}`);
+  }
+
+  async sealCourtDossier(caseId: string): Promise<any> {
+    return await this.request<any>(`/reports/court-dossier/${caseId}/seal`, {
+      method: 'POST'
+    });
+  }
 }
 
 export interface KnowledgeMaterialItemResponse {

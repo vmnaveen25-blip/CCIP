@@ -249,3 +249,56 @@ async def export_report(
             "created_at": report.created_at.isoformat()
         }
     }
+
+
+@router.get("/court-dossier/{case_id}")
+async def get_court_dossier_json(
+    case_id: str,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """Generates structured, Section 65B/63 court-ready forensic investigation dossier in JSON format."""
+    from app.services.court_dossier_service import court_dossier_service
+    dossier = await court_dossier_service.generate_dossier_data(db, case_id, current_user)
+    return dossier
+
+
+@router.get("/court-dossier/{case_id}/pdf")
+async def get_court_dossier_pdf(
+    case_id: str,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """Renders and streams certified Section 65B/63 court-ready PDF dossier."""
+    from app.services.court_dossier_service import court_dossier_service
+    dossier = await court_dossier_service.generate_dossier_data(db, case_id, current_user)
+    pdf_bytes = court_dossier_service.render_pdf_dossier(dossier)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="Court_Dossier_{dossier.get("case_number", case_id)}.pdf"',
+            "X-Report-SHA256": dossier.get("sha256_digest", ""),
+            "X-Statutory-Act": "Section 65B IEA / Section 63 BSA"
+        }
+    )
+
+
+@router.post("/court-dossier/{case_id}/seal")
+async def seal_court_dossier(
+    case_id: str,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """Seals an immutable versioned court dossier with a permanent cryptographic SHA-256 digest."""
+    from app.services.court_dossier_service import court_dossier_service
+    version_record = await court_dossier_service.generate_and_save_dossier(db, case_id, current_user)
+    return {
+        "message": "Court dossier successfully sealed and preserved in sovereign vault.",
+        "version_id": version_record.id,
+        "report_code": version_record.report_code,
+        "sha256_digest": version_record.sha256_digest,
+        "signed_by": version_record.signer_name,
+        "sealed_at": version_record.sealed_at.isoformat()
+    }
+

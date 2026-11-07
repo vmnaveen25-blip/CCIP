@@ -50,6 +50,15 @@ from app.models.investigator_profile import InvestigatorProfile
 from app.models.administrative_approval import AdministrativeApproval
 from app.models.evidence_governance import EvidenceRetentionRecord, EvidenceAccessRequest
 from app.models.security_event import SecurityEvent
+from app.models.threat_intelligence_v2 import (
+    ThreatIntelligenceSource,
+    ThreatFeedSync,
+    ThreatIndicator,
+    ThreatCampaign,
+    ThreatAlert,
+    IntelligenceRelationship,
+    InvestigationReportVersion
+)
 
 __all__ = [
     "Base",
@@ -118,5 +127,12 @@ __all__ = [
     "PilotPrediction",
     "PilotHumanReview",
     "InvestigationConversation",
-    "InvestigationMessage"
+    "InvestigationMessage",
+    "ThreatIntelligenceSource",
+    "ThreatFeedSync",
+    "ThreatIndicator",
+    "ThreatCampaign",
+    "ThreatAlert",
+    "IntelligenceRelationship",
+    "InvestigationReportVersion"
 ]

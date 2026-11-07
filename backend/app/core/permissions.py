@@ -25,6 +25,7 @@ PRIVILEGED_PREFIXES = (
     "/api/v1/users",
     "/api/v1/police",
     "/api/v1/specialist",
+    "/api/v1/threat-intel",
 )
 
 
@@ -141,12 +142,15 @@ def require_role(allowed_roles: List[RoleEnum]):
         user_role_name = current_user.role.name if current_user.role else ""
         allowed_role_names = [r.value for r in allowed_roles]
 
-        # In prototype/local environment, grant access if user is Admin or designated staff
+        # In prototype/local environment, grant access if user is Admin or designated root
         if (
             user_role_name == RoleEnum.ADMIN.value
             or current_user.email in ("vijay@gmail.com", "root@astraea.internal")
-            or current_user.is_staff
         ):
+            return current_user
+
+        # General staff flag satisfies non-admin role requirements
+        if current_user.is_staff and RoleEnum.ADMIN.value not in allowed_role_names:
             return current_user
 
         if user_role_name not in allowed_role_names:
