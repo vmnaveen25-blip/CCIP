@@ -11,9 +11,9 @@ import { ToastSystem, useToastManager } from './components/ui/ToastSystem';
 
 import { LandingPage } from './views/LandingPage';
 import { CitizenPortal } from './views/CitizenPortal';
-import { SpecialistPortal } from './views/SpecialistPortal';
-import { AIPortal } from './views/AIPortal';
-import { AdminPortal } from './views/AdminPortal';
+const SpecialistPortal = React.lazy(() => import('./views/SpecialistPortal').then(m => ({ default: m.SpecialistPortal })));
+const AIPortal = React.lazy(() => import('./views/AIPortal').then(m => ({ default: m.AIPortal })));
+const AdminPortal = React.lazy(() => import('./views/AdminPortal').then(m => ({ default: m.AdminPortal })));
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { MOCK_CORRELATION_NODES, MOCK_THREAT_FEEDS, INITIAL_COMPLAINTS } from './data/mockData';
 import { NotificationCenterModal } from './components/NotificationCenterModal';
@@ -721,6 +721,14 @@ export const App: React.FC = () => {
           >
             <ErrorBoundary fallbackTitle="Module Telemetry Error">
               <div className="page-enter min-w-0">
+                <React.Suspense fallback={
+                  <div className="flex items-center justify-center min-h-[400px]">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                      <span className="text-xs font-mono text-emerald-400/70 tracking-widest uppercase">Loading Enclave Module...</span>
+                    </div>
+                  </div>
+                }>
                 {currentPortal === 'citizen' && (
                   <CitizenPortal
                     activeTab={activeTab}
@@ -764,6 +772,7 @@ export const App: React.FC = () => {
                     auditLogs={auditLogs}
                   />
                 )}
+                </React.Suspense>
               </div>
             </ErrorBoundary>
           </main>

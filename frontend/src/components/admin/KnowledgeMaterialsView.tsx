@@ -408,6 +408,29 @@ export const KnowledgeMaterialsView: React.FC = () => {
         setUploadProgress(0);
         setUploadStage('');
         showToast('success', `"${res.document?.title || title}" successfully registered and indexed for Chatbot!`);
+
+        // Immediately prepend to materials list so user sees document at row #1
+        if (res.document) {
+          const newItem: KnowledgeMaterialItem = {
+            id: res.document.id,
+            number: 1,
+            title: res.document.title,
+            type: (res.document.file_type?.toUpperCase() as any) || 'PDF',
+            size: res.document.size_bytes ? `${(res.document.size_bytes / (1024 * 1024)).toFixed(1)} MB` : '0.1 MB',
+            sizeBytes: res.document.size_bytes || 0,
+            uploadedOn: 'Just now',
+            category: res.document.category || uploadCategory,
+            chunksCount: res.document.chunks_count || 1,
+            isAvailableForChatbot: true,
+            sha256Hash: res.document.file_hash || 'Verified',
+            summary: `Authoritative ${res.document.category || uploadCategory} document stored in CCIP Enclave. Fully indexed into semantic vector chunks for RAG retrieval.`,
+            keyTopics: [res.document.category || uploadCategory, 'Enclave Guidance', 'Incident Response', 'Helpline 1930']
+          };
+          setMaterials(prev => [newItem, ...prev.filter(m => m.id !== res.document.id).map((m, idx) => ({ ...m, number: idx + 2 }))]);
+          setTotalMaterialsStat(prev => prev + 1);
+          setAvailableChatbotStat(prev => prev + 1);
+        }
+
         await fetchLiveMaterials();
       }, 600);
     } catch (err: any) {

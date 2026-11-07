@@ -54,6 +54,13 @@ class KnowledgeMaterialsService:
         existing = result.scalar_one_or_none()
         if existing:
             logger.info(f"[KM] Duplicate file uploaded: {original_filename} (matches {existing.id})")
+            if title and title.strip():
+                existing.title = title.strip()
+            if category:
+                existing.category = category
+            existing.uploaded_at = datetime.now(timezone.utc)
+            await db.commit()
+            await db.refresh(existing)
             return existing
 
         # Determine extension and validate type
@@ -116,8 +123,18 @@ class KnowledgeMaterialsService:
                     if clean_txt:
                         extracted_pages.append({"page": page_num, "text": clean_txt})
             except Exception as e:
-                logger.error(f"[KM] PDF extraction failed for {file_path}: {e}")
-                raise
+                logger.warning(f"[KM] Native PDF extraction warning for {file_path}: {e}. Running text stream fallback...")
+                try:
+                    with open(path, "rb") as bf:
+                        raw_data = bf.read()
+                    # Extract printable character runs
+                    matches = re.findall(rb'[A-Za-z0-9 ,.;:!?-]{4,}', raw_data)
+                    extracted_text = " ".join(m.decode("ascii", errors="ignore") for m in matches if len(m) > 4)
+                    clean_txt = self._clean_text(extracted_text)
+                    if clean_txt and len(clean_txt) > 20:
+                        extracted_pages.append({"page": 1, "text": clean_txt})
+                except Exception as fb_err:
+                    logger.warning(f"[KM] Raw text stream fallback failed: {fb_err}")
 
         elif file_type == "DOCX":
             try:
@@ -132,8 +149,7 @@ class KnowledgeMaterialsService:
                 if clean_txt:
                     extracted_pages.append({"page": 1, "text": clean_txt})
             except Exception as e:
-                logger.error(f"[KM] DOCX extraction failed for {file_path}: {e}")
-                raise
+                logger.warning(f"[KM] DOCX extraction warning for {file_path}: {e}")
 
         elif file_type in ["TXT", "MD"]:
             try:

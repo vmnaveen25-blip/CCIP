@@ -660,3 +660,36 @@ async def submit_training_for_approval(
         return appr_res
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# -----------------------------------------------------------------------------
+# 5. Centralized Orchestrator & Inference Task Routing
+# -----------------------------------------------------------------------------
+
+@router.get("/orchestrator/status")
+async def get_ai_orchestrator_status(
+    current_user: User = Depends(require_aiml)
+):
+    """
+    Returns real-time orchestrator status, loaded models count,
+    lifecycle state machine, and device telemetry for all 14 AI models.
+    """
+    from app.ai.orchestrator import ai_orchestrator
+    return await ai_orchestrator.get_orchestrator_status()
+
+
+@router.post("/orchestrator/unload")
+async def unload_ai_model(
+    model_name: str = Query(..., description="Name of the model to unload from memory"),
+    current_user: User = Depends(require_aiml_lead_only)
+):
+    """
+    Safely unloads an idle model from memory to reclaim enclave RAM/VRAM.
+    Restricted to AI_ML_SYSTEM_LEAD.
+    """
+    from app.ai.orchestrator import ai_orchestrator
+    success = ai_orchestrator.unload_model(model_name)
+    if not success:
+        raise HTTPException(status_code=400, detail=f"Model '{model_name}' could not be unloaded or is not in cache.")
+    return {"status": "SUCCESS", "message": f"Model '{model_name}' unloaded from memory."}
+

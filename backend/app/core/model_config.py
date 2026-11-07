@@ -27,6 +27,8 @@ RELATION_EXTRACTION_PATH: Path = ML_MODELS_DIR / "relation_extraction"
 CROSS_CASE_CORRELATION_PATH: Path = ML_MODELS_DIR / "cross_case_correlation"
 EVIDENCE_GRAPH_LINK_PATH: Path = ML_MODELS_DIR / "evidence_graph_link"
 FEEDBACK_GATE_PATH: Path = ML_MODELS_DIR / "feedback_gate"
+RISK_SCORING_PATH: Path = ML_MODELS_DIR / "risk_scoring"
+GRAPH_CORRELATION_PATH: Path = ML_MODELS_DIR / "graph_correlation"
 
 EMAIL_MODEL_WEIGHTS: Path = EMAIL_MODEL_PATH / "model.safetensors"
 EMAIL_MODEL_CONFIG: Path = EMAIL_MODEL_PATH / "config.json"

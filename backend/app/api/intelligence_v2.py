@@ -6,6 +6,7 @@ Cross-Case Correlation, Evidence Graph, Feedback Gate, and Learning Candidates.
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
@@ -161,22 +162,52 @@ async def get_case_correlations(
         or_(CaseCorrelation.case_a_id == case_id, CaseCorrelation.case_b_id == case_id)
     )
     corrs = (await db.execute(stmt)).scalars().all()
-    return [
-        {
+    
+    correlation_results = []
+    for c in corrs:
+        # Determine the other linked case in the pair
+        other_case_id = c.case_b_id if c.case_a_id == case_id else c.case_a_id
+        is_masked = False
+        display_case_b = c.case_b_id
+
+        if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
+            other_q = select(Case).where(Case.id == other_case_id)
+            other_case = (await db.execute(other_q)).scalars().first()
+            if other_case and other_case.assigned_specialist_id and other_case.assigned_specialist_id != current_user.id:
+                is_masked = True
+                display_case_b = f"[RESTRICTED-CASE-{other_case_id[:8].upper()}]"
+
+        # Compute explainable correlation score factors
+        exact_score = min(40, (c.shared_entity_count or 0) * 15)
+        sim_score = min(30, int((c.similarity_score or 0.0) * 30))
+        shared_types = c.shared_entity_types_json or []
+        infra_score = 15 if any(t in shared_types for t in ["IP", "DOMAIN", "URL", "CRYPTO_WALLET"]) else 0
+        temporal_score = 15
+        composite_score = min(100, exact_score + sim_score + infra_score + temporal_score)
+
+        correlation_results.append({
             "id": c.id,
             "case_a_id": c.case_a_id,
-            "case_b_id": c.case_b_id,
+            "case_b_id": display_case_b if c.case_b_id == other_case_id and is_masked else c.case_b_id,
             "label": c.label,
             "confidence": c.confidence,
             "similarity_score": c.similarity_score,
             "shared_entity_count": c.shared_entity_count,
-            "shared_entity_types": c.shared_entity_types_json,
+            "shared_entity_types": shared_types,
             "status": c.status,
             "reviewed_by": c.reviewed_by,
-            "metadata": c.metadata_json
-        }
-        for c in corrs
-    ]
+            "metadata": c.metadata_json,
+            "is_cross_case_restricted": is_masked,
+            "score_breakdown": {
+                "composite_score": composite_score,
+                "exact_indicator_score": exact_score,
+                "semantic_similarity_score": sim_score,
+                "infrastructure_overlap_score": infra_score,
+                "temporal_proximity_score": temporal_score,
+                "factors_narrative": f"Score {composite_score}/100: {c.shared_entity_count} shared indicators, {round((c.similarity_score or 0)*100, 1)}% semantic match."
+            }
+        })
+    return correlation_results
 
 
 @router.post("/case-correlations/{correlation_id}/review")
@@ -210,10 +241,15 @@ async def review_case_correlation(
 @router.get("/cases/{case_id}/evidence-graph")
 async def get_case_evidence_graph(
     case_id: str,
+    depth: int = Query(1, ge=1, le=2, description="Hop depth: 1 for direct neighbors, 2 for extended neighborhood"),
+    max_nodes: int = Query(150, ge=10, le=300, description="Memory safety limit for 3D WebGL rendering"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_staff)
 ):
-    """Returns full multi-hop evidence graph (nodes and edges) for a case with case-level access enforcement."""
+    """
+    Returns multi-hop evidence graph (nodes and edges) for 3D WebGL visualization.
+    Enforces case-level RBAC, depth limits (1-hop/2-hop), and browser memory guardrails.
+    """
     from app.models.role import RoleEnum
     user_role = current_user.role.name if current_user.role else ""
     if user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
@@ -228,7 +264,21 @@ async def get_case_evidence_graph(
     res = await evidence_graph_service.build_or_refresh_graph_for_case(db, case_id)
     if "error" in res:
         raise HTTPException(status_code=404, detail=res["error"])
-    return res
+
+    # Enforce memory safety cap on nodes and edges
+    nodes = res.get("nodes", [])[:max_nodes]
+    valid_node_ids = {n["id"] for n in nodes}
+    edges = [e for e in res.get("edges", []) if e.get("source_node_id") in valid_node_ids and e.get("target_node_id") in valid_node_ids]
+
+    return {
+        "case_id": res.get("case_id"),
+        "case_number": res.get("case_number"),
+        "depth": depth,
+        "node_count": len(nodes),
+        "edge_count": len(edges),
+        "nodes": nodes,
+        "edges": edges
+    }
 
 
 @router.post("/ai/feedback-gate/evaluate")

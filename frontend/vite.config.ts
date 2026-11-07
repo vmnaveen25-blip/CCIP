@@ -207,6 +207,19 @@ function bindBackendPlugin(): Plugin {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), bindBackendPlugin()],
+  build: {
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-graph': ['three', 'three-spritetext', 'react-force-graph-3d'],
+          'vendor-charts': ['recharts'],
+          'vendor-icons': ['lucide-react'],
+        }
+      }
+    }
+  },
   server: {
     port: 5173,
     host: true,
