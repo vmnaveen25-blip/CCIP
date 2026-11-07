@@ -172,3 +172,4 @@ dist/assets/vendor-graph-Ct6gPWpo.js      1,467.81 kB │ gzip: 399.10 kB
 - **TypeScript Typecheck:** 0 errors
 - **Vite Production Bundler:** 0 errors
 - **Code Splitting:** Three.js and graph visualization isolated into `vendor-graph`, preventing initial portal load delay.
+

@@ -167,3 +167,4 @@ If new evidence emerges (e.g., an IP address previously classified as a benign C
 - `test_05_scoring_history_preservation_on_false_positive`: **PASSED** (verifies score factors preserved and not overwritten upon `FALSE_POSITIVE` mark).
 - `test_06_indicator_review_history_endpoint_and_rereview`: **PASSED** (verifies history retrieval, multi-stage transitions, and relational audit logging).
 - `test_14_false_positive_handling` (Stage 12 Suite): **PASSED** (verifies indicator exclusion from active high-priority alert queues).
+

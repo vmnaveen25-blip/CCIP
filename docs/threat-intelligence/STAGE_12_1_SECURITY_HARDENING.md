@@ -76,3 +76,4 @@ Building upon the Stage 12 foundation, Stage 12.1 eliminates critical vulnerabil
 ## 4. CONCLUSION
 
 Stage 12.1 establishes rigorous, court-defensible threat intelligence ingestion and reporting safeguards. The platform complies with secure outbound communication standards, maintains an auditable intelligence lifecycle, and provides non-repudiable evidentiary guarantees for judicial proceedings under Section 65B of the Indian Evidence Act and Section 63 of the Bharatiya Sakshya Adhiniyam, 2023.
+
