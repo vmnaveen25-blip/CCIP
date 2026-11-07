@@ -25,3 +25,4 @@ As an intelligence platform evaluating untrusted citizen complaints, threat feed
 
 - **Local Enclave Residence:** Models run 100% offline in local inference containers without external cloud API dependencies (Zero data transmission to foreign servers).
 - **Integrity Seals:** Model directories are read-only to worker processes.
+

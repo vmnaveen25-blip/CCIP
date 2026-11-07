@@ -61,3 +61,4 @@ stateDiagram-v2
 5. `DEGRADED`: Fallback heuristic adapter is answering queries due to timeout or GPU pressure.
 6. `UNAVAILABLE`: Weights are absent or corrupted.
 7. `DISABLED`: Administratively deactivated in Model Registry.
+

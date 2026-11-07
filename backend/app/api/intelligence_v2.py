@@ -6,8 +6,8 @@ Cross-Case Correlation, Evidence Graph, Feedback Gate, and Learning Candidates.
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, or_
 from pydantic import BaseModel, Field
 
 from app.db.session import get_db

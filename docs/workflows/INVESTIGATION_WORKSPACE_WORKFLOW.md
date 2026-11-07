@@ -53,3 +53,4 @@ flowchart TD
 
 ### 2.5 Section 65B Digital Certificate Issuance
 - With one click, the investigator can generate a court-admissible Section 65B Indian Evidence Act / Section 63 BSA certificate that bundles all case evidence with verifiable cryptographic hashes.
+

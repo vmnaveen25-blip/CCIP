@@ -36,6 +36,7 @@ class Evidence(Base):
     version: Mapped[int] = mapped_column(BigInteger, default=1, nullable=False)
     parent_evidence_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("evidence.id", ondelete="SET NULL"), nullable=True)
     malware_scan_status: Mapped[str] = mapped_column(String(50), default="NOT_SCANNED", nullable=False)  # "NOT_SCANNED", "CLEAN", "SUSPICIOUS", "INFECTED"
+    is_legal_hold: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 

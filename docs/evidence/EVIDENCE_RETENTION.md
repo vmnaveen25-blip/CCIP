@@ -48,3 +48,4 @@ When an evidence item completes its retention lifespan without active legal hold
    - Authorizing officer ID.
    - Disposal certificate digest.
 4. Physical disk blocks are overwritten with pseudo-random bytes prior to unlinking file pointers.
+

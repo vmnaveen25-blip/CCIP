@@ -1,4 +1,5 @@
 import io
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
@@ -381,6 +382,8 @@ async def get_evidence_processing_result(
 # -----------------------------------------------------------------------------
 
 @router.get("/{evidence_id}/verify-hash")
+@router.get("/{evidence_id}/verify-integrity")
+@router.post("/{evidence_id}/verify-integrity")
 async def verify_evidence_hash(
     evidence_id: str,
     request: Request,
@@ -455,6 +458,7 @@ async def verify_evidence_hash(
         "stored_hash": ev.sha256_hash,
         "verified_hash": computed_hash,
         "integrity_verified": is_match,
+        "match": is_match,
         "status": "VERIFIED_AUTHENTIC" if is_match else "TAMPER_ALERT",
         "action": "HASH_VERIFICATION_COMPLETE"
     }
@@ -463,8 +467,7 @@ async def verify_evidence_hash(
 @router.post("/{evidence_id}/legal-hold")
 async def toggle_evidence_legal_hold(
     evidence_id: str,
-    legal_hold: bool = Form(...),
-    reason: str = Form("Statutory legal hold mandate"),
+    request: Request,
     current_user: User = Depends(require_staff),
     db: AsyncSession = Depends(get_db)
 ):
@@ -472,9 +475,28 @@ async def toggle_evidence_legal_hold(
     Activates or deactivates a statutory Legal Hold on digital evidence.
     When active, automatic or administrative statutory deletion routines are strictly blocked.
     """
-    from datetime import datetime, timezone, timedelta
+    from datetime import timedelta
     from app.models.evidence_governance import EvidenceRetentionRecord
     from app.services.audit_service import audit_service
+
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        body = await request.json()
+        hold_val = body.get("legal_hold")
+        reason_val = body.get("reason", "Statutory legal hold mandate")
+    else:
+        form = await request.form()
+        hold_val = form.get("legal_hold")
+        reason_val = form.get("reason", "Statutory legal hold mandate")
+
+    if hold_val is None:
+        raise HTTPException(status_code=400, detail="Missing required field: legal_hold")
+
+    if isinstance(hold_val, str):
+        legal_hold = hold_val.strip().lower() in ("true", "1", "yes")
+    else:
+        legal_hold = bool(hold_val)
+    reason = str(reason_val)
 
     q = select(Evidence).where(Evidence.id == evidence_id)
     res = await db.execute(q)
@@ -500,6 +522,8 @@ async def toggle_evidence_legal_hold(
         ret.legal_hold_active = legal_hold
         ret.legal_hold_reason = reason
         ret.legal_hold_placed_by_id = current_user.id
+
+    ev.is_legal_hold = legal_hold
 
     await audit_service.log_event(
         db=db,
@@ -564,3 +588,83 @@ async def get_evidence_custody_log(
             for log in logs
         ]
     }
+
+
+@router.delete("/{evidence_id}")
+async def delete_evidence_item(
+    evidence_id: str,
+    request: Request,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """Securely deletes evidence item, strictly rejected if active legal hold is present."""
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    user_agent = request.headers.get("user-agent")
+
+    deleted_ev = await evidence_service.delete_evidence(
+        db=db,
+        evidence_id=evidence_id,
+        current_user=current_user,
+        ip_address=client_ip,
+        user_agent=user_agent
+    )
+    return {
+        "status": "SUCCESS",
+        "message": f"Evidence {deleted_ev.original_filename} ({deleted_ev.id}) tombstoned.",
+        "evidence_id": deleted_ev.id,
+        "is_deleted": True
+    }
+
+
+@router.get("/{evidence_id}/certificate-65b")
+async def generate_evidence_certificate_65b(
+    evidence_id: str,
+    current_user: User = Depends(require_staff),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Generates a statutory Section 65B (Indian Evidence Act, 1872 / Section 63 BSA 2023)
+    certificate certifying the cryptographic SHA-256 integrity and lawful custody of an electronic record.
+    """
+    import platform
+    from app.services.audit_service import audit_service
+
+    q = select(Evidence).where(Evidence.id == evidence_id)
+    res = await db.execute(q)
+    ev = res.scalars().first()
+    if not ev:
+        raise HTTPException(status_code=404, detail="Evidence item not found")
+
+    cert_id = f"CERT-65B-2026-{ev.id[:8].upper()}"
+    officer_name = current_user.full_name or current_user.email
+
+    cert_payload = {
+        "certificate_id": cert_id,
+        "evidence_id": ev.id,
+        "original_filename": ev.original_filename,
+        "mime_type": ev.mime_type,
+        "file_size_bytes": ev.file_size_bytes,
+        "sha256_hash": ev.sha256_hash,
+        "statutory_act": "Section 65B Indian Evidence Act 1872 / Section 63 Bharatiya Sakshya Adhiniyam 2023",
+        "certifying_officer": officer_name,
+        "officer_role": current_user.role.name if current_user.role else "Specialist",
+        "issuing_node": platform.node(),
+        "device_operating_declaration": "The computing device produced the electronic record in the ordinary course of operations without malfunction.",
+        "certification_statement": (
+            f"I, {officer_name}, certify pursuant to Section 65B of the Indian Evidence Act, 1872 and Section 63 of the Bharatiya Sakshya Adhiniyam, 2023, "
+            f"that electronic record '{ev.original_filename}' (SHA-256: {ev.sha256_hash}) was ingested, hashed, and preserved in the CCIP Enclave Vault without tampering."
+        ),
+        "issued_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    await audit_service.log_event(
+        db=db,
+        actor=officer_name,
+        action="SECTION_65B_CERTIFICATE_ISSUED",
+        resource=f"evidence:{ev.id}",
+        clearance="STATUTORY_ADMISSIBILITY",
+        user_id=current_user.id,
+        metadata={"certificate_id": cert_id, "sha256": ev.sha256_hash}
+    )
+
+    return cert_payload

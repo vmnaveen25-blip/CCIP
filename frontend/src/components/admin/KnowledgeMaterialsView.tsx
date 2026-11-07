@@ -411,6 +411,8 @@ export const KnowledgeMaterialsView: React.FC = () => {
 
         // Immediately prepend to materials list so user sees document at row #1
         if (res.document) {
+          const isReupload = materials.some(m => m.id === res.document.id);
+          const isAvailable = res.document.chatbot_status === 'AVAILABLE';
           const newItem: KnowledgeMaterialItem = {
             id: res.document.id,
             number: 1,
@@ -420,15 +422,19 @@ export const KnowledgeMaterialsView: React.FC = () => {
             sizeBytes: res.document.size_bytes || 0,
             uploadedOn: 'Just now',
             category: res.document.category || uploadCategory,
-            chunksCount: res.document.chunks_count || 1,
-            isAvailableForChatbot: true,
+            chunksCount: res.document.chunks_count || 0,
+            isAvailableForChatbot: isAvailable,
             sha256Hash: res.document.file_hash || 'Verified',
             summary: `Authoritative ${res.document.category || uploadCategory} document stored in CCIP Enclave. Fully indexed into semantic vector chunks for RAG retrieval.`,
             keyTopics: [res.document.category || uploadCategory, 'Enclave Guidance', 'Incident Response', 'Helpline 1930']
           };
           setMaterials(prev => [newItem, ...prev.filter(m => m.id !== res.document.id).map((m, idx) => ({ ...m, number: idx + 2 }))]);
-          setTotalMaterialsStat(prev => prev + 1);
-          setAvailableChatbotStat(prev => prev + 1);
+          if (!isReupload) {
+            setTotalMaterialsStat(prev => prev + 1);
+          }
+          if (isAvailable && !isReupload) {
+            setAvailableChatbotStat(prev => prev + 1);
+          }
         }
 
         await fetchLiveMaterials();

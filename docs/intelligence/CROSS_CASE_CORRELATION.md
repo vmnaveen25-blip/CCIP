@@ -64,3 +64,4 @@ To prevent Broken Object Level Authorization (BOLA/IDOR) and unauthorized intell
   - Complainant name, email, phone number, and narrative of Case B are stripped.
   - Only the shared indicator value (e.g. `UPI: fraudster@okaxis`) and the explainable correlation score are presented.
 - Full access to Case B requires an administrative transfer or supervisor authorization.
+

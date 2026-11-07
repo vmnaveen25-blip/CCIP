@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     # Demo Seeding Control
     ALLOW_DEMO_SEEDING: bool = False
 
+    # Development Auth Bypass (Strictly False by default; never permitted in production or for privileged operations)
+    ALLOW_DEV_AUTH_BYPASS: bool = False
+
     # Malware Scanning Engine
     MALWARE_SCANNER_TYPE: str = "development"  # "development", "clamav"
     CLAMAV_HOST: str = "localhost"

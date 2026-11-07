@@ -39,3 +39,4 @@ All 3 file upload pipelines across the platform were audited and remediated:
 3. **Citizen Intake Complaint Attachments**:
    - Integrated into complaint filing wizard.
    - Uploads linked to complaint record with automatic file categorization and initial custody record.
+

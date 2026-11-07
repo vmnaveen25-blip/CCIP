@@ -106,3 +106,4 @@ CCIP utilizes Louvain Community Detection and connected components analysis on t
 1. **Cluster Identification**: Subgraphs with internal edge density $\ge 0.70$ are flagged as candidate cybercrime syndicates.
 2. **Mule Network Propagation**: Transitive fund flows across multiple banking nodes ($A \to B \to C$) identify money laundering layers.
 3. **Automated Cross-Case Alerts**: When a newly filed complaint shares $\ge 2$ forensic entities with existing open investigations, an automated intelligence alert is delivered to all assigned investigators.
+

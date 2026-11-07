@@ -35,3 +35,4 @@ flowchart TD
 1. **Intake Seal:** `POST /api/v1/evidence/upload` calculates SHA-256 and seals original filename, MIME type, and size.
 2. **On-Demand Check:** `GET /api/v1/evidence/{id}/verify-hash` reads the physical storage key and compares against the recorded intake hash.
 3. **Court-Admissible Section 65B Certificates:** `GET /api/v1/cases/{id}/certificate-65b` generates cryptographically signed statements affirming system reliability and bit-for-bit authenticity.
+

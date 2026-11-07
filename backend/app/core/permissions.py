@@ -15,6 +15,37 @@ from app.core.logging import logger
 
 security_bearer = HTTPBearer(auto_error=False)
 
+PRIVILEGED_PREFIXES = (
+    "/api/v1/admin",
+    "/api/v1/evidence",
+    "/api/v1/cases",
+    "/api/v1/investigations",
+    "/api/v1/reports",
+    "/api/v1/mlops",
+    "/api/v1/users",
+    "/api/v1/police",
+    "/api/v1/specialist",
+)
+
+
+def _is_dev_bypass_permitted(request: Request) -> bool:
+    """Explicit development authentication bypass check.
+    Disabled by default; restricted strictly to development environment,
+    localhost connections, and non-privileged routes.
+    """
+    if not getattr(settings, "ALLOW_DEV_AUTH_BYPASS", False):
+        return False
+    if settings.is_production or (getattr(settings, "APP_ENV", "") or "").lower() != "development":
+        return False
+    client_host = request.client.host if request.client else ""
+    if client_host not in ("127.0.0.1", "localhost", "::1"):
+        return False
+    # Strictly forbid dev bypass on privileged administrative, evidence, and investigation endpoints
+    path = request.url.path
+    if any(path.startswith(prefix) for prefix in PRIVILEGED_PREFIXES):
+        return False
+    return True
+
 
 async def get_current_user(
     request: Request,
@@ -29,8 +60,7 @@ async def get_current_user(
         token = request.cookies.get("access_token")
 
     if not token:
-        # In prototype/local environment, fallback to active administrator if token omitted only in dev/test
-        if not settings.is_production:
+        if _is_dev_bypass_permitted(request):
             query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
             res = await db.execute(query)
             admin_fallback = res.scalars().first()
@@ -45,23 +75,8 @@ async def get_current_user(
         if not user_id:
             raise AuthenticationError("Token payload missing subject identifier")
     except jwt.ExpiredSignatureError:
-        # If access token expired in active session, fallback to active administrator only in dev/test
-        if not settings.is_production:
-            query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
-            res = await db.execute(query)
-            admin_fallback = res.scalars().first()
-            if admin_fallback:
-                request.state.user = admin_fallback
-                return admin_fallback
         raise AuthenticationError("Access token has expired", code="TOKEN_EXPIRED")
     except Exception as e:
-        if not settings.is_production:
-            query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
-            res = await db.execute(query)
-            admin_fallback = res.scalars().first()
-            if admin_fallback:
-                request.state.user = admin_fallback
-                return admin_fallback
         raise AuthenticationError(f"Invalid authentication token: {str(e)}")
 
     query = select(User).where(User.id == user_id)
@@ -69,13 +84,6 @@ async def get_current_user(
     user = result.scalars().first()
 
     if not user:
-        if not settings.is_production:
-            query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
-            res = await db.execute(query)
-            admin_fallback = res.scalars().first()
-            if admin_fallback:
-                request.state.user = admin_fallback
-                return admin_fallback
         raise AuthenticationError("Authenticated user account not found")
 
     if not user.is_active or user.is_deleted:
@@ -105,7 +113,7 @@ async def get_optional_current_user(
         token = request.cookies.get("access_token")
 
     if not token:
-        if not settings.is_production:
+        if _is_dev_bypass_permitted(request):
             query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
             res = await db.execute(query)
             return res.scalars().first()
@@ -124,10 +132,6 @@ async def get_optional_current_user(
         request.state.user = user
         return user
     except Exception:
-        if not settings.is_production:
-            query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
-            res = await db.execute(query)
-            return res.scalars().first()
         return None
 
 

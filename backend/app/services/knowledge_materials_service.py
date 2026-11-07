@@ -22,6 +22,7 @@ from sqlalchemy import select, func, and_, or_, delete
 from app.core.logging import logger
 from app.models.knowledge_material import KnowledgeMaterial, KnowledgeChunk
 from app.ai.adapters.case_similarity import CaseSimilarityAdapter
+from app.services.malware_service import malware_scanner
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 STORAGE_DIR = BACKEND_DIR / "storage" / "knowledge_materials"
@@ -33,7 +34,7 @@ class KnowledgeMaterialsService:
         self.embedding_adapter = CaseSimilarityAdapter()
 
     # -------------------------------------------------------------
-    # 1. Secure File Storage & Registration
+    # 1. Secure File Storage & Registration (MIME Magic + AV Scan)
     # -------------------------------------------------------------
     async def register_and_store_document(
         self,
@@ -44,16 +45,21 @@ class KnowledgeMaterialsService:
         category: str = "General Awareness",
         uploaded_by: str = "System Administrator"
     ) -> KnowledgeMaterial:
-        """Stores the original raw document safely and registers the database record."""
-        # Calculate SHA-256 integrity hash
+        """Stores the original raw document safely with magic byte verification and malware scanning."""
+        if not file_bytes or len(file_bytes) == 0:
+            raise ValueError("Uploaded file is empty (0 bytes).")
+        if len(file_bytes) > 25 * 1024 * 1024:
+            raise ValueError("File exceeds maximum allowable size of 25 MB.")
+
+        # Calculate primary SHA-256 integrity hash
         file_hash = hashlib.sha256(file_bytes).hexdigest()
 
-        # Check for duplicate
+        # Check for duplicate: preserve original, record re-upload, update timestamp
         stmt = select(KnowledgeMaterial).where(KnowledgeMaterial.file_hash == file_hash)
         result = await db.execute(stmt)
         existing = result.scalar_one_or_none()
         if existing:
-            logger.info(f"[KM] Duplicate file uploaded: {original_filename} (matches {existing.id})")
+            logger.info(f"[KM] Duplicate file re-uploaded: {original_filename} matches existing {existing.id}")
             if title and title.strip():
                 existing.title = title.strip()
             if category:
@@ -68,13 +74,62 @@ class KnowledgeMaterialsService:
         if ext not in [".pdf", ".docx", ".txt", ".md"]:
             raise ValueError(f"Unsupported file format '{ext}'. Only PDF, DOCX, TXT, and MD are allowed.")
 
-        file_type = ext.replace(".", "").upper()
-        clean_title = (title.strip() if title else original_filename)
+        # MIME magic byte verification
+        if ext == ".pdf":
+            header_sample = file_bytes[:1024]
+            if b"%PDF-" not in header_sample:
+                if file_bytes[:2] == b"MZ" or file_bytes[:4] == b"\x7fELF":
+                    raise ValueError("Binary executable masquerading as PDF rejected.")
+                raise ValueError("MIME verification failed: Missing %PDF- magic signature.")
+        elif ext == ".docx":
+            if file_bytes[:4] != b"PK\x03\x04":
+                raise ValueError("MIME verification failed: File is not a valid OpenXML ZIP package.")
+        elif ext in [".txt", ".md"]:
+            if b"\x00" in file_bytes[:512]:
+                raise ValueError("MIME verification failed: Text file contains non-printable binary null characters.")
+
+        # Malware scanning stage
+        scan_status, scan_details = await malware_scanner.scan_bytes(file_bytes, original_filename)
+        is_quarantined = scan_status in ("INFECTED", "SUSPICIOUS")
+
         doc_id = str(uuid.uuid4())
         safe_filename = f"km_{doc_id[:8]}_{re.sub(r'[^a-zA-Z0-9_.-]', '_', original_filename)}"
+
+        if is_quarantined:
+            quarantine_dir = BACKEND_DIR / "storage" / "quarantine"
+            quarantine_dir.mkdir(parents=True, exist_ok=True)
+            target_path = quarantine_dir / f"quarantine_{safe_filename}"
+            with open(target_path, "wb") as f:
+                f.write(file_bytes)
+
+            clean_title = (title.strip() if title else original_filename)
+            material = KnowledgeMaterial(
+                id=doc_id,
+                title=clean_title,
+                original_filename=original_filename,
+                stored_filename=safe_filename,
+                file_type=ext.replace(".", "").upper(),
+                file_size_bytes=len(file_bytes),
+                file_hash=file_hash,
+                category=category,
+                storage_path=str(target_path),
+                uploaded_by=uploaded_by,
+                processing_status="QUARANTINED",
+                chatbot_status="DISABLED",
+                chunks_count=0,
+                error_message=f"Threat detected: {scan_details or scan_status}"
+            )
+            db.add(material)
+            await db.commit()
+            await db.refresh(material)
+            logger.warning(f"[KM] File {original_filename} quarantined: {scan_details}")
+            return material
+
+        file_type = ext.replace(".", "").upper()
+        clean_title = (title.strip() if title else original_filename)
         target_path = STORAGE_DIR / safe_filename
 
-        # Write to secure local storage
+        # Write pristine original file to secure storage (never overwritten)
         with open(target_path, "wb") as f:
             f.write(file_bytes)
 
@@ -90,7 +145,7 @@ class KnowledgeMaterialsService:
             storage_path=str(target_path),
             uploaded_by=uploaded_by,
             processing_status="PROCESSING",
-            chatbot_status="AVAILABLE",
+            chatbot_status="DISABLED",  # strictly DISABLED until extraction & indexing succeed
             chunks_count=0
         )
         db.add(material)
@@ -100,41 +155,143 @@ class KnowledgeMaterialsService:
         return material
 
     # -------------------------------------------------------------
-    # 2. Text Extraction (PDF, DOCX, TXT)
+    # 2. Document Extraction (PDF, DOCX, TXT)
     # -------------------------------------------------------------
-    def extract_text_from_file(self, file_path: str, file_type: str) -> List[Dict[str, Any]]:
+    def extract_text_from_file(self, file_path: str, file_type: str) -> Dict[str, Any]:
         """
         Extracts text passages with page/section provenance.
-        Returns list of {"page": int, "text": str}.
+        Returns detailed extraction report with status:
+        SUCCESS, OCR_REQUIRED, PARTIALLY_EXTRACTED, FAILED, ENCRYPTED
         """
         path = Path(file_path)
         if not path.is_file():
-            raise FileNotFoundError(f"Material file not found at {file_path}")
+            return {
+                "pages": [],
+                "page_count": 0,
+                "total_text_length": 0,
+                "extraction_method": "none",
+                "warnings": [f"Material file not found at {file_path}"],
+                "status": "FAILED",
+                "error_message": f"Material file not found at {file_path}"
+            }
 
-        extracted_pages = []
+        extracted_pages: List[Dict[str, Any]] = []
+        warnings: List[str] = []
+        total_pages = 0
 
         if file_type == "PDF":
             try:
                 import pypdf
                 reader = pypdf.PdfReader(str(path))
-                for page_num, page in enumerate(reader.pages, start=1):
+                if getattr(reader, "is_encrypted", False):
+                    try:
+                        decrypted = reader.decrypt("")
+                        if decrypted == 0:
+                            return {
+                                "pages": [],
+                                "page_count": len(reader.pages) if hasattr(reader, "pages") else 0,
+                                "total_text_length": 0,
+                                "extraction_method": "pypdf_encrypted",
+                                "warnings": ["PDF is password protected"],
+                                "status": "ENCRYPTED",
+                                "error_message": "Document is password-protected or encrypted; unable to extract text without credentials."
+                            }
+                    except Exception:
+                        return {
+                            "pages": [],
+                            "page_count": 0,
+                            "total_text_length": 0,
+                            "extraction_method": "pypdf_encrypted",
+                            "warnings": ["PDF is password protected"],
+                            "status": "ENCRYPTED",
+                            "error_message": "Document is password-protected or encrypted; unable to extract text without credentials."
+                        }
+
+                total_pages = len(reader.pages)
+                if total_pages == 0:
+                    return {
+                        "pages": [],
+                        "page_count": 0,
+                        "total_text_length": 0,
+                        "extraction_method": "pypdf",
+                        "warnings": ["PDF contains 0 pages"],
+                        "status": "FAILED",
+                        "error_message": "PDF document contains 0 pages."
+                    }
+
+                max_pages = min(total_pages, 200)
+                if total_pages > 200:
+                    warnings.append(f"Document contains {total_pages} pages; processed first 200 pages.")
+
+                for page_num in range(max_pages):
+                    page = reader.pages[page_num]
                     txt = page.extract_text() or ""
                     clean_txt = self._clean_text(txt)
                     if clean_txt:
-                        extracted_pages.append({"page": page_num, "text": clean_txt})
+                        extracted_pages.append({"page": page_num + 1, "text": clean_txt})
+
+                total_chars = sum(len(p["text"]) for p in extracted_pages)
+
+                # Detect scanned / image-only documents
+                if total_chars < 30:
+                    return {
+                        "pages": [],
+                        "page_count": total_pages,
+                        "total_text_length": total_chars,
+                        "extraction_method": "pypdf_native",
+                        "warnings": warnings + ["Scanned or image-only pages detected with no extractable text."],
+                        "status": "OCR_REQUIRED",
+                        "error_message": "Scanned document detected with no extractable text. OCR processing required."
+                    }
+
+                return {
+                    "pages": extracted_pages,
+                    "page_count": total_pages,
+                    "total_text_length": total_chars,
+                    "extraction_method": "pypdf_native",
+                    "warnings": warnings,
+                    "status": "SUCCESS",
+                    "error_message": None
+                }
+
             except Exception as e:
-                logger.warning(f"[KM] Native PDF extraction warning for {file_path}: {e}. Running text stream fallback...")
+                logger.warning(f"[KM] Native PDF extraction exception for {file_path}: {e}. Running raw stream recovery...")
                 try:
                     with open(path, "rb") as bf:
                         raw_data = bf.read()
-                    # Extract printable character runs
-                    matches = re.findall(rb'[A-Za-z0-9 ,.;:!?-]{4,}', raw_data)
-                    extracted_text = " ".join(m.decode("ascii", errors="ignore") for m in matches if len(m) > 4)
-                    clean_txt = self._clean_text(extracted_text)
-                    if clean_txt and len(clean_txt) > 20:
-                        extracted_pages.append({"page": 1, "text": clean_txt})
+                    matches = re.findall(rb'[A-Za-z0-9 ,.;:!?-]{6,}', raw_data)
+                    recovered = " ".join(m.decode("ascii", errors="ignore") for m in matches if len(m) > 6)
+                    clean_txt = self._clean_text(recovered)
+                    if clean_txt and len(clean_txt) >= 60:
+                        return {
+                            "pages": [{"page": 1, "text": clean_txt}],
+                            "page_count": 1,
+                            "total_text_length": len(clean_txt),
+                            "extraction_method": "text_stream_recovery",
+                            "warnings": warnings + [f"PDF parser encountered error ({str(e)}); partial text recovered from stream."],
+                            "status": "PARTIALLY_EXTRACTED",
+                            "error_message": None
+                        }
+                    else:
+                        return {
+                            "pages": [],
+                            "page_count": 0,
+                            "total_text_length": 0,
+                            "extraction_method": "none",
+                            "warnings": warnings + [f"PDF extraction error: {str(e)}"],
+                            "status": "FAILED",
+                            "error_message": f"Malformed or damaged PDF file: {str(e)}"
+                        }
                 except Exception as fb_err:
-                    logger.warning(f"[KM] Raw text stream fallback failed: {fb_err}")
+                    return {
+                        "pages": [],
+                        "page_count": 0,
+                        "total_text_length": 0,
+                        "extraction_method": "none",
+                        "warnings": warnings + [f"Recovery error: {str(fb_err)}"],
+                        "status": "FAILED",
+                        "error_message": f"Corrupted PDF file could not be parsed: {str(e)}"
+                    }
 
         elif file_type == "DOCX":
             try:
@@ -146,23 +303,80 @@ class KnowledgeMaterialsService:
                         full_text.append(p.text.strip())
                 joined = "\n\n".join(full_text)
                 clean_txt = self._clean_text(joined)
-                if clean_txt:
-                    extracted_pages.append({"page": 1, "text": clean_txt})
+                if not clean_txt or len(clean_txt) < 20:
+                    return {
+                        "pages": [],
+                        "page_count": 1,
+                        "total_text_length": len(clean_txt or ""),
+                        "extraction_method": "python-docx",
+                        "warnings": warnings,
+                        "status": "FAILED",
+                        "error_message": "DOCX document contains no usable text."
+                    }
+                return {
+                    "pages": [{"page": 1, "text": clean_txt}],
+                    "page_count": 1,
+                    "total_text_length": len(clean_txt),
+                    "extraction_method": "python-docx",
+                    "warnings": warnings,
+                    "status": "SUCCESS",
+                    "error_message": None
+                }
             except Exception as e:
-                logger.warning(f"[KM] DOCX extraction warning for {file_path}: {e}")
+                return {
+                    "pages": [],
+                    "page_count": 0,
+                    "total_text_length": 0,
+                    "extraction_method": "none",
+                    "warnings": warnings,
+                    "status": "FAILED",
+                    "error_message": f"DOCX parsing failed: {str(e)}"
+                }
 
         elif file_type in ["TXT", "MD"]:
             try:
                 with open(path, "r", encoding="utf-8", errors="replace") as f:
                     txt = f.read()
                 clean_txt = self._clean_text(txt)
-                if clean_txt:
-                    extracted_pages.append({"page": 1, "text": clean_txt})
+                if not clean_txt or len(clean_txt) < 15:
+                    return {
+                        "pages": [],
+                        "page_count": 1,
+                        "total_text_length": len(clean_txt or ""),
+                        "extraction_method": "text_plain",
+                        "warnings": warnings,
+                        "status": "FAILED",
+                        "error_message": "Text document contains no usable content."
+                    }
+                return {
+                    "pages": [{"page": 1, "text": clean_txt}],
+                    "page_count": 1,
+                    "total_text_length": len(clean_txt),
+                    "extraction_method": "text_plain",
+                    "warnings": warnings,
+                    "status": "SUCCESS",
+                    "error_message": None
+                }
             except Exception as e:
-                logger.error(f"[KM] Text extraction failed for {file_path}: {e}")
-                raise
+                return {
+                    "pages": [],
+                    "page_count": 0,
+                    "total_text_length": 0,
+                    "extraction_method": "none",
+                    "warnings": warnings,
+                    "status": "FAILED",
+                    "error_message": f"Text reading failed: {str(e)}"
+                }
 
-        return extracted_pages
+        return {
+            "pages": [],
+            "page_count": 0,
+            "total_text_length": 0,
+            "extraction_method": "none",
+            "warnings": [f"Unsupported format {file_type}"],
+            "status": "FAILED",
+            "error_message": f"Unsupported file type '{file_type}'"
+        }
 
     def _clean_text(self, text: str) -> str:
         """Normalizes whitespace and removes control characters."""
@@ -190,7 +404,6 @@ class KnowledgeMaterialsService:
             page_num = page_data["page"]
             text = page_data["text"]
 
-            # Split by paragraph first
             paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
             current_chunk = ""
 
@@ -206,7 +419,6 @@ class KnowledgeMaterialsService:
                             "text": current_chunk,
                             "token_count": len(current_chunk.split())
                         })
-                        # Keep overlap from the end of current_chunk
                         overlap_start = max(0, len(current_chunk) - chunk_overlap)
                         overlap_text = current_chunk[overlap_start:]
                         current_chunk = f"{overlap_text}\n\n{p}".strip()
@@ -228,7 +440,7 @@ class KnowledgeMaterialsService:
     # 4. Asynchronous Document Processing Pipeline
     # -------------------------------------------------------------
     async def process_document(self, material_id: str, db: Optional[AsyncSession] = None):
-        """Extracts text, chunks, computes embeddings, and marks AVAILABLE."""
+        """Extracts text, chunks, computes embeddings, and marks AVAILABLE strictly on success."""
         from app.db.database import AsyncSessionLocal
 
         if db is not None:
@@ -247,32 +459,43 @@ class KnowledgeMaterialsService:
 
         try:
             logger.info(f"[KM] Starting extraction for material: {material.title}")
-            pages = self.extract_text_from_file(material.storage_path, material.file_type)
-            if not pages:
-                # Resilient fallback so scanned or minimal PDFs do not abort pipeline
-                pages = [{
-                    "page": 1,
-                    "text": f"Document Title: {material.title}\nCategory: {material.category}\nOriginal File: {material.original_filename}\nGrounding Content: Material archived for CCIP Sovereign Assistant guidance."
-                }]
+            extraction = self.extract_text_from_file(material.storage_path, material.file_type)
+            status = extraction["status"]
 
+            # If extraction failed, encrypted, or requires OCR: NEVER create synthetic text!
+            if status in ("FAILED", "ENCRYPTED", "OCR_REQUIRED"):
+                del_stmt = delete(KnowledgeChunk).where(KnowledgeChunk.material_id == material_id)
+                await session.execute(del_stmt)
+                material.chunks_count = 0
+                material.processing_status = status
+                material.chatbot_status = "DISABLED"
+                material.error_message = extraction.get("error_message")
+                await session.commit()
+                logger.warning(f"[KM] Material {material_id} cannot enter RAG: {status} ({extraction.get('error_message')})")
+                return
+
+            pages = extraction["pages"]
             chunks_data = self.chunk_text(pages)
-            if not chunks_data:
-                fallback_txt = pages[0]["text"] if pages else material.title
-                chunks_data = [{
-                    "chunk_index": 1,
-                    "page_number": 1,
-                    "text": fallback_txt,
-                    "token_count": len(fallback_txt.split())
-                }]
+            # Filter out empty or meaningless chunks
+            valid_chunks = [c for c in chunks_data if len(c["text"].strip()) >= 25]
+
+            if not valid_chunks:
+                del_stmt = delete(KnowledgeChunk).where(KnowledgeChunk.material_id == material_id)
+                await session.execute(del_stmt)
+                material.chunks_count = 0
+                material.processing_status = "FAILED"
+                material.chatbot_status = "DISABLED"
+                material.error_message = "No valid semantic chunks could be created from document content."
+                await session.commit()
+                return
 
             # Clear existing chunks if any (for re-indexing)
             del_stmt = delete(KnowledgeChunk).where(KnowledgeChunk.material_id == material_id)
             await session.execute(del_stmt)
 
             # Generate embeddings and persist chunks
-            for c in chunks_data:
+            for c in valid_chunks:
                 text_content = c["text"]
-                # 384-dimensional vector embedding
                 raw_vector = self.embedding_adapter.get_embedding(text_content)
                 vector_bytes = struct.pack(f"{len(raw_vector)}f", *raw_vector)
 
@@ -288,15 +511,20 @@ class KnowledgeMaterialsService:
                 )
                 session.add(chunk_obj)
 
-            material.chunks_count = len(chunks_data)
+            material.chunks_count = len(valid_chunks)
             material.processing_status = "AVAILABLE"
+            material.chatbot_status = "AVAILABLE"
             material.error_message = None
             await session.commit()
-            logger.info(f"[KM] Successfully indexed {len(chunks_data)} chunks for {material.title}")
+            logger.info(f"[KM] Successfully indexed {len(valid_chunks)} chunks for {material.title}")
 
         except Exception as e:
             logger.error(f"[KM] Ingestion pipeline failed for {material_id}: {e}")
+            del_stmt = delete(KnowledgeChunk).where(KnowledgeChunk.material_id == material_id)
+            await session.execute(del_stmt)
+            material.chunks_count = 0
             material.processing_status = "FAILED"
+            material.chatbot_status = "DISABLED"
             material.error_message = str(e)
             await session.commit()
 
@@ -338,7 +566,8 @@ class KnowledgeMaterialsService:
             .where(
                 and_(
                     KnowledgeMaterial.processing_status == "AVAILABLE",
-                    KnowledgeMaterial.chatbot_status == "AVAILABLE"
+                    KnowledgeMaterial.chatbot_status == "AVAILABLE",
+                    KnowledgeMaterial.chunks_count > 0
                 )
             )
         )
@@ -363,6 +592,7 @@ class KnowledgeMaterialsService:
                 sim = float(np.dot(query_vec, chunk_vec))
                 if sim >= similarity_threshold:
                     scored_chunks.append({
+                        "id": chunk_id,
                         "chunk_id": chunk_id,
                         "title": doc_title,
                         "category": category,

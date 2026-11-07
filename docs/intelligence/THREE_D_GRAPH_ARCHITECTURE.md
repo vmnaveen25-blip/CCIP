@@ -76,3 +76,4 @@ To maintain high visual fidelity under cyber-forensic operational conditions:
 4. **Camera Fly-To Interaction**:
    - Selecting a node smoothly interpolates the 3D camera vector towards the selected entity over a 1.2-second cubic ease curve.
    - Automatically highlights immediate 1-hop and 2-hop neighbor subgraphs while dimming unrelated network nodes.
+

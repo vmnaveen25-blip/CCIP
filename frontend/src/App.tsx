@@ -310,13 +310,6 @@ export const App: React.FC = () => {
         }
       }
 
-      // When on the landing page, close session and enforce explicit sign-in
-      if (currentPortal === 'landing') {
-        apiClient.setToken(null);
-        setCurrentUser(null);
-        return;
-      }
-
       const token = apiClient.getToken();
       if (token) {
         try {

@@ -34,3 +34,4 @@ All 14 models deployed in the CCIP Sovereign Enclave are validated for execution
 - **Max Memory Cap:** Total working set for active models is bounded at 2.5 GB.
 - **Dynamic Eviction:** If idle for > 15 minutes, models in cache transition from `READY` to `READY_FOR_LAZY_LOAD` and release tensor memory.
 - **Safe Concurrent Inference:** Thread locks (`_email_lock`, `_sms_lock`, `_url_lock`, `_complaint_lock`) guarantee race-condition-free inference.
+

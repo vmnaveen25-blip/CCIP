@@ -72,3 +72,4 @@ The system provides on-demand generation of statutory electronic evidence certif
 3. **Schedule of Evidence:** Lists every digital artifact, file size, MIME type, acquisition timestamp, intake SHA-256 hash, and current verified physical hash.
 4. **Integrity Status:** Evaluates bit-for-bit match (`AUTHENTICATED_AND_VERIFIED` or `INTEGRITY_TAMPER_ALERT`).
 5. **Cryptographic Seal:** Generates a SHA-256 digest over the canonical JSON certificate payload.
+

@@ -186,6 +186,7 @@ class ComplaintService:
             "id": complaint.id,
             "referenceNumber": complaint.reference_number,
             "trackingToken": getattr(complaint, "tracking_token", None),
+            "tracking_token": getattr(complaint, "tracking_token", None),
             "title": complaint.title,
             "category": complaint.category,
             "subcategory": getattr(complaint, "triage_provenance_json", {}).get("subcategory") if isinstance(getattr(complaint, "triage_provenance_json", None), dict) else None,

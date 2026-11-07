@@ -82,3 +82,4 @@ POST /api/v1/evidence/{evidence_id}/verify-integrity
 - Direct web access: **Forbidden** (files are never exposed via static URL routing).
 - Download access: **Authenticated Stream Only** (`GET /api/v1/evidence/{evidence_id}/download`) requiring role `INVESTIGATOR`, `CHIEF_ANALYST`, or `ADMIN`.
 - Every download event appends an `EXPORTED` custody log with the downloading officer's credentials.
+

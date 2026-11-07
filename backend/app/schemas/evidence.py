@@ -15,6 +15,7 @@ class EvidenceResponse(BaseModel):
     sha256_hash: str
     integrity_status: str
     is_verified: bool
+    is_legal_hold: Optional[bool] = False
     malware_scan_status: Optional[str] = "CLEAN"
     quarantined: Optional[bool] = False
     processing_status: Optional[str] = "COMPLETED"
@@ -29,6 +30,7 @@ class EvidenceUploadResponse(BaseModel):
     type: str
     sha256Hash: str
     verified: bool
+    is_legal_hold: Optional[bool] = False
     integrity_status: str
     malware_scan_status: Optional[str] = "CLEAN"
     quarantined: Optional[bool] = False

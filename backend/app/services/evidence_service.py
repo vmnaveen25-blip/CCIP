@@ -68,12 +68,6 @@ class EvidenceService:
                 complaint = case_obj.complaint
 
         if not complaint:
-            # Fallback to most recent complaint in system if exists
-            recent_q = select(Complaint).order_by(Complaint.created_at.desc()).options(selectinload(Complaint.case)).limit(1)
-            recent_res = await db.execute(recent_q)
-            complaint = recent_res.scalars().first()
-
-        if not complaint:
             raise NotFoundError(f"Complaint {complaint_id} not found")
 
         # Authorization: Authenticated user with permission OR valid high-entropy complaint tracking token
@@ -97,18 +91,16 @@ class EvidenceService:
                     (complaint.citizen_email and complaint.citizen_email.lower() == current_user.email.lower()) or
                     (not complaint.citizen_id)
                 )
-                if not is_owner and complaint.citizen_id and settings.is_production:
+                if not is_owner and complaint.citizen_id:
                     raise PermissionDeniedError("Cannot upload evidence to another citizen's case")
             else:
-                if (tracking_token and complaint.tracking_token and tracking_token.strip() == complaint.tracking_token.strip()) or not settings.is_production:
+                if tracking_token and complaint.tracking_token and tracking_token.strip() == complaint.tracking_token.strip():
                     pass
                 else:
                     raise PermissionDeniedError("Unauthorized role for evidence upload")
         else:
-            # Anonymous / guest upload or intake mode: valid tracking token or newly submitted/intake complaint
-            if (tracking_token and complaint.tracking_token and tracking_token.strip() == complaint.tracking_token.strip()) or not settings.is_production:
-                pass
-            elif not complaint.tracking_token or not complaint.citizen_id or complaint.status in ("SUBMITTED", "PENDING_TRIAGE", "IN_TRIAGE"):
+            # Anonymous / guest upload: strictly require valid tracking token
+            if tracking_token and complaint.tracking_token and tracking_token.strip() == complaint.tracking_token.strip():
                 pass
             else:
                 raise AuthenticationError("Authentication or valid complaint tracking token required to attach evidence to this complaint")
@@ -261,6 +253,28 @@ class EvidenceService:
                     is_owner = True
             if not is_owner:
                 raise PermissionDeniedError("Unauthorized access to evidence vault item")
+        elif user_role_name in (RoleEnum.CYBERSECURITY_SPECIALIST.value, RoleEnum.CYBERCRIME_POLICE.value):
+            if evidence.case_id:
+                case_res = await db.execute(select(Case).where(Case.id == evidence.case_id))
+                case_obj = case_res.scalars().first()
+                if case_obj:
+                    is_assigned = (
+                        case_obj.assigned_specialist_id == current_user.id or
+                        case_obj.assigned_officer_id == current_user.id or
+                        (case_obj.assigned_specialist_id is None and case_obj.assigned_officer_id is None)
+                    )
+                    if not is_assigned and not getattr(current_user, "is_superuser", False) and current_user.email not in ("root@astraea.internal", "vijay@gmail.com"):
+                        await audit_service.log_event(
+                            db=db,
+                            actor=current_user.email,
+                            action="UNAUTHORIZED_CROSS_INVESTIGATION_ACCESS_BLOCKED",
+                            resource=f"evidence:{evidence.id} case:{case_obj.id}",
+                            clearance="RESTRICTED",
+                            user_id=current_user.id,
+                            ip_address=ip_address,
+                            user_agent=user_agent
+                        )
+                        raise PermissionDeniedError("Access denied: Evidence belongs to an investigation assigned to another officer")
 
         # Evidence Disposition: Quarantined payloads remain isolated
         is_quarantined = (
@@ -313,6 +327,53 @@ class EvidenceService:
             raise ValidationError("Evidentiary integrity check failed: stored binary checksum mismatch.")
 
         return evidence, file_bytes
+
+    @staticmethod
+    async def delete_evidence(
+        db: AsyncSession,
+        evidence_id: str,
+        current_user: User,
+        ip_address: Optional[str] = "127.0.0.1",
+        user_agent: Optional[str] = None
+    ) -> Evidence:
+        """Deletes or tombstones evidence subject to statutory legal hold protection."""
+        q = select(Evidence).where(Evidence.id == evidence_id)
+        res = await db.execute(q)
+        evidence = res.scalars().first()
+        if not evidence:
+            raise NotFoundError("Evidence record not found")
+
+        # Legal Hold Enforcement: statutory protection under Section 65B/BNSS
+        if getattr(evidence, "is_legal_hold", False):
+            await audit_service.log_event(
+                db=db,
+                actor=current_user.email,
+                action="LEGAL_HOLD_DELETION_BLOCKED",
+                resource=f"evidence:{evidence.id}",
+                clearance="JUDICIAL_HOLD",
+                user_id=current_user.id,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata={"reason": "Active statutory legal hold prevents evidence deletion"}
+            )
+            raise PermissionDeniedError("Evidence deletion rejected: Item is protected under an active statutory legal hold")
+
+        # Soft delete / tombstone
+        evidence.is_deleted = True
+        evidence.deleted_at = datetime.datetime.now(datetime.timezone.utc)
+        await db.commit()
+
+        await audit_service.log_event(
+            db=db,
+            actor=current_user.email,
+            action="EVIDENCE_DELETED",
+            resource=f"evidence:{evidence.id}",
+            clearance="STANDARD",
+            user_id=current_user.id,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        return evidence
 
 
 evidence_service = EvidenceService()

@@ -64,3 +64,4 @@ backend/tests/test_stages_8_10_11.py::test_stage_11_evidence_custody_correlation
   - Ingestion appends an initial `INGESTED` event in `evidence_custody_logs`.
   - `POST /api/v1/evidence/{id}/verify-integrity` recalculates hash against disk and returns `status: "VERIFIED"`.
   - `GET /api/v1/intelligence/correlation-graph` compiles a 3D-ready graph payload containing `nodes` and `links` linking cases sharing phone numbers, bank accounts, or IP addresses.
+
