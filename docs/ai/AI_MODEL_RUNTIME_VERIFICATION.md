@@ -78,3 +78,4 @@ Prior to full deployment with live neural networks:
    - `cross_case_correlation/model.safetensors` (~500MB)
    - `relation_extraction/model.safetensors` (~500MB)
 3. Ensure server nodes are provisioned with at least 16 GB system RAM and 8 vCPUs.
+

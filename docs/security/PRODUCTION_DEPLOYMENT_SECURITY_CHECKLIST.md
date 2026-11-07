@@ -64,3 +64,4 @@
 - [ ] **Foreign Key Enforcement:** Confirm `PRAGMA foreign_keys = ON;` is executed on SQLite connection checkout, or migrate to PostgreSQL with foreign key constraints.
 - [ ] **Connection Pooling:** Configure async connection pool with `pool_size=20`, `max_overflow=10`, and `pool_timeout=30`.
 - [ ] **Automated Backups:** Implement point-in-time recovery (PITR) with encrypted offsite snapshots.
+
