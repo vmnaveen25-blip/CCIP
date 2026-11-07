@@ -344,7 +344,8 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
     try {
       const sha256 = await computeFileSHA256(file);
       try {
-        const res = await apiClient.uploadEvidence(targetCaseId, file);
+        const caseTrackingToken = (activeCase as any)?.trackingToken || (activeCase as any)?.tracking_token || (complaints && complaints[0] && ((complaints[0] as any).tracking_token || (complaints[0] as any).trackingToken));
+        const res = await apiClient.uploadEvidence(targetCaseId, file, caseTrackingToken);
         if (res) {
           setEvidenceList(prev => [res, ...prev]);
           setUploadedFiles(prev => [{
@@ -438,11 +439,12 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
 
       const created = await apiClient.createComplaint(payload);
       if (created) {
+        const effectiveToken = (created as any).tracking_token || (created as any).trackingToken;
         // Upload any attached files to this newly registered complaint
         for (const f of uploadedFiles) {
           if (f.rawFile) {
             try {
-              await apiClient.uploadEvidence(created.id, f.rawFile);
+              await apiClient.uploadEvidence(created.id, f.rawFile, effectiveToken);
             } catch (evErr) {
               console.warn('Failed to upload evidence for new complaint:', f.name, evErr);
             }

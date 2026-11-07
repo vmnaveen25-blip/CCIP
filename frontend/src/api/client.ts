@@ -321,10 +321,13 @@ class APIClient {
     return await this.getEvidenceList();
   }
 
-  async uploadEvidence(complaintId: string, file: File): Promise<any> {
+  async uploadEvidence(complaintId: string, file: File, trackingToken?: string): Promise<any> {
     const formData = new FormData();
     formData.append('complaint_id', complaintId);
     formData.append('file', file);
+    if (trackingToken) {
+      formData.append('tracking_token', trackingToken);
+    }
 
     return await this.request<any>('/evidence/upload', {
       method: 'POST',

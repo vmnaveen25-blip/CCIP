@@ -40,6 +40,7 @@ async def upload_knowledge_material(
     file: UploadFile = File(...),
     title: Optional[str] = Form(None),
     category: str = Form("General Awareness"),
+    description: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
     admin: User = Depends(require_admin)
 ):

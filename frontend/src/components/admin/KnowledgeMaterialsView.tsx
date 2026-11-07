@@ -379,6 +379,9 @@ export const KnowledgeMaterialsView: React.FC = () => {
     formData.append('file', uploadedFile);
     formData.append('title', title);
     formData.append('category', uploadCategory);
+    if (uploadDescription.trim()) {
+      formData.append('description', uploadDescription.trim());
+    }
 
     try {
       setTimeout(() => {

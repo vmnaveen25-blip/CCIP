@@ -348,27 +348,28 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
       const created = await apiClient.createComplaint(payload);
       if (created) {
         // Upload ID file if present
+        const effectiveTrackingToken = (created as any).tracking_token || (created as any).trackingToken;
         if (idFile?.rawFile) {
           try {
-            await apiClient.uploadEvidence(created.id, idFile.rawFile);
+            await apiClient.uploadEvidence(created.id, idFile.rawFile, effectiveTrackingToken);
           } catch (e) {
-            console.warn('ID evidence upload skipped/mocked');
+            console.warn('ID evidence upload skipped/mocked', e);
           }
         }
         // Upload Suspect Photo if present
         if (suspectPhoto?.rawFile) {
           try {
-            await apiClient.uploadEvidence(created.id, suspectPhoto.rawFile);
+            await apiClient.uploadEvidence(created.id, suspectPhoto.rawFile, effectiveTrackingToken);
           } catch (e) {
-            console.warn('Suspect photo upload skipped/mocked');
+            console.warn('Suspect photo upload skipped/mocked', e);
           }
         }
         // Upload Other Document if present
         if (otherDoc?.rawFile) {
           try {
-            await apiClient.uploadEvidence(created.id, otherDoc.rawFile);
+            await apiClient.uploadEvidence(created.id, otherDoc.rawFile, effectiveTrackingToken);
           } catch (e) {
-            console.warn('Other doc upload skipped/mocked');
+            console.warn('Other doc upload skipped/mocked', e);
           }
         }
 
