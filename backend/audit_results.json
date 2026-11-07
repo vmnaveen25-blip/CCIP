@@ -1,0 +1,242 @@
+{
+  "audit_timestamp": "2026-11-07T07:31:47Z",
+  "auth_verification": {
+    "dev_bypass_default_disabled": true,
+    "remote_ip_bypass_blocked": true,
+    "spoofed_forwarded_headers_ignored": true,
+    "privileged_paths_blocked_on_localhost": {
+      "/api/v1/admin": true,
+      "/api/v1/evidence": true,
+      "/api/v1/cases": true,
+      "/api/v1/investigations": true,
+      "/api/v1/reports": true,
+      "/api/v1/mlops": true,
+      "/api/v1/users": true,
+      "/api/v1/police": true,
+      "/api/v1/specialist": true
+    },
+    "all_privileged_paths_safeguarded": true,
+    "production_mode_bypass_disabled": true
+  },
+  "malware_file_security": {
+    "clamav_offline_graceful_handling": {
+      "status": "NOT_SCANNED",
+      "detail": "ClamAV daemon offline.",
+      "is_safe_fallback": true
+    },
+    "eicar_detection": {
+      "status": "INFECTED",
+      "detected": true,
+      "detail": "EICAR standard antivirus test signature detected."
+    },
+    "mz_executable_disguised_as_pdf_rejected": {
+      "rejected": true,
+      "error_message": "Binary executable masquerading as PDF rejected."
+    },
+    "scanned_pdf_ocr_required": {
+      "status": "FAILED",
+      "extracted_chars": 0,
+      "marked_ocr_required": false,
+      "synthetic_text_prevented": true
+    }
+  },
+  "evidence_immutability": {
+    "primary_sha256_length": 64,
+    "tamper_detection_effective": true,
+    "hash_algorithm": "SHA-256 (FIPS 180-4 compliant)"
+  },
+  "rag_isolation": {
+    "quarantined_document_isolated_from_rag": true,
+    "leak_prevented": true
+  },
+  "model_ecosystem": {
+    "url_phishing": {
+      "name": "XGBoost URL Phishing Detector",
+      "task_type": "Tabular Classifier",
+      "directory_present": true,
+      "weights_file": "phishing_model.pkl",
+      "weights_file_on_disk": true,
+      "version": "1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "REAL_MODEL_INFERENCE (XGBoost weights: 1.15MB)",
+      "latency_ms": 376.4,
+      "error": null
+    },
+    "case_similarity": {
+      "name": "Sentence-Transformers MiniLM-L6-v2",
+      "task_type": "Semantic Embedding",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "case-similarity-bootstrap-v1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "HEURISTIC_HASH_FALLBACK",
+      "latency_ms": 0.6,
+      "error": null
+    },
+    "complaint_classifier": {
+      "name": "DeBERTa-v3 Complaint Classifier",
+      "task_type": "Sequence Classifier",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "RULE_BASED_FALLBACK",
+      "latency_ms": 0.54,
+      "error": null
+    },
+    "cross_case_correlation": {
+      "name": "DeBERTa-v3 Cross-Case Matcher",
+      "task_type": "Pairwise Classifier",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "cross-case-correlation-bootstrap-v1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "JACCARD_HEURISTIC_FALLBACK",
+      "latency_ms": 1.12,
+      "error": null
+    },
+    "cyber_ner": {
+      "name": "RoBERTa Cyber NER Token Classifier",
+      "task_type": "Token Classification",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "cyber-ner-bootstrap-v4.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "SOVEREIGN_HEURISTIC_ENGINE",
+      "latency_ms": 0.0,
+      "error": null
+    },
+    "email_threat": {
+      "name": "BERT Email Threat Detector",
+      "task_type": "Sequence Classifier",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "SOVEREIGN_HEURISTIC_ENGINE",
+      "latency_ms": 0.0,
+      "error": null
+    },
+    "sms_spam": {
+      "name": "RoBERTa SMS Spam Classifier",
+      "task_type": "Sequence Classifier",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "SOVEREIGN_HEURISTIC_ENGINE",
+      "latency_ms": 0.0,
+      "error": null
+    },
+    "incident_urgency": {
+      "name": "DistilRoBERTa Incident Urgency",
+      "task_type": "Sequence Classifier",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "incident-urgency-bootstrap-v3.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "RULE_BASED_HEURISTIC_FALLBACK",
+      "latency_ms": 0.54,
+      "error": null
+    },
+    "relation_extraction": {
+      "name": "DeBERTa-v3 Cyber Relation Extractor",
+      "task_type": "Relation Classification",
+      "directory_present": true,
+      "weights_file": "model.safetensors",
+      "weights_file_on_disk": false,
+      "version": "relation-extraction-bootstrap-v1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "COOCCURRENCE_HEURISTIC_FALLBACK",
+      "latency_ms": 0.55,
+      "error": null
+    },
+    "evidence_graph_link": {
+      "name": "Evidence Graph Link Predictor",
+      "task_type": "Graph Edge Scoring",
+      "directory_present": true,
+      "weights_file": "model.pkl",
+      "weights_file_on_disk": false,
+      "version": "evidence-graph-link-bootstrap-v1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "GRAPH_HEURISTIC_FALLBACK",
+      "latency_ms": 0.0,
+      "error": null
+    },
+    "feedback_gate": {
+      "name": "Feedback Gate Governance Model",
+      "task_type": "Five-Gate Governance",
+      "directory_present": true,
+      "weights_file": "model.pkl",
+      "weights_file_on_disk": false,
+      "version": "feedback-gate-bootstrap-v1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "DETERMINISTIC_FIVE_GATE_PIPELINE",
+      "latency_ms": 0.0,
+      "error": null
+    },
+    "graph_correlation": {
+      "name": "3D Graph Correlation Engine",
+      "task_type": "Network Analysis",
+      "directory_present": true,
+      "weights_file": "heuristic",
+      "weights_file_on_disk": false,
+      "version": "1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "SOVEREIGN_HEURISTIC_ENGINE",
+      "latency_ms": 0.0,
+      "error": null
+    },
+    "investigation_assistant": {
+      "name": "Investigation Dossier Copilot",
+      "task_type": "Generative Triage",
+      "directory_present": true,
+      "weights_file": "heuristic",
+      "weights_file_on_disk": false,
+      "version": "1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "SOVEREIGN_HEURISTIC_ENGINE",
+      "latency_ms": 0.0,
+      "error": null
+    },
+    "risk_scoring": {
+      "name": "Multi-Factor Case Risk Scorer",
+      "task_type": "Risk Scoring Engine",
+      "directory_present": true,
+      "weights_file": "heuristic",
+      "weights_file_on_disk": false,
+      "version": "1.0.0",
+      "license": "Apache-2.0 (CCIP Sovereign)",
+      "test_status": "SUCCESS",
+      "runtime_execution_mode": "SOVEREIGN_HEURISTIC_ENGINE",
+      "latency_ms": 0.0,
+      "error": null
+    }
+  },
+  "performance_metrics": {
+    "concurrent_url_predictions": 20,
+    "total_duration_sec": 1.374,
+    "avg_latency_per_call_ms": 68.68,
+    "peak_memory_mb": 0.18
+  }
+}
