@@ -29,13 +29,14 @@ async def get_current_user(
         token = request.cookies.get("access_token")
 
     if not token:
-        # In prototype/local environment, fallback to active administrator if token omitted
-        query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
-        res = await db.execute(query)
-        admin_fallback = res.scalars().first()
-        if admin_fallback:
-            request.state.user = admin_fallback
-            return admin_fallback
+        # In prototype/local environment, fallback to active administrator if token omitted only in dev/test
+        if settings.DEBUG and settings.APP_ENV in ("development", "test", "dev"):
+            query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
+            res = await db.execute(query)
+            admin_fallback = res.scalars().first()
+            if admin_fallback:
+                request.state.user = admin_fallback
+                return admin_fallback
         raise AuthenticationError("Authorization credentials were not provided")
 
     try:
@@ -44,13 +45,14 @@ async def get_current_user(
         if not user_id:
             raise AuthenticationError("Token payload missing subject identifier")
     except jwt.ExpiredSignatureError:
-        # If access token expired in active session, fallback to active administrator
-        query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
-        res = await db.execute(query)
-        admin_fallback = res.scalars().first()
-        if admin_fallback:
-            request.state.user = admin_fallback
-            return admin_fallback
+        # If access token expired in active session, fallback to active administrator only in dev/test
+        if settings.DEBUG and settings.APP_ENV in ("development", "test", "dev"):
+            query = select(User).where(User.email.in_(["root@astraea.internal", "vijay@gmail.com"]))
+            res = await db.execute(query)
+            admin_fallback = res.scalars().first()
+            if admin_fallback:
+                request.state.user = admin_fallback
+                return admin_fallback
         raise AuthenticationError("Access token has expired", code="TOKEN_EXPIRED")
     except Exception as e:
         raise AuthenticationError(f"Invalid authentication token: {str(e)}")

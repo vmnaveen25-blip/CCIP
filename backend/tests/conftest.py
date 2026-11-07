@@ -11,19 +11,19 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
-# Enforce in-memory SQLite isolation before any app module imports
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["SYNC_DATABASE_URL"] = "sqlite:///:memory:"
+# Enforce in-memory SQLite isolation before any app module imports with shared cache for async background workers
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///file:testmem?mode=memory&cache=shared&uri=true"
+os.environ["SYNC_DATABASE_URL"] = "sqlite:///file:testmem?mode=memory&cache=shared&uri=true"
 
 from app.main import app
 from app.db.base import Base
-from app.db.database import get_db
+from app.db.database import get_db, AsyncSessionLocal
 from app.core.config import settings
 from scripts.seed import seed_database
 
-TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
+TEST_DB_URL = "sqlite+aiosqlite:///file:testmem?mode=memory&cache=shared&uri=true"
 
-test_engine = create_async_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
+test_engine = create_async_engine(TEST_DB_URL, connect_args={"check_same_thread": False, "uri": True})
 TestSessionLocal = async_sessionmaker(bind=test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
