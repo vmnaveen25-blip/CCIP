@@ -108,3 +108,4 @@ sequenceDiagram
 2. **Cluster Matching:** `cross_case_correlation_service.py` evaluates indicator co-occurrence across open complaints and formal police cases.
 3. **Weight Computation:** Jaccard similarity and graph adjacency metrics score the likelihood that separate complaints represent the same syndicated cybercrime syndicate.
 4. **Graph Persistence:** Generated correlations are persisted in `case_correlations` and rendered dynamically in the 3D WebGL correlation graph (`react-force-graph-3d`).
+

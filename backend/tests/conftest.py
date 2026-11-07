@@ -19,7 +19,6 @@ from app.main import app
 from app.db.base import Base
 from app.db.database import get_db, AsyncSessionLocal
 from app.core.config import settings
-from scripts.seed import seed_database
 
 TEST_DB_URL = "sqlite+aiosqlite:///file:testmem?mode=memory&cache=shared&uri=true"
 

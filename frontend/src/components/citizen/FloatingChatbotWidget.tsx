@@ -275,7 +275,8 @@ export const FloatingChatbotWidget: React.FC<FloatingChatbotWidgetProps> = ({
       }
 
       let actionObj: Message['action'] = undefined;
-      if (res.helpline_triggered) {
+      const isUrgentAdvisory = (res as any).is_urgent_advisory || (res as any).helpline_triggered;
+      if (isUrgentAdvisory) {
         actionObj = {
           type: 'call-1930',
           label: 'Call 1930 Helpline'
@@ -287,6 +288,7 @@ export const FloatingChatbotWidget: React.FC<FloatingChatbotWidgetProps> = ({
         };
       }
 
+      const sourcesList = (res as any).sources || (res as any).citations || [];
       const botMsg: Message = {
         id: `bot-${Date.now()}`,
         sender: 'bot',
@@ -294,7 +296,7 @@ export const FloatingChatbotWidget: React.FC<FloatingChatbotWidgetProps> = ({
         steps: steps.length > 0 ? steps : undefined,
         outro: outro || undefined,
         text: singleText || undefined,
-        citations: res.citations?.map(c => ({
+        citations: sourcesList.map((c: any) => ({
           title: c.title,
           page: c.page
         })),

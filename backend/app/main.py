@@ -126,9 +126,19 @@ async def handle_validation_error(request: Request, exc: RequestValidationError)
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
     formatted_errors = []
     for err in exc.errors():
-        err_copy = dict(err)
-        if "ctx" in err_copy and isinstance(err_copy["ctx"], dict):
-            err_copy["ctx"] = {k: str(v) if isinstance(v, Exception) else v for k, v in err_copy["ctx"].items()}
+        err_copy = {}
+        for k, v in err.items():
+            if isinstance(v, bytes):
+                err_copy[k] = v.decode("utf-8", errors="replace")
+            elif isinstance(v, dict):
+                err_copy[k] = {
+                    ik: str(iv) if isinstance(iv, (Exception, bytes)) else iv
+                    for ik, iv in v.items()
+                }
+            elif isinstance(v, Exception):
+                err_copy[k] = str(v)
+            else:
+                err_copy[k] = v
         formatted_errors.append(err_copy)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

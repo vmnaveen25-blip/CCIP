@@ -95,3 +95,4 @@ graph TD
 - **DPDP Act 2023 (India):** Automated PII redaction of Aadhaar, PAN, and bank accounts in `pii_redactor.py`. Ephemeral storage for public chatbot inquiries.
 - **CERT-In Cyber Security Directions:** Mandatory logging of system access and security incidents; NTP-synchronized timestamps.
 - **GIGW 3.0 Guidelines:** Accessibility compliance, glassmorphic visual hierarchy, responsive interfaces across mobile and desktop.
+

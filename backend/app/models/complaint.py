@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from app.models.evidence import Evidence
     from app.models.case import Case
     from app.models.cyber_entity import CyberEntity
+    from app.models.report_indicator import ReportIndicator
+    from app.models.citizen_consent import CitizenConsent
 
 
 class ComplaintStatusEnum(str, enum.Enum):
@@ -90,4 +92,6 @@ class Complaint(Base):
     evidence_files: Mapped[List["Evidence"]] = relationship("Evidence", back_populates="complaint", cascade="all, delete-orphan", lazy="selectin")
     case: Mapped[Optional["Case"]] = relationship("Case", back_populates="complaint", uselist=False, lazy="selectin")
     entities: Mapped[List["CyberEntity"]] = relationship("CyberEntity", back_populates="complaint", cascade="all, delete-orphan", lazy="selectin")
+    indicators: Mapped[List["ReportIndicator"]] = relationship("ReportIndicator", back_populates="complaint", cascade="all, delete-orphan", lazy="selectin")
+    consents: Mapped[List["CitizenConsent"]] = relationship("CitizenConsent", back_populates="complaint", cascade="all, delete-orphan", lazy="selectin")
 

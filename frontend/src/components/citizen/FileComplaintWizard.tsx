@@ -321,22 +321,33 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
   // STEP 4 SUBMISSION
   const handleSubmitFinal = async () => {
     if (!declarationAccepted) {
-      alert('Please accept the declaration to submit your complaint.');
+      alert('Please accept the statutory declaration to submit your complaint.');
       return;
     }
 
     setIsSubmitting(true);
     try {
+      const formIdempotencyKey = `ccip_wiz_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const payload = {
         title: `${effectiveIncidentType} Report - ${bankMerchant || 'Digital Incident'}`,
         description: incidentDetails,
         category: (effectiveIncidentType as any) || 'Financial Fraud',
-        incident_date: incidentDateTime.replace('T', ' ') + ' UTC',
-        loss_amount: !isNotFinancialCrime && fraudAmount ? parseFloat(fraudAmount) : 0,
-        citizen_name: currentUser?.full_name || 'Naveen Kumar',
-        citizen_email: currentUser?.email || 'naveen.citizen@gov.in',
-        citizen_phone: currentUser?.phone_number || '+91 9876543210',
-        suspect_info: {
+        incidentDate: incidentDateTime.replace('T', ' ') + ' UTC',
+        financialLoss: !isNotFinancialCrime && fraudAmount ? parseFloat(fraudAmount) : 0,
+        currency: 'INR',
+        citizenName: currentUser?.full_name || 'Complainant Citizen',
+        citizenEmail: currentUser?.email || 'citizen@ccip.gov.in',
+        citizenPhone: currentUser?.phone_number || '+91 9876543210',
+        paymentProvider: bankMerchant || undefined,
+        transactionReference: utrNumber || undefined,
+        idempotencyKey: formIdempotencyKey,
+        consent: {
+          termsVersion: '2026.1-DPDP',
+          dataProcessingAccepted: true,
+          evidenceSubmissionAccepted: true,
+          truthfulnessDeclared: true
+        },
+        suspectInfo: {
           alias: suspectUrls ? `Target: ${suspectUrls.split('\n')[0]}` : undefined,
           email: suspectEmail || undefined,
           phone: suspectPhone || undefined,
@@ -353,7 +364,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
           try {
             await apiClient.uploadEvidence(created.id, idFile.rawFile, effectiveTrackingToken);
           } catch (e) {
-            console.warn('ID evidence upload skipped/mocked', e);
+            console.warn('ID evidence upload warning:', e);
           }
         }
         // Upload Suspect Photo if present
@@ -361,7 +372,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
           try {
             await apiClient.uploadEvidence(created.id, suspectPhoto.rawFile, effectiveTrackingToken);
           } catch (e) {
-            console.warn('Suspect photo upload skipped/mocked', e);
+            console.warn('Suspect photo upload warning:', e);
           }
         }
         // Upload Other Document if present
@@ -369,7 +380,7 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
           try {
             await apiClient.uploadEvidence(created.id, otherDoc.rawFile, effectiveTrackingToken);
           } catch (e) {
-            console.warn('Other doc upload skipped/mocked', e);
+            console.warn('Other doc upload warning:', e);
           }
         }
 
@@ -378,34 +389,8 @@ export const FileComplaintWizard: React.FC<FileComplaintWizardProps> = ({
       }
     } catch (err: any) {
       console.error('Complaint registration failed:', err);
-      // Fallback mock complaint if offline
-      const mockCreated: Complaint = {
-        id: 'CASE-' + Math.floor(100000 + Math.random() * 900000),
-        referenceNumber: 'CCIP/2026/FIN-' + Math.floor(1000 + Math.random() * 9000),
-        title: `${effectiveIncidentType} Report`,
-        description: incidentDetails,
-        category: effectiveIncidentType as any,
-        severity: 'CRITICAL',
-        status: 'SUBMITTED',
-        citizenName: currentUser?.full_name || 'Naveen Kumar',
-        citizenEmail: currentUser?.email || 'naveen.citizen@gov.in',
-        citizenPhone: currentUser?.phone_number || '+91 9876543210',
-        incidentDate: incidentDateTime,
-        reportedDate: new Date().toISOString(),
-        financialLoss: !isNotFinancialCrime && fraudAmount ? parseFloat(fraudAmount) : 0,
-        evidenceFiles: [],
-        aiTriageScore: 92,
-        timeline: [
-          {
-            title: 'Incident Lodged & Sealed',
-            timestamp: new Date().toISOString(),
-            description: 'Complaint verified and entered into central police intelligence registry.',
-            actor: 'System Enclave'
-          }
-        ]
-      };
-      onSubmitComplaint(mockCreated);
-      setSubmissionSuccess(mockCreated);
+      const errMsg = err?.message || 'Complaint submission failed. Please check network connectivity and ensure all required fields are complete.';
+      alert(errMsg);
     } finally {
       setIsSubmitting(false);
     }

@@ -31,16 +31,18 @@ async def create_complaint(
     current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """File a new cybercrime complaint or save as draft."""
+    """File a new cybercrime complaint or save as draft with idempotency support."""
     client_ip = request.client.host if request.client else "127.0.0.1"
     user_agent = request.headers.get("user-agent")
+    idempotency_key = request.headers.get("x-idempotency-key")
 
     complaint = await complaint_service.create_complaint(
         db=db,
         data=req,
         current_user=current_user,
         ip_address=client_ip,
-        user_agent=user_agent
+        user_agent=user_agent,
+        idempotency_key=idempotency_key
     )
     return complaint_service.map_to_frontend_schema(complaint)
 
@@ -296,3 +298,117 @@ async def get_complaint_timeline(
         )
         for ev in complaint.events
     ]
+
+
+@router.post("/{complaint_id}/additional-info", response_model=ComplaintFrontendSchema)
+async def submit_additional_info(
+    complaint_id: str,
+    payload: dict,
+    request: Request,
+    token: Optional[str] = Query(None),
+    current_user: Optional[User] = Depends(get_optional_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Complainant submits requested clarifications, transaction references, or suspect indicators."""
+    complaint = await complaint_service.get_for_tracking(db, complaint_id)
+    
+    # Ownership verification: token or authenticated citizen
+    verified = False
+    header_token = request.headers.get("x-tracking-token")
+    active_token = token or header_token
+    if active_token and getattr(complaint, "tracking_token", None):
+        import hmac
+        verified = hmac.compare_digest(str(active_token).strip(), str(complaint.tracking_token).strip())
+
+    if not verified and current_user:
+        if complaint.citizen_id and current_user.id == complaint.citizen_id:
+            verified = True
+        elif complaint.citizen_email and current_user.email.lower() == complaint.citizen_email.lower():
+            verified = True
+        elif current_user.role and current_user.role.name in ["CYBERSECURITY_SPECIALIST", "CYBERCRIME_POLICE", "ADMIN"]:
+            verified = True
+
+    if not verified:
+        raise HTTPException(status_code=403, detail="Not authorized to provide updates for this complaint")
+
+    notes = payload.get("notes") or payload.get("description") or "Additional documentation and indicators submitted."
+    actor_name = current_user.full_name if current_user else "Complainant"
+
+    now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    ev = ComplaintEvent(
+        complaint_id=complaint.id,
+        title="Complainant Submitted Additional Information",
+        description=notes,
+        actor=actor_name,
+        verified_hash=None,
+        timestamp=now_str
+    )
+    db.add(ev)
+
+    if complaint.status == "ADDITIONAL_INFO_REQUIRED":
+        complaint.status = "UNDER_REVIEW"
+
+    await db.commit()
+    await db.refresh(complaint)
+
+    # Return refreshed schema
+    full_complaint = await complaint_service.get_for_tracking(db, complaint.id)
+    return complaint_service.map_to_frontend_schema(full_complaint)
+
+
+@router.post("/{complaint_id}/assign", response_model=ComplaintFrontendSchema)
+async def assign_complaint(
+    complaint_id: str,
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Assign complaint to an investigation unit and officer (Supervisor, Police, or Admin only)."""
+    user_role = current_user.role.name if current_user.role else ""
+    if user_role not in ["ADMIN", "CYBERCRIME_POLICE", "CYBERSECURITY_SPECIALIST"]:
+        raise HTTPException(status_code=403, detail="Insufficient clearance to assign complaints")
+
+    complaint = await complaint_service.get_for_tracking(db, complaint_id)
+    unit = payload.get("assigned_unit") or payload.get("assignedUnit")
+    officer = payload.get("assigned_officer") or payload.get("assignedOfficer")
+
+    if unit:
+        complaint.assigned_unit = unit
+    if officer:
+        complaint.assigned_officer = officer
+
+    prev_status = complaint.status
+    if complaint.status in ["SUBMITTED", "UNDER_REVIEW", "VALIDATION_PENDING"]:
+        complaint.status = "ASSIGNED"
+
+    now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    ev = ComplaintEvent(
+        complaint_id=complaint.id,
+        title=f"Complaint Assigned to {unit or 'Unit'}",
+        description=f"Assigned by {current_user.full_name} ({user_role}) to {officer or 'Officer'} in {unit or 'Department'}.",
+        actor=f"{user_role} ({current_user.full_name})",
+        verified_hash=None,
+        timestamp=now_str
+    )
+    db.add(ev)
+
+    from app.services.audit_service import audit_service
+    await audit_service.log_event(
+        db=db,
+        actor=current_user.full_name,
+        action="COMPLAINT_ASSIGNED",
+        resource=f"complaint:{complaint.id}",
+        user_id=current_user.id,
+        metadata_json={
+            "complaint_ref": complaint.reference_number,
+            "unit": unit,
+            "officer": officer,
+            "previous_status": prev_status,
+            "new_status": complaint.status
+        }
+    )
+
+    await db.commit()
+    await db.refresh(complaint)
+    return complaint_service.map_to_frontend_schema(complaint)
+

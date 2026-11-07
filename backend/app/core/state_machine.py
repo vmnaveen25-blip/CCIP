@@ -4,22 +4,26 @@ from app.models.case import CaseStatusEnum
 from app.models.complaint import ComplaintStatusEnum
 from app.core.exceptions import ValidationError, PermissionDeniedError
 
-# Valid status transitions graph
+# Valid status transitions graph supporting complete statutory cybercrime lifecycle
 ALLOWED_TRANSITIONS: Dict[str, List[str]] = {
     "DRAFT": ["SUBMITTED", "CANCELLED", "CLOSED"],
-    "SUBMITTED": ["UNDER_REVIEW", "TRIAGED", "VALIDATED", "CASE_CREATED", "CANCELLED", "CLOSED"],
-    "UNDER_REVIEW": ["TRIAGED", "VALIDATED", "CASE_CREATED", "CLOSED"],
-    "TRIAGED": ["UNDER_REVIEW", "VALIDATED", "CASE_CREATED", "CLOSED"],
-    "VALIDATED": ["CASE_CREATED", "ASSIGNED", "CLOSED"],
-    "CASE_CREATED": ["ASSIGNED", "UNDER_INVESTIGATION", "CLOSED"],
-    "OPEN": ["CASE_CREATED", "UNDER_REVIEW", "CLOSED"],  # Retained for legacy DB compatibility
-    "ASSIGNED": ["UNDER_INVESTIGATION", "CLOSED"],
-    "UNDER_INVESTIGATION": ["EVIDENCE_VERIFIED", "LAW_ENFORCEMENT_DISPATCHED", "RESOLVED", "CLOSED", "ASSIGNED"],
-    "EVIDENCE_VERIFIED": ["LAW_ENFORCEMENT_DISPATCHED", "UNDER_INVESTIGATION", "RESOLVED", "CLOSED"],
-    "LAW_ENFORCEMENT_DISPATCHED": ["UNDER_INVESTIGATION", "RESOLVED", "CLOSED"],
-    "PENDING_VALIDATION": ["VALIDATED", "RESOLVED", "UNDER_INVESTIGATION", "CLOSED"],
+    "SUBMITTED": ["UNDER_REVIEW", "VALIDATION_PENDING", "TRIAGED", "VALIDATED", "CASE_CREATED", "ASSIGNED", "REJECTED", "CANCELLED", "CLOSED"],
+    "VALIDATION_PENDING": ["UNDER_REVIEW", "TRIAGED", "VALIDATED", "ASSIGNED", "UNDER_INVESTIGATION", "ADDITIONAL_INFO_REQUIRED", "REJECTED", "CLOSED"],
+    "UNDER_REVIEW": ["TRIAGED", "VALIDATED", "CASE_CREATED", "ASSIGNED", "UNDER_INVESTIGATION", "ADDITIONAL_INFO_REQUIRED", "REFERRED", "REJECTED", "CLOSED"],
+    "TRIAGED": ["UNDER_REVIEW", "VALIDATED", "CASE_CREATED", "ASSIGNED", "UNDER_INVESTIGATION", "REJECTED", "CLOSED"],
+    "VALIDATED": ["CASE_CREATED", "ASSIGNED", "UNDER_INVESTIGATION", "REFERRED", "CLOSED"],
+    "CASE_CREATED": ["ASSIGNED", "UNDER_INVESTIGATION", "ADDITIONAL_INFO_REQUIRED", "REFERRED", "CLOSED"],
+    "OPEN": ["CASE_CREATED", "UNDER_REVIEW", "ASSIGNED", "CLOSED"],  # Retained for legacy DB compatibility
+    "ASSIGNED": ["UNDER_INVESTIGATION", "ADDITIONAL_INFO_REQUIRED", "REFERRED", "CLOSED"],
+    "UNDER_INVESTIGATION": ["ADDITIONAL_INFO_REQUIRED", "EVIDENCE_VERIFIED", "LAW_ENFORCEMENT_DISPATCHED", "REFERRED", "RESOLVED", "CLOSED", "ASSIGNED"],
+    "ADDITIONAL_INFO_REQUIRED": ["UNDER_REVIEW", "UNDER_INVESTIGATION", "SUBMITTED", "CANCELLED", "CLOSED"],
+    "EVIDENCE_VERIFIED": ["LAW_ENFORCEMENT_DISPATCHED", "UNDER_INVESTIGATION", "REFERRED", "RESOLVED", "CLOSED"],
+    "LAW_ENFORCEMENT_DISPATCHED": ["UNDER_INVESTIGATION", "REFERRED", "RESOLVED", "CLOSED"],
+    "PENDING_VALIDATION": ["VALIDATED", "RESOLVED", "UNDER_INVESTIGATION", "REJECTED", "CLOSED"],
+    "REFERRED": ["UNDER_INVESTIGATION", "RESOLVED", "CLOSED"],
     "RESOLVED": ["CLOSED"],
     "CLOSED": [],  # Terminal in standard mutation. Reopening strictly requires POST /cases/{id}/reopen
+    "REJECTED": [],  # Terminal state for rejected non-jurisdictional/fraudulent reports
     "CANCELLED": []  # Terminal state for cancelled/withdrawn complaints
 }
 
@@ -43,32 +47,35 @@ def validate_status_transition(current_status: str, target_status: str, user_rol
             f"Invalid status transition from '{curr}' to '{target}'. Allowed target statuses: {allowed_targets}"
         )
 
-    # 1. Citizen Role: Strictly limited to DRAFT -> SUBMITTED or DRAFT -> CANCELLED
+    # 1. Citizen Role: Limited to DRAFT -> SUBMITTED, DRAFT -> CANCELLED, or responding to ADDITIONAL_INFO_REQUIRED -> SUBMITTED
     if user_role == RoleEnum.CITIZEN.value:
         if curr == "DRAFT" and target in ["SUBMITTED", "CANCELLED"]:
             return
-        raise PermissionDeniedError("Citizens may only transition complaints from DRAFT to SUBMITTED or CANCELLED.")
+        if curr == "ADDITIONAL_INFO_REQUIRED" and target in ["SUBMITTED", "UNDER_REVIEW"]:
+            return
+        raise PermissionDeniedError("Citizens may only transition complaints from DRAFT/ADDITIONAL_INFO_REQUIRED to SUBMITTED or CANCELLED.")
 
     # 2. AI Lead Role: Strictly read-only on operational workflows
     elif user_role == RoleEnum.AI_ML_SYSTEM_LEAD.value:
         raise PermissionDeniedError("AI_ML_SYSTEM_LEAD does not have authority to alter operational case status.")
 
-    # 3. Cybersecurity Specialist: Technical review, triage, validation, evidence verification
+    # 3. Cybersecurity Specialist: Technical review, triage, validation, evidence verification, additional info
     elif user_role == RoleEnum.CYBERSECURITY_SPECIALIST.value:
         specialist_allowed_targets = [
-            "UNDER_REVIEW", "TRIAGED", "VALIDATED", "CASE_CREATED",
-            "UNDER_INVESTIGATION", "EVIDENCE_VERIFIED"
+            "UNDER_REVIEW", "VALIDATION_PENDING", "TRIAGED", "VALIDATED", "CASE_CREATED",
+            "UNDER_INVESTIGATION", "EVIDENCE_VERIFIED", "ADDITIONAL_INFO_REQUIRED"
         ]
         if target not in specialist_allowed_targets:
             raise PermissionDeniedError(
                 f"Specialists are not authorized to set status to '{target}'. Permitted: {specialist_allowed_targets}"
             )
 
-    # 4. Cybercrime Police: Case creation, assignment, investigation, law enforcement action, resolution, closure
+    # 4. Cybercrime Police: Case creation, assignment, investigation, law enforcement action, referral, resolution, closure
     elif user_role == RoleEnum.CYBERCRIME_POLICE.value:
         police_allowed_targets = [
-            "UNDER_REVIEW", "CASE_CREATED", "ASSIGNED", "UNDER_INVESTIGATION", "EVIDENCE_VERIFIED",
-            "LAW_ENFORCEMENT_DISPATCHED", "RESOLVED", "CLOSED"
+            "UNDER_REVIEW", "VALIDATION_PENDING", "CASE_CREATED", "ASSIGNED", "UNDER_INVESTIGATION", 
+            "EVIDENCE_VERIFIED", "ADDITIONAL_INFO_REQUIRED", "REFERRED",
+            "LAW_ENFORCEMENT_DISPATCHED", "RESOLVED", "CLOSED", "REJECTED"
         ]
         if target not in police_allowed_targets:
             raise PermissionDeniedError(

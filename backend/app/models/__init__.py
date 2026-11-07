@@ -44,6 +44,12 @@ from app.models.knowledge_material import (
     PublicChatSession,
     PublicChatMessage
 )
+from app.models.citizen_consent import CitizenConsent
+from app.models.report_indicator import ReportIndicator
+from app.models.investigator_profile import InvestigatorProfile
+from app.models.administrative_approval import AdministrativeApproval
+from app.models.evidence_governance import EvidenceRetentionRecord, EvidenceAccessRequest
+from app.models.security_event import SecurityEvent
 
 __all__ = [
     "Base",
@@ -52,6 +58,13 @@ __all__ = [
     "PublicChatSession",
     "PublicChatMessage",
     "DocumentProcessingResult",
+    "CitizenConsent",
+    "ReportIndicator",
+    "InvestigatorProfile",
+    "AdministrativeApproval",
+    "EvidenceRetentionRecord",
+    "EvidenceAccessRequest",
+    "SecurityEvent",
     "Role",
     "RoleEnum",
     "role_permissions_table",
@@ -107,4 +120,3 @@ __all__ = [
     "InvestigationConversation",
     "InvestigationMessage"
 ]
-

@@ -11,7 +11,7 @@ from typing import List, Optional, Dict, Any, Union
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc, or_
+from sqlalchemy import select, func, desc, or_, and_
 from sqlalchemy.orm import selectinload
 
 from app.db.database import get_db
@@ -40,6 +40,10 @@ from app.services.websocket_manager import ws_manager
 from app.ai.model_manager import model_manager
 from app.services.investigation_knowledge_service import investigation_knowledge_service
 from app.core.config import settings
+from app.models.investigator_profile import InvestigatorProfile
+from app.models.administrative_approval import AdministrativeApproval
+from app.models.evidence_governance import EvidenceRetentionRecord, EvidenceAccessRequest
+from app.models.security_event import SecurityEvent
 
 router = APIRouter(prefix="/admin", tags=["Admin System Governance"])
 
@@ -1031,4 +1035,418 @@ async def list_database_backups(
 
     backups.sort(key=lambda x: x["createdAt"], reverse=True)
     return backups
+
+
+# -----------------------------------------------------------------------------
+# 8. Investigator Profile & Workload Governance
+# -----------------------------------------------------------------------------
+@router.get("/investigators")
+async def list_investigators(
+    specialization: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Directory of cybercrime investigators with forensic specializations and live workloads."""
+    q = select(InvestigatorProfile).options(selectinload(InvestigatorProfile.user)).order_by(InvestigatorProfile.badge_number)
+    if status:
+        q = q.where(InvestigatorProfile.availability_status == status)
+    
+    res = await db.execute(q)
+    profiles = res.scalars().all()
+
+    # Filter specialization in Python if requested
+    results = []
+    for p in profiles:
+        if specialization and specialization not in p.specializations:
+            continue
+        
+        # Calculate real active case count
+        active_count = await db.scalar(
+            select(func.count(Case.id)).where(
+                and_(
+                    Case.assigned_specialist_id == p.user_id,
+                    Case.status.not_in(["CLOSED", "RESOLVED"])
+                )
+            )
+        ) or 0
+        p.current_active_cases = active_count
+
+        results.append({
+            "id": p.id,
+            "userId": p.user_id,
+            "fullName": p.user.full_name if p.user else "Unknown Officer",
+            "email": p.user.email if p.user else "",
+            "badgeNumber": p.badge_number,
+            "designation": p.designation,
+            "jurisdictionZone": p.jurisdiction_zone,
+            "specializations": p.specializations,
+            "maxActiveCases": p.max_active_cases,
+            "currentActiveCases": p.current_active_cases,
+            "availabilityStatus": p.availability_status,
+            "clearanceLevel": p.clearance_level,
+            "workloadPercentage": round((p.current_active_cases / p.max_active_cases * 100), 1) if p.max_active_cases > 0 else 0.0
+        })
+
+    return results
+
+
+@router.post("/investigators", status_code=status.HTTP_201_CREATED)
+async def create_or_update_investigator_profile(
+    payload: dict,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Provision or update an investigator's specialized forensic profile and capacity."""
+    user_id = payload.get("user_id") or payload.get("userId")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required")
+
+    u_res = await db.execute(select(User).where(User.id == user_id))
+    user_obj = u_res.scalars().first()
+    if not user_obj:
+        raise HTTPException(status_code=404, detail="User account not found")
+
+    # Check if profile already exists
+    p_res = await db.execute(select(InvestigatorProfile).where(InvestigatorProfile.user_id == user_id))
+    profile = p_res.scalars().first()
+
+    badge_number = payload.get("badge_number") or payload.get("badgeNumber") or f"CCIP-INV-{user_obj.id[:6].upper()}"
+    designation = payload.get("designation") or "Cybercrime Forensic Specialist"
+    jurisdiction = payload.get("jurisdiction_zone") or payload.get("jurisdictionZone") or "Central Cyber Command"
+    specializations = payload.get("specializations") or ["FINANCIAL_FRAUD", "MALWARE_ANALYSIS"]
+    max_cases = int(payload.get("max_active_cases") or payload.get("maxActiveCases") or 15)
+    availability = payload.get("availability_status") or payload.get("availabilityStatus") or "AVAILABLE"
+
+    if profile:
+        profile.badge_number = badge_number
+        profile.designation = designation
+        profile.jurisdiction_zone = jurisdiction
+        profile.specializations = specializations
+        profile.max_active_cases = max_cases
+        profile.availability_status = availability
+    else:
+        profile = InvestigatorProfile(
+            user_id=user_id,
+            badge_number=badge_number,
+            designation=designation,
+            jurisdiction_zone=jurisdiction,
+            specializations=specializations,
+            max_active_cases=max_cases,
+            availability_status=availability
+        )
+        db.add(profile)
+
+    await db.commit()
+    await db.refresh(profile)
+
+    return {
+        "status": "SUCCESS",
+        "message": f"Investigator profile {profile.badge_number} saved.",
+        "profile": {
+            "id": profile.id,
+            "userId": profile.user_id,
+            "badgeNumber": profile.badge_number,
+            "designation": profile.designation,
+            "specializations": profile.specializations,
+            "maxActiveCases": profile.max_active_cases,
+            "availabilityStatus": profile.availability_status
+        }
+    }
+
+
+# -----------------------------------------------------------------------------
+# 9. Dual-Authorization Governance (Separation of Duties)
+# -----------------------------------------------------------------------------
+@router.get("/approvals")
+async def list_administrative_approvals(
+    status: Optional[str] = Query(None),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """List pending and historical two-person dual authorization requests."""
+    q = select(AdministrativeApproval).options(
+        selectinload(AdministrativeApproval.requested_by),
+        selectinload(AdministrativeApproval.approved_by)
+    ).order_by(desc(AdministrativeApproval.created_at))
+
+    if status:
+        q = q.where(AdministrativeApproval.status == status)
+
+    res = await db.execute(q)
+    approvals = res.scalars().all()
+
+    return [
+        {
+            "id": a.id,
+            "actionType": a.action_type,
+            "resourceType": a.resource_type,
+            "resourceId": a.resource_id,
+            "requestedBy": {
+                "id": a.requested_by.id if a.requested_by else None,
+                "name": a.requested_by.full_name if a.requested_by else "Unknown",
+                "email": a.requested_by.email if a.requested_by else ""
+            },
+            "approvedBy": {
+                "id": a.approved_by.id if a.approved_by else None,
+                "name": a.approved_by.full_name if a.approved_by else None,
+                "email": a.approved_by.email if a.approved_by else None
+            } if a.approved_by else None,
+            "status": a.status,
+            "justification": a.justification,
+            "reviewNotes": a.review_notes,
+            "createdAt": a.created_at.isoformat(),
+            "decidedAt": a.decided_at.isoformat() if a.decided_at else None,
+            "expiresAt": a.expires_at.isoformat()
+        }
+        for a in approvals
+    ]
+
+
+@router.post("/approvals/request", status_code=status.HTTP_201_CREATED)
+async def request_administrative_approval(
+    payload: dict,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Submits a high-risk operation for dual authorization (Separation of Duties).
+    Permitted types: BULK_USER_SUSPEND, SENSITIVE_EVIDENCE_EXPORT, EVIDENCE_PURGE, AI_CONFIG_OVERRIDE.
+    """
+    action_type = payload.get("action_type") or payload.get("actionType")
+    resource_type = payload.get("resource_type") or payload.get("resourceType")
+    resource_id = payload.get("resource_id") or payload.get("resourceId")
+    justification = payload.get("justification")
+    payload_snapshot = payload.get("payload_snapshot") or payload.get("payload") or {}
+
+    if not action_type or not resource_type or not resource_id or not justification:
+        raise HTTPException(status_code=400, detail="Missing required approval request fields")
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    expires_at = now + datetime.timedelta(hours=48)
+
+    approval = AdministrativeApproval(
+        action_type=action_type,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        requested_by_id=current_user.id,
+        status="PENDING",
+        justification=justification,
+        payload_snapshot=payload_snapshot,
+        created_at=now,
+        expires_at=expires_at
+    )
+    db.add(approval)
+
+    await audit_service.log_event(
+        db=db,
+        actor=current_user.email,
+        action="APPROVAL_REQUEST_SUBMITTED",
+        resource=f"{resource_type}:{resource_id}",
+        clearance="ADMINISTRATOR",
+        metadata={
+            "action_type": action_type,
+            "justification": justification,
+            "approval_id": approval.id
+        }
+    )
+
+    await db.commit()
+    await db.refresh(approval)
+
+    return {
+        "status": "PENDING_APPROVAL",
+        "approvalId": approval.id,
+        "message": "Dual-authorization request logged. Requires sign-off from a second authorized administrator."
+    }
+
+
+@router.post("/approvals/{approval_id}/decision")
+async def decide_administrative_approval(
+    approval_id: str,
+    payload: dict,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Approve or reject a dual-authorization request.
+    STRICT ENFORCEMENT: The requesting user cannot approve their own high-risk action!
+    """
+    decision = payload.get("decision")  # "APPROVED" or "REJECTED"
+    review_notes = payload.get("review_notes") or payload.get("notes") or ""
+
+    if decision not in ["APPROVED", "REJECTED"]:
+        raise HTTPException(status_code=400, detail="Decision must be 'APPROVED' or 'REJECTED'")
+
+    q = select(AdministrativeApproval).where(AdministrativeApproval.id == approval_id)
+    res = await db.execute(q)
+    approval = res.scalars().first()
+
+    if not approval:
+        raise HTTPException(status_code=404, detail="Approval request not found")
+
+    if approval.status != "PENDING":
+        raise HTTPException(status_code=400, detail=f"Request is already in '{approval.status}' state")
+
+    # STRICT SEPARATION OF DUTIES
+    if approval.requested_by_id == current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Dual-Authorization Violation: You cannot approve or sign-off on your own high-risk administrative action."
+        )
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    approval.status = decision
+    approval.approved_by_id = current_user.id
+    approval.review_notes = review_notes
+    approval.decided_at = now
+
+    await audit_service.log_event(
+        db=db,
+        actor=current_user.email,
+        action=f"APPROVAL_{decision}",
+        resource=f"{approval.resource_type}:{approval.resource_id}",
+        clearance="ADMINISTRATOR",
+        metadata={
+            "approval_id": approval.id,
+            "action_type": approval.action_type,
+            "decision": decision,
+            "notes": review_notes
+        }
+    )
+
+    await db.commit()
+
+    return {
+        "status": "SUCCESS",
+        "approvalId": approval.id,
+        "decision": decision,
+        "message": f"Administrative approval request has been {decision.lower()}."
+    }
+
+
+# -----------------------------------------------------------------------------
+# 10. Security Events Registry & Telemetry
+# -----------------------------------------------------------------------------
+@router.get("/security-events")
+async def list_security_events(
+    category: Optional[str] = Query(None),
+    severity: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Enclave Security Console: Monitor real-time authentication anomalies and authorization violations."""
+    q = select(SecurityEvent).order_by(desc(SecurityEvent.created_at)).limit(limit)
+    if category:
+        q = q.where(SecurityEvent.event_category == category)
+    if severity:
+        q = q.where(SecurityEvent.severity == severity)
+
+    res = await db.execute(q)
+    events = res.scalars().all()
+
+    return [
+        {
+            "id": ev.id,
+            "category": ev.event_category,
+            "severity": ev.severity,
+            "sourceIp": ev.source_ip,
+            "userId": ev.user_id,
+            "endpoint": ev.endpoint,
+            "method": ev.method,
+            "actionTaken": ev.action_taken,
+            "details": ev.details,
+            "timestamp": ev.created_at.isoformat()
+        }
+        for ev in events
+    ]
+
+
+# -----------------------------------------------------------------------------
+# 11. Evidence Governance & Legal Hold Management
+# -----------------------------------------------------------------------------
+@router.get("/evidence-governance")
+async def list_evidence_governance(
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Audit view for digital evidence retention policies, legal holds, and statutory compliance."""
+    res = await db.execute(select(EvidenceRetentionRecord).options(selectinload(EvidenceRetentionRecord.evidence)))
+    retentions = res.scalars().all()
+
+    results = []
+    for r in retentions:
+        results.append({
+            "id": r.id,
+            "evidenceId": r.evidence_id,
+            "filename": r.evidence.original_filename if r.evidence else "Unknown",
+            "sha256Hash": r.evidence.sha256_hash if r.evidence else "",
+            "retentionPeriodYears": r.retention_period_years,
+            "legalHoldActive": r.legal_hold_active,
+            "legalHoldReason": r.legal_hold_reason,
+            "purgeEligibleAt": r.purge_eligible_at.isoformat() if r.purge_eligible_at else None,
+            "createdAt": r.created_at.isoformat()
+        })
+
+    return results
+
+
+@router.post("/evidence-governance/{evidence_id}/legal-hold")
+async def toggle_legal_hold(
+    evidence_id: str,
+    payload: dict,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Toggle statutory legal hold on digital evidence to prevent automated retention pruning."""
+    active = payload.get("active", True)
+    reason = payload.get("reason") or "Judicial proceedings or active statutory inquiry."
+
+    ev_res = await db.execute(select(Evidence).where(Evidence.id == evidence_id))
+    evidence = ev_res.scalars().first()
+    if not evidence:
+        raise HTTPException(status_code=404, detail="Evidence record not found")
+
+    ret_res = await db.execute(select(EvidenceRetentionRecord).where(EvidenceRetentionRecord.evidence_id == evidence_id))
+    record = ret_res.scalars().first()
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    if not record:
+        record = EvidenceRetentionRecord(
+            evidence_id=evidence_id,
+            retention_period_years=7,
+            legal_hold_active=active,
+            legal_hold_reason=reason if active else None,
+            legal_hold_placed_by_id=current_user.id if active else None,
+            purge_eligible_at=now + datetime.timedelta(days=365 * 7)
+        )
+        db.add(record)
+    else:
+        record.legal_hold_active = active
+        record.legal_hold_reason = reason if active else None
+        record.legal_hold_placed_by_id = current_user.id if active else None
+
+    await audit_service.log_event(
+        db=db,
+        actor=current_user.email,
+        action="LEGAL_HOLD_UPDATED",
+        resource=f"evidence:{evidence_id}",
+        clearance="ADMINISTRATOR",
+        metadata={
+            "evidence_id": evidence_id,
+            "legal_hold_active": active,
+            "reason": reason
+        }
+    )
+
+    await db.commit()
+
+    return {
+        "status": "SUCCESS",
+        "evidenceId": evidence_id,
+        "legalHoldActive": active,
+        "message": f"Legal hold status set to {active} for evidence {evidence.original_filename}."
+    }
+
 

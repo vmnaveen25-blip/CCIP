@@ -81,3 +81,4 @@ sequenceDiagram
 - [x] Single-use OTPs with 300-second expiration and 60-second cooldown.
 - [x] Refresh tokens rotated upon consumption.
 - [x] All authentication events (success, failure, password change) recorded in immutable audit log.
+

@@ -1326,6 +1326,76 @@ class APIClient {
   async getPublicChatHealth(): Promise<{ status: string; service: string; retrieval_mode: string }> {
     return await this.request<{ status: string; service: string; retrieval_mode: string }>('/public-chat/health');
   }
+
+  // STAGES 6 & 7: GOVERNANCE & INTAKE APIS
+  async submitAdditionalInfo(complaintId: string, payload: { notes?: string; description?: string }, trackingToken?: string): Promise<any> {
+    const url = trackingToken ? `/complaints/${complaintId}/additional-info?token=${encodeURIComponent(trackingToken)}` : `/complaints/${complaintId}/additional-info`;
+    return await this.request<any>(url, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async assignComplaint(complaintId: string, payload: { assignedUnit?: string; assignedOfficer?: string }): Promise<any> {
+    return await this.request<any>(`/complaints/${complaintId}/assign`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async listInvestigators(params?: { specialization?: string; status?: string }): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (params?.specialization) q.append('specialization', params.specialization);
+    if (params?.status) q.append('status', params.status);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return await this.request<any[]>(`/admin/investigators${qs}`);
+  }
+
+  async saveInvestigatorProfile(payload: any): Promise<any> {
+    return await this.request<any>('/admin/investigators', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async listApprovals(status?: string): Promise<any[]> {
+    const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+    return await this.request<any[]>(`/admin/approvals${qs}`);
+  }
+
+  async requestApproval(payload: { actionType: string; resourceType: string; resourceId: string; justification: string; payload?: any }): Promise<any> {
+    return await this.request<any>('/admin/approvals/request', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async decideApproval(approvalId: string, decision: 'APPROVED' | 'REJECTED', notes?: string): Promise<any> {
+    return await this.request<any>(`/admin/approvals/${approvalId}/decision`, {
+      method: 'POST',
+      body: JSON.stringify({ decision, notes })
+    });
+  }
+
+  async listSecurityEvents(params?: { category?: string; severity?: string; limit?: number }): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (params?.category) q.append('category', params.category);
+    if (params?.severity) q.append('severity', params.severity);
+    if (params?.limit) q.append('limit', String(params.limit));
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return await this.request<any[]>(`/admin/security-events${qs}`);
+  }
+
+  async listEvidenceGovernance(): Promise<any[]> {
+    return await this.request<any[]>('/admin/evidence-governance');
+  }
+
+  async toggleLegalHold(evidenceId: string, active: boolean, reason?: string): Promise<any> {
+    return await this.request<any>(`/admin/evidence-governance/${evidenceId}/legal-hold`, {
+      method: 'POST',
+      body: JSON.stringify({ active, reason })
+    });
+  }
 }
 
 export interface KnowledgeMaterialItemResponse {
@@ -1398,10 +1468,13 @@ export interface PublicChatMessageCitation {
 export interface PublicChatMessageResponse {
   response: string;
   session_id: string;
-  confidence: number;
-  helpline_triggered: boolean;
-  citations: PublicChatMessageCitation[];
-  processing_time_ms: number;
+  confidence?: number;
+  helpline_triggered?: boolean;
+  is_urgent_advisory?: boolean;
+  citations?: PublicChatMessageCitation[];
+  sources?: PublicChatMessageCitation[];
+  latency_ms?: number;
+  processing_time_ms?: number;
 }
 
 export const apiClient = new APIClient();
